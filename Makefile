@@ -20,10 +20,10 @@ clean:
 	rm -rvf build
 
 lib: $(libdir)bimap.ml $(libdir)bimap.mli 
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core uint mysql ppx_deriving ppx_deriving.eq ppx_deriving.ord ppx_deriving.show fieldslib ppx_fields_conv pcre ppx_sexp_conv ppx_compare yojson ppx_deriving_yojson' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.a
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core uint mysql ppx_deriving ppx_deriving.eq ppx_deriving.ord ppx_deriving.show fieldslib ppx_fields_conv pcre ppx_sexp_conv ppx_compare yojson ppx_deriving_yojson' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cma
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core uint mysql ppx_deriving ppx_deriving.eq ppx_deriving.ord ppx_deriving.show fieldslib ppx_fields_conv pcre ppx_sexp_conv ppx_compare yojson ppx_deriving_yojson' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmo
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core uint mysql ppx_deriving ppx_deriving.eq ppx_deriving.ord ppx_deriving.show fieldslib ppx_fields_conv pcre ppx_sexp_conv ppx_compare yojson ppx_deriving_yojson' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmx
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.a
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cma
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmo
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmx
 
 install: lib
 	ocamlfind install $(PROJECT) ./$(builddir)$(libdir)* META
