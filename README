@@ -1,0 +1,5 @@
+Implementation of a bi-map; see com.google.guava.bimap. Implemented
+here for re-use using two maps under the hood. Also supports multi-bi-map,
+in which a key is mapped to multiple values as in a multi-map and
+the inverse view is supported as well under which any one of the values
+will provide the key.
