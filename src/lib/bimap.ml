@@ -17,17 +17,24 @@ BUT DOES WITH THE FOLLOWING VERSION -- seems we cannot have named args?!?
     method add_inverse ~key ~data =
       let () = reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key) in
       forward_map := Core.Map.add !forward_map ~key ~data
+(*
+    method add_multi ~key ~data =
+      let () = forward_map := (Core.Map.add_multi !forward_map ~key ~data) in
+      reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key)
+    method remove_multi ~key ~data =
+      let () = forward_map := (Core.Map.remove_multi !forward_map ~key ~data) in
+      reverse_map := (Core.Map.remove !reverse_map ~key:data ~data:key)
+     *)				   
     method is_empty =
       Core.Map.is_empty !forward_map
     method length =
       Core.Map.length !forward_map
-(*    method change ~key ~f =
-      let old_value = Core.Map.find_exn forward_map key in 
-      let forward_map = Core.Map.change forward_map key ~f in
-      let new_value = Core.Map.find_exn forward_map key in 
-      let reverse_map = Core.Map.add reverse_map ~key:new_value ~data:key in
-      let reverse_map = Core.Map.remove reverse_map old_value in
-      ()*)
+    method change ~key ~f =
+      let old_value = Core.Map.find_exn !forward_map key in 
+      let () = forward_map := (Core.Map.change !forward_map key ~f) in
+      let new_value = Core.Map.find_exn !forward_map key in 
+      let () = reverse_map := (Core.Map.add !reverse_map ~key:new_value ~data:key) in
+      reverse_map := (Core.Map.remove !reverse_map old_value)
     method find ~key =
       Core.Map.find !forward_map key
     method find_inverse ~key =
@@ -36,5 +43,15 @@ BUT DOES WITH THE FOLLOWING VERSION -- seems we cannot have named args?!?
       Core.Map.find_exn !forward_map key
     method find_exn_inverse ~key =
       Core.Map.find_exn !reverse_map key
-  end 	    
+    method update key ~f =
+      let oldvalue = Core.Map.find_exn !forward_map key in
+      let () = forward_map := (Core.Map.update !forward_map key ~f) in
+      let newvalue = Core.Map.find_exn !forward_map key in 
+      let () = reverse_map := (Core.Map.add !reverse_map newvalue key) in
+      reverse_map := (Core.Map.remove !reverse_map oldvalue)  
+    method mem key =
+      Core.Map.mem !forward_map key
+    method mem_inverse key =
+      Core.Map.mem !reverse_map key		   
+  end
 end 
