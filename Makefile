@@ -24,6 +24,10 @@ lib: $(libdir)bimap.ml $(libdir)bimap.mli
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cma
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmo
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmx
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.a
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cma
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmo
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmx
 
 install: lib
 	ocamlfind install $(PROJECT) ./$(builddir)$(libdir)* META
