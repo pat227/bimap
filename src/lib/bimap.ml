@@ -1,7 +1,7 @@
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 module Bimap = struct
-  class ['a,'b,'c,'d] bimap_class (m1:('a,'b,'c) Core.Map.t) (m2:('b,'a,'d) Core.Map.t) = object
+  class ['a,'b] bimap_class m1 m2 = object
     val mutable forward_map = ref m1
     val mutable reverse_map = ref m2
     (* COMPILER WILL NOT WORK WITH add METHOD unless it has type definitions; and even if 
@@ -11,33 +11,42 @@ module Bimap = struct
       (fun key data -> 
        let () = forward_map := (Core.Map.add !forward_map ~key ~data) in 
        reverse_map := Core.Map.add !reverse_map ~key:data ~data:key)
-	(*
-    method add ~(key:'a) ~(data:'b) = 
-      let () = forward_map := (Core.Map.add !forward_map ~key:key ~data:data) in 
-      reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key)*)
-(*BUT DOES WITH THE FOLLOWING VERSION -- seems we cannot have named args?!?*)
-(*MORE UNBOUND types lurk here
-    method to_tree =
-      Core.Map.to_tree !forward_map
-    method to_tree_inverse =
-      Core.Map.to_tree !reverse_map*)
-
-    method add_inverse ~(key:'b) ~(data:'a) =
-      let () = forward_map := Core.Map.add !forward_map ~key:key ~data:data in 
-      reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key)
-      
-(*
+    method add_inverse ~key ~data =
+      let () = reverse_map := (Core.Map.add !reverse_map ~key ~data) in
+      forward_map := Core.Map.add !forward_map ~key:data ~data:key
+    (*unfortunately, as a consequence of 'b being a parameter of the class,
+      if we use Map.add_multi with 'b as the value of forward map then 'b is a 
+      polymorphic list. Then this constrains the keys in the reverse map to be
+      of the same type, ie, a polymorphic list, which is wrong. Not sure 
+      how to work around this; may be forced to eliminate the mutable members
+      to eliminate the type parameters on the class, but then client code
+      has to supply forward and reverse maps in order all the time.*)
     method add_multi ~key ~data =
-      let () = forward_map := (Core.Map.add_multi !forward_map ~key ~data) in
+      let oldlistvalues = Core.Option.value (Core.Map.find !forward_map key) ~default:[] in  
+      let () = forward_map := (Core.Map.add !forward_map ~key ~data:(data :: oldlistvalues)) in
       reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key)
+      (*let rec add__multi k v =
+	match v with
+	| [] -> ()
+	| h :: t ->
+	   let () = forward_map := (Core.Map.add_multi !forward_map ~key:k ~data:h) in
+	   add__multi k t in*)
+      (*let rec add_reverse_keys k v =
+	match k with
+	| [] -> ()
+	| h :: t -> 
+	   let () = reverse_map := (Core.Map.add !reverse_map ~key:h ~data:v) in
+	   add_reverse_keys t v in
+      let () = add__multi key data in
+      add_reverse_keys [data] key*)
+
+
+    (*
     method remove_multi ~key ~data =
       let () = forward_map := (Core.Map.remove_multi !forward_map ~key ~data) in
       reverse_map := (Core.Map.remove !reverse_map ~key:data ~data:key)
  *)
-    method is_empty =
-      Core.Map.is_empty !forward_map
-    method length =
-      Core.Map.length !forward_map
+				  
     method change ~key ~f =
       let old_value = Core.Map.find_exn !forward_map key in 
       let () = forward_map := (Core.Map.change !forward_map key ~f) in
@@ -50,6 +59,10 @@ module Bimap = struct
       let new_value = Core.Map.find_exn !reverse_map key in 
       let () = forward_map := (Core.Map.add !forward_map ~key:new_value ~data:key) in
       forward_map := (Core.Map.remove !forward_map old_key)
+    method data =
+      Core.Map.data !forward_map
+    method data_inverse =
+      Core.Map.data !reverse_map
     method find ~key =
       Core.Map.find !forward_map key
     method find_inverse ~key =
@@ -58,20 +71,8 @@ module Bimap = struct
       Core.Map.find_exn !forward_map key
     method find_exn_inverse ~key =
       Core.Map.find_exn !reverse_map key
-    method remove ~key =
-      let reverse_key = Core.Map.find_exn !forward_map key in 
-      let () = forward_map := (Core.Map.remove !forward_map key) in
-      reverse_map := (Core.Map.remove !reverse_map reverse_key)
-    method remove_inverse ~key =
-      let fwd_key = Core.Map.find_exn !reverse_map key in 
-      let () = reverse_map := (Core.Map.remove !reverse_map key) in
-      forward_map := (Core.Map.remove !forward_map fwd_key)
-    method update key ~f =
-      let oldvalue = Core.Map.find_exn !forward_map key in
-      let () = forward_map := (Core.Map.update !forward_map key ~f) in
-      let newvalue = Core.Map.find_exn !forward_map key in 
-      let () = reverse_map := (Core.Map.add !reverse_map newvalue key) in
-      reverse_map := (Core.Map.remove !reverse_map oldvalue)
+    method is_empty =
+      Core.Map.is_empty !forward_map
     method iter_keys ~f =
       Core.Map.iter_keys !forward_map ~f
     method iter_keys_inverse ~f =
@@ -84,6 +85,12 @@ module Bimap = struct
       Core.Map.iteri !forward_map ~f
     method iteri_inverse ~f =
       Core.Map.iteri !reverse_map ~f
+    method keys =
+      Core.Map.keys !forward_map
+    method keys_inverse =
+      Core.Map.keys !reverse_map
+    method length =
+      Core.Map.length !forward_map
     method map ~f =
       let () = forward_map := (Core.Map.map !forward_map ~f) in
       let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
@@ -116,19 +123,27 @@ module Bimap = struct
       Core.Map.mem !forward_map key
     method mem_inverse key =
       Core.Map.mem !reverse_map key
-    method keys =
-      Core.Map.keys !forward_map
-    method keys_inverse =
-      Core.Map.keys !reverse_map
-    method data =
-      Core.Map.data !forward_map
-    method data_inverse =
-      Core.Map.data !reverse_map
-(*    method fold ~init ~f =
+    method remove ~key =
+      let reverse_key = Core.Map.find_exn !forward_map key in 
+      let () = forward_map := (Core.Map.remove !forward_map key) in
+      reverse_map := (Core.Map.remove !reverse_map reverse_key)
+    method remove_inverse ~key =
+      let fwd_key = Core.Map.find_exn !reverse_map key in 
+      let () = reverse_map := (Core.Map.remove !reverse_map key) in
+      forward_map := (Core.Map.remove !forward_map fwd_key)
+    method update key ~f =
+      let oldvalue = Core.Map.find_exn !forward_map key in
+      let () = forward_map := (Core.Map.update !forward_map key ~f) in
+      let newvalue = Core.Map.find_exn !forward_map key in 
+      let () = reverse_map := (Core.Map.add !reverse_map newvalue key) in
+      reverse_map := (Core.Map.remove !reverse_map oldvalue)
+  end
+end 
+
+(*
+    method fold ~init ~f =
       Core.Map.fold !forward_map ~init ~f
     method fold_inverse ~init ~f =
       Core.Map.fold !reverse_map ~init ~f
     method equal f ~other_fwd_map =
       Core.Map.equal f !forward_map !other_fwd_map *)
-  end
-end 
