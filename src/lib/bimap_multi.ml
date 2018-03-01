@@ -1,17 +1,13 @@
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
-module Bimap = struct
+module Bimap_multi = struct
   class ['a,'b] bimap_class m1 m2 = object
     val mutable forward_map = ref m1
     val mutable reverse_map = ref m2 
-    (* COMPILER WILL NOT WORK WITH add METHOD unless it has type definitions; and even if 
-       we provide an identical function with a dummy name, then compiler complains about
-       add inverse all of a sudden!*)
-    method add : 'a -> 'b -> unit = 
-      (fun key data -> 
-       let () = forward_map := (Core.Map.add !forward_map ~key ~data) in 
-       reverse_map := Core.Map.add !reverse_map ~key:data ~data:key)
-    method add_inverse ~key ~data =
+    method add_multi ~(key:'a) ~(data:'b) =
+      let () = forward_map := (Core.Map.add_multi !forward_map ~key ~data) in
+      reverse_map := Core.Map.add !reverse_map ~key:data ~data:key
+(*    method add_inverse ~key ~data =
       let () = reverse_map := (Core.Map.add !reverse_map ~key ~data) in
       forward_map := Core.Map.add !forward_map ~key:data ~data:key
     method change ~key ~f =
@@ -111,7 +107,7 @@ module Bimap = struct
       let () = forward_map := (Core.Map.update !forward_map key ~f) in
       let newvalue = Core.Map.find_exn !forward_map key in 
       let () = reverse_map := (Core.Map.add !reverse_map newvalue key) in
-      reverse_map := (Core.Map.remove !reverse_map oldvalue)
+      reverse_map := (Core.Map.remove !reverse_map oldvalue)*)
   end
 end 
 

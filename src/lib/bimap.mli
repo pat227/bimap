@@ -4,12 +4,10 @@ module Bimap :
       ('a, 'b, 'c) Core.Map.t ->
       ('b, 'a, 'd) Core.Map.t ->
       object
-        constraint 'b = 'e list
         val mutable forward_map : ('a, 'b, 'c) Core.Map.t ref
         val mutable reverse_map : ('b, 'a, 'd) Core.Map.t ref
         method add : 'a -> 'b -> unit
         method add_inverse : key:'b -> data:'a -> unit
-        method add_multi : key:'a -> data:'e -> unit
         method change :
           key:'a ->
           f:('b Core_kernel__.Import.option -> 'b Core_kernel__.Import.option) ->
@@ -18,8 +16,13 @@ module Bimap :
           key:'b ->
           f:('a Core_kernel__.Import.option -> 'a Core_kernel__.Import.option) ->
           unit
+	(*CANNOT WRITE THESE RIGHT NOW -- 
+        method comparator : unit -> ('a, 'c) Core_kernel__.Comparator.t
+        method comparator_inverse :
+		 unit -> ('b, 'd) Core_kernel__.Comparator.t*)
         method data : 'b Core_kernel__.Import.list
         method data_inverse : 'a Core_kernel__.Import.list
+	method empty : unit -> unit
         method find : key:'a -> 'b Core_kernel__.Import.option
         method find_exn : key:'a -> 'b
         method find_exn_inverse : key:'b -> 'a
