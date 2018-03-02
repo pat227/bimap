@@ -20,6 +20,8 @@ module Bimap_multi : sig
             method find_exn : key:'a -> 'b list
             method find_exn_inverse : key:'b -> 'a
             method find_inverse : key:'b -> 'a option
+	    (*method fold : init:'e -> (key:'a -> data:'b list -> 'e -> 'e) -> 'e
+	    method fold_inverse : init:'e -> (key:'b -> data:'a -> 'e -> 'e) -> 'e*)
 	    method is_empty : bool
             method iter :
 		     f:('b list -> unit) -> unit
