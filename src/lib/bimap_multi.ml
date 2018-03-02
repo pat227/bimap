@@ -45,11 +45,6 @@ module Bimap_multi = struct
       Core.Map.find_exn !forward_map key
     method find_exn_inverse ~key =
       Core.Map.find_exn !reverse_map key
-(*  UNBOUND 'e --- how to write these?
-    method fold ~init ~f =
-      Core.Map.fold !forward_map ~init ~f
-    method fold_inverse ~init ~f =
-      Core.Map.fold !reverse_map ~init ~f*)
     method is_empty =
       Core.Map.is_empty !forward_map
     method iter_keys ~f =
@@ -134,20 +129,22 @@ module Bimap_multi = struct
       let newvalues = Core.Map.find_exn !forward_map key in 
       let () = self#add_inverse_values newvalues key in
       self#remove_inverse_keys oldvalues
-(*
-    (*Cannot do these right now--type 'c the compraator is unbound
-    method comparator () =
-      Core.Map.comparator !forward_map
-    method comparator_inverse () =
-      Core.Map.comparator !reverse_map*)
-*)
   end
 end 
 
 (*
-
     method equal f ~other_fwd_map =
       Core.Map.equal f !forward_map !other_fwd_map *)
 
-    (*
- *)
+(*  UNBOUND 'e --- how to write these?
+    method fold ~init ~f =
+      Core.Map.fold !forward_map ~init ~f
+    method fold_inverse ~init ~f =
+      Core.Map.fold !reverse_map ~init ~f*)
+(*
+Cannot do these right now--type 'c the compraator is unbound
+    method comparator () =
+      Core.Map.comparator !forward_map
+    method comparator_inverse () =
+      Core.Map.comparator !reverse_map
+*)

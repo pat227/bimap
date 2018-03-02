@@ -15,6 +15,7 @@ module Bimap_multi : sig
             method data : 'b list list
             method data_inverse : 'a list
             method empty : unit -> unit
+	    (*method filteri : f:('a -> 'b list -> bool) -> unit*)
 	    method find :
 		     key:'a -> 'b list option
             method find_exn : key:'a -> 'b list

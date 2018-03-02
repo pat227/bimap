@@ -6,56 +6,62 @@ module Bimap :
       object
         val mutable forward_map : ('a, 'b, 'c) Core.Map.t ref
         val mutable reverse_map : ('b, 'a, 'd) Core.Map.t ref
-        method add : 'a -> 'b -> unit
+        method add : key:'a -> data:'b -> unit
         method add_inverse : key:'b -> data:'a -> unit
         method change :
           key:'a ->
-          f:('b Core_kernel__.Import.option -> 'b Core_kernel__.Import.option) ->
+          f:('b option -> 'b option) ->
           unit
         method change_inverse :
           key:'b ->
-          f:('a Core_kernel__.Import.option -> 'a Core_kernel__.Import.option) ->
+          f:('a option -> 'a option) ->
           unit
 	(*CANNOT WRITE THESE RIGHT NOW -- 
         method comparator : unit -> ('a, 'c) Core_kernel__.Comparator.t
         method comparator_inverse :
 		 unit -> ('b, 'd) Core_kernel__.Comparator.t*)
-        method data : 'b Core_kernel__.Import.list
-        method data_inverse : 'a Core_kernel__.Import.list
+        method data : 'b list
+        method data_inverse : 'a list
 	method empty : unit -> unit
-        method find : key:'a -> 'b Core_kernel__.Import.option
+        method find : key:'a -> 'b option
         method find_exn : key:'a -> 'b
         method find_exn_inverse : key:'b -> 'a
-        method find_inverse : key:'b -> 'a Core_kernel__.Import.option
-        method is_empty : Core_kernel__.Import.bool
+        method find_inverse : key:'b -> 'a option
+	method filter : f:('b -> bool) -> unit
+	method filter_inverse : f:('a -> bool) -> unit
+	method filteri : f:(key:'a -> data:'b -> bool) -> unit
+	method filteri_inverse : f:(key:'b -> data:'a -> bool) -> unit
+	method filter_keys : f:('a -> bool) -> unit
+	method filter_keys_inverse : f:('b -> bool) -> unit
+	(*	method forward_map : ('a,'b,_) Core.Map.t*)
+        method is_empty : bool
         method iter :
-          f:('b -> Core_kernel__.Import.unit) -> Core_kernel__.Import.unit
+          f:('b -> unit) -> unit
         method iter_inverse :
-          f:('a -> Core_kernel__.Import.unit) -> Core_kernel__.Import.unit
+          f:('a -> unit) -> unit
         method iter_keys :
-          f:('a -> Core_kernel__.Import.unit) -> Core_kernel__.Import.unit
+          f:('a -> unit) -> unit
         method iter_keys_inverse :
-          f:('b -> Core_kernel__.Import.unit) -> Core_kernel__.Import.unit
+          f:('b -> unit) -> unit
         method iteri :
-          f:(key:'a -> data:'b -> Core_kernel__.Import.unit) ->
-          Core_kernel__.Import.unit
+          f:(key:'a -> data:'b -> unit) -> unit
         method iteri_inverse :
-          f:(key:'b -> data:'a -> Core_kernel__.Import.unit) ->
-          Core_kernel__.Import.unit
-        method keys : 'a Core_kernel__.Import.list
-        method keys_inverse : 'b Core_kernel__.Import.list
-        method length : Core_kernel__.Import.int
-        method map : f:('b -> 'b) -> Core_kernel__.Import.unit
-        method map_inverse : f:('a -> 'a) -> Core_kernel__.Import.unit
+          f:(key:'b -> data:'a -> unit) -> unit
+        method keys : 'a list
+        method keys_inverse : 'b list
+        method length : int
+        method map : f:('b -> 'b) -> unit
+        method map_inverse : f:('a -> 'a) -> unit
         method mapi :
-          f:(key:'a -> data:'b -> 'b) -> Core_kernel__.Import.unit
+          f:(key:'a -> data:'b -> 'b) -> unit
         method mapi_inverse :
-          f:(key:'b -> data:'a -> 'a) -> Core_kernel__.Import.unit
-        method mem : 'a -> Core_kernel__.Import.bool
-        method mem_inverse : 'b -> Core_kernel__.Import.bool
+          f:(key:'b -> data:'a -> 'a) -> unit
+        method mem : 'a -> bool
+        method mem_inverse : 'b -> bool
         method remove : key:'a -> unit
         method remove_inverse : key:'b -> unit
+	(*	method reverse_map : ('b, 'a, _) Core.Map.t*)
         method update :
-          'a -> f:('b Core_kernel__.Import.option -> 'b) -> unit
+          'a -> f:('b option -> 'b) -> unit
       end
   end
