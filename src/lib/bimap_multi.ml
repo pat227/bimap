@@ -10,14 +10,14 @@ module Bimap_multi = struct
     method add_multi_inverse ~(key:'b) ~(data:'a) =
       let () = forward_map := (Core.Map.add_multi !forward_map ~key:data ~data:key) in
       reverse_map := Core.Map.add !reverse_map ~key ~data
-    method private add_inverse_values k v =
+    method private add_inverse_values klist v =
       let rec add_values k v =
 	match k with
 	| h :: t ->
 	   let () = reverse_map := (Core.Map.add !reverse_map ~key:h ~data:v) in
 	   add_values t v
 	| [] -> () in
-      add_values k v 		  
+      add_values klist v
     method change ~key ~f =
       let old_value_list = Core.Map.find_exn !forward_map key in 
       let () = forward_map := (Core.Map.change !forward_map key ~f) in
@@ -65,6 +65,34 @@ module Bimap_multi = struct
       Core.Map.keys !reverse_map
     method length =
       Core.Map.length !forward_map
+    method map ~f =
+      let () = forward_map := (Core.Map.map !forward_map ~f) in
+      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
+      Core.Map.iter_keys
+	!forward_map
+	~f:(fun k ->
+	    self#add_inverse_values (Core.Map.find_exn !forward_map k) k)
+    method map_inverse ~f =
+      let () = reverse_map := (Core.Map.map !reverse_map ~f) in
+      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
+      Core.Map.iter_keys
+	!reverse_map
+	~f:(fun k -> forward_map :=
+		       Core.Map.add_multi !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
+    method mapi ~f =
+      let () = forward_map := (Core.Map.mapi !forward_map ~f) in
+      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
+      Core.Map.iter_keys
+	!forward_map
+	~f:(fun k ->
+	    self#add_inverse_values (Core.Map.find_exn !forward_map k) k)
+    method mapi_inverse ~f =
+      let () = reverse_map := (Core.Map.mapi !reverse_map ~f) in
+      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
+      Core.Map.iter_keys
+	!reverse_map
+	~f:(fun k -> forward_map :=
+		       Core.Map.add_multi !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
     method mem key =
       Core.Map.mem !forward_map key
     method mem_inverse key =
@@ -85,49 +113,26 @@ module Bimap_multi = struct
       let fwd_key = Core.Map.find_exn !reverse_map key in 
       let () = reverse_map := (Core.Map.remove !reverse_map key) in
       forward_map := (Core.Map.remove !forward_map fwd_key)
-
+    method remove_multi ~key =
+      try
+	let values = Core.Map.find_exn !forward_map key in
+	let head_element = Core.List.nth_exn values 0 in 
+	let () = forward_map := (Core.Map.remove_multi !forward_map key) in
+	reverse_map := (Core.Map.remove !reverse_map head_element)
+      with e -> ()
+    method update key ~f =
+      let oldvalues = Core.Map.find_exn !forward_map key in
+      let () = forward_map := (Core.Map.update !forward_map key ~f) in
+      let newvalues = Core.Map.find_exn !forward_map key in 
+      let () = self#add_inverse_values newvalues key in
+      self#remove_inverse_keys oldvalues
 (*
-
     (*Cannot do these right now--type 'c the compraator is unbound
     method comparator () =
       Core.Map.comparator !forward_map
     method comparator_inverse () =
       Core.Map.comparator !reverse_map*)
-
-    method map ~f =
-      let () = forward_map := (Core.Map.map !forward_map ~f) in
-      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
-      Core.Map.iter_keys
-	!forward_map
-	~f:(fun k -> reverse_map :=
-		       Core.Map.add !reverse_map ~key:(Core.Map.find_exn !forward_map k) ~data:k)
-    method map_inverse ~f =
-      let () = reverse_map := (Core.Map.map !reverse_map ~f) in
-      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
-      Core.Map.iter_keys
-	!reverse_map
-	~f:(fun k -> forward_map :=
-		       Core.Map.add !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
-    method mapi ~f =
-      let () = forward_map := (Core.Map.mapi !forward_map ~f) in
-      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
-      Core.Map.iter_keys
-	!forward_map
-	~f:(fun k -> reverse_map :=
-		       Core.Map.add !reverse_map ~key:(Core.Map.find_exn !forward_map k) ~data:k)
-    method mapi_inverse ~f =
-      let () = reverse_map := (Core.Map.mapi !reverse_map ~f) in
-      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
-      Core.Map.iter_keys
-	!reverse_map
-	~f:(fun k -> forward_map :=
-		       Core.Map.add !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
-    method update key ~f =
-      let oldvalue = Core.Map.find_exn !forward_map key in
-      let () = forward_map := (Core.Map.update !forward_map key ~f) in
-      let newvalue = Core.Map.find_exn !forward_map key in 
-      let () = reverse_map := (Core.Map.add !reverse_map newvalue key) in
-      reverse_map := (Core.Map.remove !reverse_map oldvalue)*)
+*)
   end
 end 
 
@@ -138,35 +143,6 @@ end
       Core.Map.fold !reverse_map ~init ~f
     method equal f ~other_fwd_map =
       Core.Map.equal f !forward_map !other_fwd_map *)
-    (*unfortunately, as a consequence of 'b being a parameter of the class,
-      if we use Map.add_multi with 'b as the value of forward map then 'b is a 
-      polymorphic list. Then this constrains the keys in the reverse map to be
-      of the same type, ie, a polymorphic list, which is wrong. Not sure 
-      how to work around this; may be forced to eliminate the mutable members
-      to eliminate the type parameters on the class, but then client code
-      has to supply forward and reverse maps in order all the time.
-    method add_multi ~key ~data =
-      let oldlistvalues = Core.Option.value (Core.Map.find !forward_map key) ~default:[] in  
-      let () = forward_map := (Core.Map.add !forward_map ~key ~data:(data :: oldlistvalues)) in
-      reverse_map := (Core.Map.add !reverse_map ~key:data ~data:key) *)
-      (*let rec add__multi k v =
-	match v with
-	| [] -> ()
-	| h :: t ->
-	   let () = forward_map := (Core.Map.add_multi !forward_map ~key:k ~data:h) in
-	   add__multi k t in*)
-      (*let rec add_reverse_keys k v =
-	match k with
-	| [] -> ()
-	| h :: t -> 
-	   let () = reverse_map := (Core.Map.add !reverse_map ~key:h ~data:v) in
-	   add_reverse_keys t v in
-      let () = add__multi key data in
-      add_reverse_keys [data] key*)
-
 
     (*
-    method remove_multi ~key ~data =
-      let () = forward_map := (Core.Map.remove_multi !forward_map ~key ~data) in
-      reverse_map := (Core.Map.remove !reverse_map ~key:data ~data:key)
  *)

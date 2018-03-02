@@ -36,9 +36,15 @@ module Bimap_multi : sig
 	    method keys : 'a list
             method keys_inverse : 'b list
             method length : int
+	    method map : f:('b list -> 'b list) -> unit
+	    method map_inverse : f:('a -> 'a) -> unit
+	    method mapi : f:(key:'a -> data:'b list -> 'b list) -> unit
+	    method mapi_inverse : f:(key:'b -> data:'a -> 'a) -> unit
 	    method mem : 'a -> bool
             method mem_inverse : 'b -> bool
 	    method remove : key:'a -> unit
             method remove_inverse : key:'b -> unit
+	    method remove_multi : key:'a -> unit
+	    method update : 'a -> f:('b list option -> 'b list) -> unit
 	  end
 end
