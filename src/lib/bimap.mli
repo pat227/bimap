@@ -45,10 +45,10 @@ module Bimap :
 	(*	method forward_map : ('a,'b,_) Core.Map.t*)
 	(*method fold : init:'a -> f:(key:'a -> data:'b -> 'a -> 'a) -> 'a*)
         method fold : init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e
-	method fold_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
+	method fold_inverse : init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e
 	(*method fold_range_inclusive : min:'a -> max:'a -> init:'b -> f:(key:'a -> data:'b -> 'b) -> 'b*)
-	method fold_right : init:'a -> f:(key:'a -> data:'b -> 'a -> 'a) -> 'a
-	method fold_right_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
+	method fold_right : init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e
+	method fold_right_inverse : init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e
 	method for_all : f:('b -> bool) -> bool
 	method for_all_inverse : f:('a -> bool) -> bool
 	method is_empty : bool

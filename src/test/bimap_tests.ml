@@ -9,6 +9,7 @@ module Bimap_tests = struct
     begin
       bim#add ~key:1 ~data:"one";
       bim#add ~key:2 ~data:"two";
+      assert_equal false (bim#is_empty);
       assert_equal "one" (bim#find_exn ~key:1);
       assert_equal "two" (bim#find_exn ~key:2);
       assert_equal 1 (bim#find_exn_inverse ~key:"one");
@@ -31,6 +32,7 @@ module Bimap_tests = struct
     begin
       bim#add ~key:1 ~data:"one";
       bim#add ~key:2 ~data:"two";
+      assert_equal false (bim#is_empty);
       assert_equal (Some "one") (bim#find ~key:1);
       assert_equal (Some "two") (bim#find ~key:2);
       assert_equal (Some 1) (bim#find_inverse ~key:"one");
@@ -70,7 +72,8 @@ module Bimap_tests = struct
       assert_equal true (bim#existsi ~f:(fun ~key ~data -> key = 3 && data = "triple"));
       assert_equal true (bim#existsi_inverse ~f:(fun ~key ~data -> key = "double" && data = 2));
       bim#empty ();
-      assert_equal 0 (bim#count ~f:(fun x -> true));      
+      assert_equal 0 (bim#count ~f:(fun x -> true));
+      assert_equal true (bim#is_empty);
     end 
 
   let test3 text_ctx =
@@ -162,8 +165,33 @@ module Bimap_tests = struct
       bim#add ~key:1 ~data:"single";
       bim#add ~key:2 ~data:"double";
       bim#add ~key:3 ~data:"triple";
-      (*bim#fold ~init:0 ~f:(fun ~key ~data -> if key < 3 then (data ^ init) else init);*)
-    end 
+      let concat = bim#fold ~init:"" ~f:(fun ~key ~data init -> if key < 3 then (init ^ data) else init) in
+      assert_equal "singledouble" concat;
+      let sum = bim#fold_inverse
+		      ~init:0
+		      ~f:(fun ~key ~data init ->
+			  if key.[0] = 't' || key.[0] = 'd'
+			  then (data + init) else init) in
+      assert_equal 5 sum;
+      let dividend = bim#fold_inverse
+		       ~init:1
+		       ~f:(fun ~key ~data init ->
+			   if key.[0] = 't' || key.[0] = 'd'
+			   then (data / init) else init) in
+      assert_equal 1 dividend;
+      let concat2 =
+	bim#fold_right
+	      ~init:"" ~f:(fun ~key ~data init ->
+			   if key < 3 then (init ^ data) else init) in
+      assert_equal "doublesingle" concat2;
+      let dividend2 =
+	bim#fold_right_inverse
+			 ~init:1 ~f:(fun ~key ~data init ->
+				     if key.[0] ='t' || key.[0]='d'
+				     then (data / init) else init) in
+      assert_equal 0 dividend2;
+      assert_equal true (bim#for_all ~f:(fun v -> if (String.length v) > 0 then true else false));
+    end
       
   let suite =
     "suite">:::

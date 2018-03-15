@@ -97,18 +97,16 @@ module Bimap = struct
       let () = reverse_map := (Core.Map.filter_map !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     (*    method forward_map = !forward_map*)
-    (*method fold ~(init:'a) ~(f:key:'a -> data:'b -> 'a -> 'a) =
-      Core.Map.fold !forward_map ~init ~f*)
     method fold : 'e. init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e = 
       (fun ~init ~f -> Core.Map.fold !forward_map ~init ~f)
-    method fold_inverse ~(init:'b) ~(f:key:'b -> data:'a -> 'b -> 'b) =
-      Core.Map.fold !reverse_map ~init ~f
+    method fold_inverse : 'e. init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e =
+      (fun ~init ~f -> Core.Map.fold !reverse_map ~init ~f)
 (*    method fold_range_inclusive ~min ~max ~init ~f =
       Core.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
-    method fold_right ~(init:'a) ~(f:key:'a -> data:'b -> 'a -> 'a) =
-      Core.Map.fold_right !forward_map ~init ~f
-    method fold_right_inverse ~(init:'b) ~(f:key:'b -> data:'a -> 'b -> 'b) =
-      Core.Map.fold_right !reverse_map ~init ~f
+    method fold_right : 'e. init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e =
+      (fun ~init ~f -> Core.Map.fold_right !forward_map ~init ~f)
+    method fold_right_inverse : 'e. init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e =
+      (fun ~init ~f -> Core.Map.fold_right !reverse_map ~init ~f)
     method for_all ~f =
       Core.Map.for_all !forward_map ~f
     method for_all_inverse ~f =
