@@ -1,4 +1,4 @@
-module type Comparable = Core.Comparable.S
+(*module type Comparable = Core.Comparable.S
 module Bimap_module :
 functor (A : Comparable) (B : Comparable) -> sig
 	  type t = {
@@ -9,3 +9,4 @@ functor (A : Comparable) (B : Comparable) -> sig
 	  val add_inverse : key:B.t -> data:A.t -> t
 	end 
 end
+*)

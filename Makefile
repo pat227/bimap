@@ -2,6 +2,7 @@ PROJECT=bimap
 libdir=src/lib/
 maindir=src/main/
 builddir=build/
+testdir=src/test/
 
 ifndef PREFIX
   PREFIX = $(shell dirname $$(dirname $$(which ocamlfind)))
@@ -28,10 +29,13 @@ lib: $(libdir)bimap.ml $(libdir)bimap.mli
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cma
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cmo
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cmx
-#	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.a
-#	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cma
-#	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmo
-#	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmx
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.a
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cma
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmo
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmx
+#ocamlfind ocamlc -thread -o test -package "oUnit core" -linkpkg -g -I $(libdir) $(libdir)bimap.mli $(libdir)bimap.ml $(testdir)bimap_tests.ml
+tests: lib $(testdir)bimap_tests.ml
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core oUnit' -build-dir build -I src/lib src/test/bimap_tests.native
 
 install: lib
 	ocamlfind install $(PROJECT) ./$(builddir)$(libdir)* META
