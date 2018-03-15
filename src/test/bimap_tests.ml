@@ -35,6 +35,8 @@ module Bimap_tests = struct
       assert_equal (Some "two") (bim#find ~key:2);
       assert_equal (Some 1) (bim#find_inverse ~key:"one");
       assert_equal (Some 2) (bim#find_inverse ~key:"two");
+      assert_equal None (bim#find ~key:3);
+      assert_equal None (bim#find_inverse ~key:"three");
       bim#add_inverse ~key:"three" ~data:3;
       assert_equal (Some "three") (bim#find ~key:3);
       assert_equal (Some 3) (bim#find_inverse ~key:"three");
@@ -83,6 +85,7 @@ module Bimap_tests = struct
       bim#filter ~f:(fun v -> String.length v > 8);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+
       bim#add ~key:5 ~data:"pentuple";
       bim#add ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
@@ -92,20 +95,82 @@ module Bimap_tests = struct
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter_keys ~f:(fun k -> k < 5);
       assert_equal 1 (bim#count ~f:(fun x -> true));
+      
       bim#add ~key:5 ~data:"pentuple";
       bim#add ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter_keys_inverse ~f:(fun v -> String.length v > 8);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+
+      bim#add ~key:4 ~data:"quadruple";
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      assert_equal 3 (bim#count ~f:(fun x -> true));
+      bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key <6);
+      assert_equal 2 (bim#count ~f:(fun x -> true));
+      assert_equal (Some "quadruple") (bim#find ~key:4);
+      assert_equal (Some "pentuple") (bim#find ~key:5);
+      assert_equal None (bim#find ~key:6);
       
+      bim#add ~key:4 ~data:"quadruple";
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      bim#filteri_inverse ~f:(fun ~key ~data -> String.length key > 8 || data <6);
+      assert_equal 2 (bim#count ~f:(fun x -> true));
+      assert_equal 2 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal (Some "quadruple") (bim#find ~key:4);
+      assert_equal (Some "pentuple") (bim#find ~key:5);
+      assert_equal None (bim#find ~key:6);
+      assert_equal (Some 4) (bim#find_inverse ~key:"quadruple");
+      assert_equal (Some 5) (bim#find_inverse ~key:"pentuple");
+      assert_equal None (bim#find_inverse ~key:"sextuple");
+
+      bim#add ~key:4 ~data:"quadruple";
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      bim#filter_map ~f:(fun v -> if String.length v > 8 then (Some "survivor") else None);
+      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal (Some "survivor") (bim#find ~key:4);
+      assert_equal None (bim#find ~key:5);
+      assert_equal None (bim#find ~key:6);
+      assert_equal (Some 4) (bim#find_inverse ~key:"survivor");
+      assert_equal None (bim#find_inverse ~key:"pentuple");
+      assert_equal None (bim#find_inverse ~key:"sextuple");
+
+      bim#add ~key:4 ~data:"quadruple";
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      bim#filter_map_inverse ~f:(fun v -> if v > 5 then (Some (v * 2)) else None);
+      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal (Some 12) (bim#find_inverse ~key:"sextuple");
+      assert_equal None (bim#find_inverse ~key:"quadruple");
+      assert_equal None (bim#find_inverse ~key:"pentuple");
+      assert_equal None (bim#find ~key:4);
+      assert_equal None (bim#find ~key:5);
+      assert_equal None (bim#find ~key:6);
+      assert_equal (Some "sextuple") (bim#find ~key:12);      
+    end
+
+  let test4 text_ctx =
+    let string_map = Core.String.Map.empty in
+    let int_map = Core.Int.Map.empty in 
+    let bim = new Bimap.bimap_class int_map string_map in
+    begin
+      bim#add ~key:1 ~data:"single";
+      bim#add ~key:2 ~data:"double";
+      bim#add ~key:3 ~data:"triple";
+      (*bim#fold ~init:0 ~f:(fun ~key ~data -> if key < 3 then (data ^ init) else init);*)
     end 
       
   let suite =
     "suite">:::
       ["test1">:: test1;
        "test2">:: test2;
-       "test3">:: test3];;
+       "test3">:: test3;
+       "test4">:: test4];;
 
   let () =
     run_test_tt_main suite

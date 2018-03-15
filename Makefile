@@ -34,7 +34,7 @@ lib: $(libdir)bimap.ml $(libdir)bimap.mli
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmo
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmx
 #ocamlfind ocamlc -thread -o test -package "oUnit core" -linkpkg -g -I $(libdir) $(libdir)bimap.mli $(libdir)bimap.ml $(testdir)bimap_tests.ml
-tests: lib $(testdir)bimap_tests.ml
+tests: $(testdir)bimap_tests.ml #lib
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core oUnit' -build-dir build -I src/lib src/test/bimap_tests.native
 
 install: lib

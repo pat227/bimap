@@ -97,8 +97,11 @@ module Bimap = struct
       let () = reverse_map := (Core.Map.filter_map !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     (*    method forward_map = !forward_map*)
-    method fold ~(init:'a) ~(f:key:'a -> data:'b -> 'a -> 'a) =
-      Core.Map.fold !forward_map ~init ~f
+    (*method fold ~(init:'a) ~(f:key:'a -> data:'b -> 'a -> 'a) =
+      Core.Map.fold !forward_map ~init ~f*)
+    method fold : 'e. init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e = 
+      (fun ~(init:'e) ~(f:(key:'a -> data:'b -> 'e -> 'e)) ->
+       Core.Map.fold !forward_map ~init ~f)
     method fold_inverse ~(init:'b) ~(f:key:'b -> data:'a -> 'b -> 'b) =
       Core.Map.fold !reverse_map ~init ~f
 (*    method fold_range_inclusive ~min ~max ~init ~f =
