@@ -44,7 +44,7 @@ module Bimap :
 	method filter_map_inverse : f:('a -> 'a option) -> unit
 	(*	method forward_map : ('a,'b,_) Core.Map.t*)
 	(*method fold : init:'a -> f:(key:'a -> data:'b -> 'a -> 'a) -> 'a*)
-	(*method fold : init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e*)
+        method fold : init:'e -> f:(key:'a -> data:'b -> 'e -> 'e) -> 'e
 	method fold_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
 	(*method fold_range_inclusive : min:'a -> max:'a -> init:'b -> f:(key:'a -> data:'b -> 'b) -> 'b*)
 	method fold_right : init:'a -> f:(key:'a -> data:'b -> 'a -> 'a) -> 'a
