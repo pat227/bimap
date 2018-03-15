@@ -57,12 +57,48 @@ module Bimap_tests = struct
       assert_equal 3 (bim#count_inverse ~f:(fun x -> true));
       assert_equal 2 (bim#counti ~f:(fun ~key ~data -> if key <= 2 then true else false));
       assert_equal ["single";"double";"triple"] (bim#data);
-      assert_equal [1;2;3] (bim#data_inverse);
+      assert_equal true (List.mem 1 (bim#data_inverse));
+      assert_equal true (List.mem 2 (bim#data_inverse));
+      assert_equal true (List.mem 3 (bim#data_inverse));
       assert_equal true (bim#exists ~f:(fun x -> x = "double"));
-      assert_equal true (bim#exists ~f:(fun ~key ~data -> key = 2 && data = "double"));
-      assert_equal false (bim#exists ~f:(fun ~key ~data -> key = 2 && data = "triple"));
+      assert_equal true (bim#exists ~f:(fun x -> x = "triple"));
+      assert_equal false (bim#exists ~f:(fun x -> x = "quadruple"));
+      assert_equal true (bim#exists_inverse ~f:(fun x -> x = 2));
+      assert_equal false (bim#exists_inverse ~f:(fun x -> x = 4));
+      assert_equal true (bim#existsi ~f:(fun ~key ~data -> key = 3 && data = "triple"));
+      assert_equal true (bim#existsi_inverse ~f:(fun ~key ~data -> key = "double" && data = 2));
       bim#empty ();
       assert_equal 0 (bim#count ~f:(fun x -> true));      
+    end 
+
+  let test3 text_ctx =
+    let string_map = Core.String.Map.empty in
+    let int_map = Core.Int.Map.empty in 
+    let bim = new Bimap.bimap_class int_map string_map in
+    begin
+      bim#add ~key:4 ~data:"quadruple";
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      assert_equal 3 (bim#count ~f:(fun x -> true));
+      bim#filter ~f:(fun v -> String.length v > 8);
+      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      assert_equal 3 (bim#count ~f:(fun x -> true));
+      bim#filter_inverse ~f:(fun v -> v > 4);
+      assert_equal 2 (bim#count ~f:(fun x -> true));
+      bim#add ~key:4 ~data:"quadruple";
+      assert_equal 3 (bim#count ~f:(fun x -> true));
+      bim#filter_keys ~f:(fun k -> k < 5);
+      assert_equal 1 (bim#count ~f:(fun x -> true));
+      bim#add ~key:5 ~data:"pentuple";
+      bim#add ~key:6 ~data:"sextuple";
+      assert_equal 3 (bim#count ~f:(fun x -> true));
+      bim#filter_keys_inverse ~f:(fun v -> String.length v > 8);
+      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+      
     end 
       
   let suite =
