@@ -35,7 +35,7 @@ module Bimap_tests = struct
       bim#remove_inverse ~key:"two";
       assert_equal 1 (bim#length);
       bim#remove ~key:4;
-      assert_equal 0 (bim#length);
+      assert_equal 0 (bim#length);     
     end
 
   let test2 text_ctx =
@@ -111,6 +111,14 @@ module Bimap_tests = struct
       assert_equal 0 (bim#length);
       assert_equal 0 (bim#count ~f:(fun x -> true));
       assert_equal true (bim#is_empty);
+
+      bim#add ~key:1 ~data:"one";
+      bim#add ~key:2 ~data:"two";
+      bim#add ~key:3 ~data:"three";
+      bim#update 1 ~f:(fun x -> match x with
+				  Some s -> Core.String.rev s
+				 | None -> "newentry");
+      assert_equal "eno" (bim#find_exn ~key:1);
     end 
 
   let test3 text_ctx =
@@ -253,6 +261,17 @@ module Bimap_tests = struct
       assert_equal "2->dosdos" (bim#find_exn ~key:2);
       assert_equal 1 (bim#find_exn_inverse ~key:"1->unouno");
       assert_equal 2 (bim#find_exn_inverse ~key:"2->dosdos");
+
+      bim#map_inverse ~f:(fun x -> x*2);
+      assert_equal [2;4;6] (bim#keys);
+      bim#mapi_inverse ~f:(fun ~key ~data -> if key.[0]='1' then
+					       data*1
+					     else
+					       if key.[0]='2' then
+						 data*2
+					       else
+						 data*3);
+      assert_equal [2;8;18] (bim#keys);
     end
       
   let suite =

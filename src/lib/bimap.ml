@@ -211,7 +211,7 @@ module Bimap = struct
       | false -> Core.Map.to_alist !forward_map
       | true -> Core.Map.to_alist ~key_order:(Core.Option.value_exn key_order) !forward_map
   end
-
+end
 (*  type ('a, 'b) t = ('a, 'b) bimap_class
   let make mapa mapb = new bimap_class mapa mapb*)
 
