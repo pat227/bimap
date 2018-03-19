@@ -1,5 +1,5 @@
 module Bimap_multi : sig
-  class ['a, 'b] bimap_class :
+  class ['a, 'b] bimap_multi_class :
 	  ('a, 'b list, 'c) Core.Map.t ->
 	  ('b, 'a, 'd) Core.Map.t ->
 	  object

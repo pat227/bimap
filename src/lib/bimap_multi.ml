@@ -1,7 +1,7 @@
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 module Bimap_multi = struct
-  class ['a,'b] bimap_class m1 m2 = object(self)
+  class ['a,'b] bimap_multi_class m1 m2 = object(self)
     val mutable forward_map = ref m1
     val mutable reverse_map = ref m2 
     method add_multi ~(key:'a) ~(data:'b) =

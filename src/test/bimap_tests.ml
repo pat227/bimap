@@ -1,4 +1,5 @@
 module Bimap = Bimap.Bimap
+module Bimap_multi = Bimap_multi.Bimap_multi
 open OUnit2
 module Bimap_tests = struct
 
@@ -273,6 +274,48 @@ module Bimap_tests = struct
 						 data*3);
       assert_equal [2;8;18] (bim#keys);
     end
+
+  let test6 text_ctx =
+    let string_map = Core.String.Map.empty in
+    let int_map = Core.Int.Map.empty in 
+    let bim = new Bimap_multi.bimap_multi_class int_map string_map in
+    begin
+      bim#add_multi ~key:1 ~data:"one";
+      bim#add_multi ~key:2 ~data:"two";
+      bim#add_multi ~key:3 ~data:"three";
+      bim#add_multi ~key:2 ~data:"dos";
+      bim#add_multi ~key:3 ~data:"tres";
+      bim#add_multi ~key:3 ~data:"triple";
+      bim#add_multi_inverse ~key:"tri" ~data:3;
+      bim#add_multi_inverse ~key:"four" ~data:4;
+
+      assert_equal 4 (bim#count ~f:(fun l -> true));
+      assert_equal 4 (bim#counti ~f:(fun ~key ~data -> true));
+      assert_equal 1 (bim#counti ~f:(fun ~key ~data -> key > 3));
+      assert_equal 8 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal 4 (bim#length);
+      assert_equal 1 (List.length (bim#find_exn 1));
+      assert_equal 2 (List.length (bim#find_exn 2));
+      assert_equal 4 (List.length (bim#find_exn 3));
+      assert_equal 1 (List.length (bim#find_exn 4));
+      assert_equal true (List.mem "one" (bim#find_exn 1));
+      assert_equal true (List.mem "two" (bim#find_exn 2));
+      assert_equal true (List.mem "dos" (bim#find_exn 2));
+      assert_equal true (List.mem "three" (bim#find_exn 3));
+      assert_equal true (List.mem "tres" (bim#find_exn 3));
+      assert_equal true (List.mem "triple" (bim#find_exn 3));
+      assert_equal true (List.mem "tri" (bim#find_exn 3));
+      
+      assert_equal 1 (bim#find_exn_inverse "one");
+      assert_equal 2 (bim#find_exn_inverse "two");
+      assert_equal 2 (bim#find_exn_inverse "dos");
+      assert_equal 3 (bim#find_exn_inverse "three");
+      assert_equal 3 (bim#find_exn_inverse "tres");
+      assert_equal 3 (bim#find_exn_inverse "tres");
+
+      assert_equal ([["one"];["two";"dos"];["three";"tres";"triple";"tri"];["four"]]) (bim#data);
+      assert_equal ([1;2;3;4]) (bim#data_inverse);
+    end 
       
   let suite =
     "suite">:::
@@ -280,7 +323,8 @@ module Bimap_tests = struct
        "test2">:: test2;
        "test3">:: test3;
        "test4">:: test4;
-       "test5">:: test5];;
+       "test5">:: test5;
+       "test6">:: test6];;
 
   let () =
     run_test_tt_main suite
