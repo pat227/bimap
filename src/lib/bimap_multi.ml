@@ -22,8 +22,8 @@ module Bimap_multi = struct
       let old_value_list = Core.Map.find_exn !forward_map key in 
       let () = forward_map := (Core.Map.change !forward_map key ~f) in
       let new_values = Core.Map.find_exn !forward_map key in
-      let () = self#add_inverse_values new_values key in 
-      self#remove_inverse_keys old_value_list		  
+      let () = self#remove_inverse_keys old_value_list in
+      self#add_inverse_values new_values key 
     method change_inverse ~key ~f =
       let old_key = Core.Map.find_exn !reverse_map key in 
       let () = reverse_map := (Core.Map.change !reverse_map key ~f) in

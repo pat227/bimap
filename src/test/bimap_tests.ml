@@ -3,6 +3,41 @@ module Bimap_multi = Bimap_multi.Bimap_multi
 open OUnit2
 module Bimap_tests = struct
 
+  let oc = Core.Out_channel.stdout;;    
+  let print_n_flush s =
+    Core.Out_channel.output_string oc s;
+    Core.Out_channel.flush oc;;
+  
+  let rec print_n_flush_alist ~sep ~to_string_func l =
+    match l with
+    | [] -> ()
+    | h :: t ->
+       let s = to_string_func h in 
+       let () = print_n_flush (s ^ sep) in
+       print_n_flush_alist ~sep ~to_string_func t;;
+
+  let rec print_n_flush_alistlist ~sep ~to_string_func l =
+    match l with
+    | [] -> ()
+    | h :: t ->
+       let () = print_n_flush " <|> " in 
+       let () = print_n_flush_alist ~sep ~to_string_func h in
+       print_n_flush_alistlist ~sep ~to_string_func t;;
+(*
+  let rec list_list_mem l v =
+    match l with
+    | [] -> false
+    | h::t ->
+       if Core.List.mem ~equal:(fun x y -> Core.String.equal x y) h v then true else
+	 list_list_mem t v
+
+  let rec key_list_list_mem l v =
+    match l with
+    | [] -> false
+    | h::t ->
+       if Core.List.mem ~equal:(fun x y -> Core.String.equal x y) h v then true else
+	 list_list_mem t v
+ *)    
   let test1 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
@@ -288,7 +323,7 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
       bim#add_multi_inverse ~key:"tri" ~data:3;
       bim#add_multi_inverse ~key:"four" ~data:4;
-
+      (*==todo change change_inverse*)
       assert_equal 4 (bim#count ~f:(fun l -> true));
       assert_equal 4 (bim#counti ~f:(fun ~key ~data -> true));
       assert_equal 1 (bim#counti ~f:(fun ~key ~data -> key > 3));
@@ -311,12 +346,55 @@ module Bimap_tests = struct
       assert_equal 2 (bim#find_exn_inverse "dos");
       assert_equal 3 (bim#find_exn_inverse "three");
       assert_equal 3 (bim#find_exn_inverse "tres");
-      assert_equal 3 (bim#find_exn_inverse "tres");
+      assert_equal 3 (bim#find_exn_inverse "triple");
+      assert_equal 3 (bim#find_exn_inverse "tri");
 
-      assert_equal ([["one"];["two";"dos"];["three";"tres";"triple";"tri"];["four"]]) (bim#data);
-      assert_equal ([1;2;3;4]) (bim#data_inverse);
-    end 
+      assert_equal (Some 1) (bim#find_inverse "one");
+      assert_equal (Some 2) (bim#find_inverse "two");
+      assert_equal (Some 2) (bim#find_inverse "dos");
+      assert_equal (Some 3) (bim#find_inverse "three");
+      assert_equal (Some 3) (bim#find_inverse "tres");
+      assert_equal (Some 3) (bim#find_inverse "triple");
+      assert_equal 3 (bim#find_exn_inverse "tri");
       
+      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);      
+      assert_equal ([["one"];["dos";"two"];["tri";"triple";"tres";"three"];["four"]]) (bim#data);
+      print_n_flush_alist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_inverse);
+      assert_equal 1 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 1 then true else false)));
+      assert_equal 2 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 2 then true else false)));
+      assert_equal 4 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 3 then true else false)));
+      assert_equal 1 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 4 then true else false)));
+
+      bim#empty ();
+      assert_equal 0 (bim#count ~f:(fun l -> true));
+      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> true));
+      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> key > 3));
+      assert_equal 0 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal 0 (bim#length);
+
+      bim#add_multi ~key:1 ~data:"one";
+      bim#add_multi ~key:2 ~data:"two";
+      bim#add_multi ~key:3 ~data:"three";
+      bim#add_multi ~key:2 ~data:"dos";
+      bim#add_multi ~key:3 ~data:"tres";
+      bim#add_multi ~key:3 ~data:"triple";
+      bim#add_multi_inverse ~key:"tri" ~data:3;
+
+      assert_equal true (bim#exists ~f:(fun x -> List.length x = 1 && Core.String.equal (List.nth x 0) "one"));
+      assert_equal true (bim#exists_inverse ~f:(fun x -> x = 2));
+      assert_equal true (bim#existsi ~f:(fun ~key ~data -> List.length data = 2 && key = 2 && List.mem "two" data));
+      assert_equal false (bim#existsi ~f:(fun ~key ~data -> List.mem "one" data && key = 2));
+      assert_equal true (bim#existsi_inverse ~f:(fun ~key ~data -> key = "tri" && data=3));
+
+      bim#change ~key:3 ~f:(fun x -> (Some ["iii";"tri";"triple";"tres";"three"]));
+      assert_equal (Some 3) (bim#find_inverse "three");
+      assert_equal (Some 3) (bim#find_inverse "tres");
+      assert_equal (Some 3) (bim#find_inverse "tri");
+      assert_equal 3 (bim#find_exn_inverse "triple");
+      assert_equal 3 (bim#find_exn_inverse "iii");
+      assert_equal 5 (List.length (bim#find_exn 3));
+    end 
+
   let suite =
     "suite">:::
       ["test1">:: test1;
