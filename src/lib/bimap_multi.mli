@@ -27,7 +27,6 @@ module Bimap_multi : sig
             method find_exn : key:'a -> 'b list
             method find_exn_inverse : key:'b -> 'a
             method find_inverse : key:'b -> 'a option
-	    (*----so far tested less any todos----*)
 	    method filter : f:('b list -> bool) -> unit
 	    method filter_inverse : f:('a -> bool) -> unit
 	    method filteri : f:(key:'a -> data:'b list -> bool) -> unit
@@ -36,6 +35,7 @@ module Bimap_multi : sig
 	    method filter_keys_inverse : f:('b -> bool) -> unit
 	    method filter_map : f:('b list -> 'b list option) -> unit
 	    method filter_map_inverse : f:('a -> 'a option) -> unit
+	    (*----so far tested----*)
 	    method fold : init:'a -> f:(key:'a -> data:'b list -> 'a -> 'a) -> 'a
 	    method fold_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
 	    method fold_right : init:'a -> f:(key:'a -> data:'b list -> 'a -> 'a) -> 'a

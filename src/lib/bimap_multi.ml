@@ -18,6 +18,19 @@ module Bimap_multi = struct
 	   add_values t v
 	| [] -> () in
       add_values klist v
+    method private add_fwd_values k vlist =
+      let rec helper k vl =
+	match vl with
+	| [] -> ()
+	| h::t ->
+	   let () = forward_map := (Core.Map.add_multi !forward_map ~key:k ~data:h) in
+	   helper k t in
+(*      let rec helper2 k vll =
+	match vll with
+	| [] -> ()
+	| h :: t -> let () = helper k h in
+		    helper2 k t in *)
+      helper k vlist
     method change ~key ~f =
       let old_value_list = Core.Map.find_exn !forward_map key in 
       let () = forward_map := (Core.Map.change !forward_map key ~f) in
@@ -25,11 +38,16 @@ module Bimap_multi = struct
       let () = self#remove_inverse_keys old_value_list in
       self#add_inverse_values new_values key 
     method change_inverse ~key ~f =
-      let old_key = Core.Map.find_exn !reverse_map key in 
+      let old_fwd_key = Core.Map.find_exn !reverse_map key in
+      let old_fwd_value_list = Core.Map.find_exn !forward_map old_fwd_key in 
       let () = reverse_map := (Core.Map.change !reverse_map key ~f) in
-      let new_value = Core.Map.find_exn !reverse_map key in 
-      let () = forward_map := (Core.Map.add_multi !forward_map ~key:new_value ~data:key) in
-      forward_map := (Core.Map.remove !forward_map old_key)
+      let new_fwd_key = Core.Map.find_exn !reverse_map key in 
+      (*let () = forward_map :=
+		 (Core.Map.add_multi !forward_map ~key:new_fwd_key ~data:key) in*)
+      let () = forward_map :=
+		 (Core.Map.remove !forward_map old_fwd_key) in
+      let () = self#add_fwd_values new_fwd_key old_fwd_value_list in
+      self#add_inverse_values old_fwd_value_list new_fwd_key
 
     method private create_inverse_map_from_forward_map =
       let () = reverse_map :=
