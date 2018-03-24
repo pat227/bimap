@@ -35,14 +35,14 @@ module Bimap_multi : sig
 	    method filter_keys_inverse : f:('b -> bool) -> unit
 	    method filter_map : f:('b list -> 'b list option) -> unit
 	    method filter_map_inverse : f:('a -> 'a option) -> unit
-	    (*----so far tested----*)
-	    method fold : init:'a -> f:(key:'a -> data:'b list -> 'a -> 'a) -> 'a
-	    method fold_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
-	    method fold_right : init:'a -> f:(key:'a -> data:'b list -> 'a -> 'a) -> 'a
-	    method fold_right_inverse : init:'b -> f:(key:'b -> data:'a -> 'b -> 'b) -> 'b
+	    method fold : init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
+	    method fold_inverse : init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e
+	    method fold_right : init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
+	    method fold_right_inverse : init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e
 	    method for_all : f:('b list -> bool) -> bool
 	    method for_all_inverse : f:('a -> bool) -> bool
 	    method is_empty : bool
+	    (*----todo----*)
             method iter :
 		     f:('b list -> unit) -> unit
             method iter_inverse :
@@ -55,6 +55,7 @@ module Bimap_multi : sig
 		     f:(key:'a -> data:'b list -> unit) -> unit
             method iteri_inverse :
 		     f:(key:'b -> data:'a -> unit) -> unit
+	    (*----so far tested----*)
 	    method keys : 'a list
             method keys_inverse : 'b list
             method length : int

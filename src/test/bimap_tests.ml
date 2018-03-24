@@ -519,9 +519,65 @@ module Bimap_tests = struct
       assert_equal 3 (bim#find_exn_inverse ~key:"two");
       assert_equal 3 (bim#find_exn_inverse ~key:"dos");
       assert_equal None (bim#find ~key:1);
-
-      
     end 
+
+
+  let test9 text_ctx =
+    let string_map = Core.String.Map.empty in
+    let int_map = Core.Int.Map.empty in 
+    let bim = new Bimap_multi.bimap_multi_class int_map string_map in
+    begin
+      bim#add_multi ~key:1 ~data:"one";
+      bim#add_multi ~key:2 ~data:"two";
+      bim#add_multi ~key:3 ~data:"three";
+      bim#add_multi ~key:2 ~data:"dos";
+      bim#add_multi ~key:3 ~data:"tres";
+      bim#add_multi ~key:3 ~data:"triple";
+
+      let total_chars =
+	bim#fold ~init:0 ~f:(fun ~key ~data accum ->
+			     (Core.List.fold data ~init:accum
+					     ~f:(fun accum data -> (String.length data) + accum))) in
+      assert_equal 24 total_chars;
+      let keys_times_num_values =
+	bim#fold_inverse ~init:0 ~f:(fun ~key ~data accum ->
+				     accum + data) in
+      assert_equal 14 keys_times_num_values;
+      (*fold over keys in decreasing order instead of increasing--in this case reverse alphabetical order*)
+      let folded_right =
+	bim#fold_right ~init:None
+		       ~f:(fun ~key ~data accum ->
+			   match accum with
+			   | None -> Some key
+			   | Some i -> Some (i - key)
+			  ) in
+      assert_equal (Some 0) folded_right;
+      let folded_right_inverse = bim#fold_right_inverse
+				       ~init:[]
+				       ~f:(fun ~key ~data accum ->
+					   key::accum
+					  ) in
+      (*print_n_flush_alist ~sep:"|" ~to_string_func:(fun x -> x) folded_right_inverse;*)
+      assert_equal "two" (Core.List.nth_exn (Core.List.rev folded_right_inverse) 0);
+      let forall = bim#for_all
+			 ~f:(fun l ->
+			     (Core.List.for_all l ~f:(fun x -> Core.String.length x > 3))
+			    ) in
+      assert_equal forall false;
+      assert_equal "two" (Core.List.nth_exn (Core.List.rev folded_right_inverse) 0);
+      let forall = bim#for_all
+			 ~f:(fun l ->
+			     (Core.List.for_all l ~f:(fun x -> Core.String.length x > 2))
+			    ) in
+      assert_equal forall true;
+      let forallinverse = bim#for_all_inverse ~f:(fun x -> x < 4) in
+      assert_equal forallinverse true;
+      let forallinverse = bim#for_all_inverse ~f:(fun x -> x < 3) in
+      assert_equal forallinverse false;
+      assert_equal false (bim#is_empty);
+      assert_equal [1;2;3] (bim#keys);
+      assert_equal ([["one"];["dos";"two"];["tri";"triple";"tres";"three"];["four"]]) (bim#keys_inverse);
+    end
 
   let suite =
     "suite">:::
@@ -532,7 +588,8 @@ module Bimap_tests = struct
        "test5">:: test5;
        "test6">:: test6;
        "test7">:: test7;
-       "test8">:: test8];;
+       "test8">:: test8;
+       "test9">:: test9];;
 
   let () =
     run_test_tt_main suite
