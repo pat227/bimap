@@ -55,14 +55,16 @@ module Bimap_multi : sig
 		     f:(key:'a -> data:'b list -> unit) -> unit
             method iteri_inverse :
 		     f:(key:'b -> data:'a -> unit) -> unit
-	    (*----so far tested----*)
 	    method keys : 'a list
             method keys_inverse : 'b list
             method length : int
 	    method map : f:('b list -> 'b list) -> unit
 	    method map_inverse : f:('a -> 'a) -> unit
+	    (*----todo----*)
 	    method mapi : f:(key:'a -> data:'b list -> 'b list) -> unit
+	    (*----todo----*)
 	    method mapi_inverse : f:(key:'b -> data:'a -> 'a) -> unit
+	    (*----so far tested----*)
 	    method mem : 'a -> bool
             method mem_inverse : 'b -> bool
 	    method min_elt : ('a * 'b list) option

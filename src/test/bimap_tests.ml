@@ -576,8 +576,69 @@ module Bimap_tests = struct
       assert_equal forallinverse false;
       assert_equal false (bim#is_empty);
       assert_equal [1;2;3] (bim#keys);
-      assert_equal ([["one"];["dos";"two"];["tri";"triple";"tres";"three"];["four"]]) (bim#keys_inverse);
+      (*let () print_n_flush_alist ~sep:"," ~to_string_func:(fun x -> x) inverse_keys in *)
+      assert_equal true (List.mem "dos" (bim#keys_inverse));
+      assert_equal 1 (List.length (List.filter (fun x -> String.equal x "dos") (bim#keys_inverse)));
+      assert_equal true (List.mem "one" (bim#keys_inverse));
+      assert_equal true (List.mem "three" (bim#keys_inverse));
+      assert_equal true (List.mem "tres" (bim#keys_inverse));
+      assert_equal true (List.mem "triple" (bim#keys_inverse));
+      assert_equal true (List.mem "two" (bim#keys_inverse));
+
+      assert_equal 3 (bim#length);
+
+      bim#map ~f:(fun l -> let len = List.length l in
+			   match len with
+			   | 1 -> ["1"]@l
+			   | 2 -> ["2"]@l
+			   | 3 -> ["3"]@l
+			   | _ -> ["unexpectedlen"]@l);
+      assert_equal 2 (List.length (bim#find_exn 1));
+      assert_equal true (List.mem "1" (bim#find_exn 1));
+      assert_equal 3 (List.length (bim#find_exn 2));
+      assert_equal true (List.mem "2" (bim#find_exn 2));
+      assert_equal 4 (List.length (bim#find_exn 3));
+      assert_equal true (List.mem "3" (bim#find_exn 3));
+      assert_equal 1 (bim#find_exn_inverse "1");
+      assert_equal 2 (bim#find_exn_inverse "2");
+      assert_equal 3 (bim#find_exn_inverse "3");
+      assert_equal 1 (bim#find_exn_inverse "one");
+      assert_equal 2 (bim#find_exn_inverse "two");
+      assert_equal 3 (bim#find_exn_inverse "three");
     end
+
+  let test10 text_ctx =
+    let string_map = Core.String.Map.empty in
+    let int_map = Core.Int.Map.empty in 
+    let bim = new Bimap_multi.bimap_multi_class int_map string_map in
+    begin
+      bim#add_multi ~key:1 ~data:"one";
+      bim#add_multi ~key:2 ~data:"two";
+      bim#add_multi ~key:3 ~data:"three";
+      bim#add_multi ~key:2 ~data:"dos";
+      bim#add_multi ~key:3 ~data:"tres";
+      bim#add_multi ~key:3 ~data:"triple";
+
+      assert_equal true (bim#mem 1);
+      assert_equal true (bim#mem 2);
+      assert_equal true (bim#mem 3);
+      assert_equal true (bim#mem_inverse "one");
+      assert_equal true (bim#mem_inverse "two");
+      assert_equal true (bim#mem_inverse "three");
+      
+      bim#map_inverse ~f:(fun x -> x *10);
+      assert_equal 10 (bim#find_exn_inverse "one");
+      assert_equal 20 (bim#find_exn_inverse "two");
+      assert_equal 30 (bim#find_exn_inverse "three");
+      assert_equal None (bim#find 1);
+      assert_equal None (bim#find 2);
+      assert_equal None (bim#find 3);
+      assert_equal true (List.mem "one" (bim#find_exn 10));
+      assert_equal true (List.mem "two" (bim#find_exn 20));
+      assert_equal true (List.mem "three" (bim#find_exn 30));
+
+      
+    end 
 
   let suite =
     "suite">:::
@@ -589,7 +650,8 @@ module Bimap_tests = struct
        "test6">:: test6;
        "test7">:: test7;
        "test8">:: test8;
-       "test9">:: test9];;
+       "test9">:: test9;
+       "test10">:: test10];;
 
   let () =
     run_test_tt_main suite
