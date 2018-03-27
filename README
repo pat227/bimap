@@ -17,18 +17,9 @@ example would be:
 (Core.String.t, Core.Int.t, Core.String.Comparator.t) Core.Map.t
 (Core.Int, Core.String.t, Core.Int.t.Comparator.t) Core.Map.t
 
-NOTE
-If 'b in the parameterized class is a list of some type, then the keys in the
-reverse map are constrained to be of type 'b (a list of some type). And unlike
-working with Core.Map directly, we cannot just decide to invoke add_multi upon
-a map that until now has never held lists as values; the paramterized type
-constraints of the class require 'b  to be a stand-in for either a list of
-some type or a type (that is not a list of some type).
+However for a multi-map, the types would be:
+('a, 'b list, 'c) Core.Map.t 
+('b, 'a, 'd) Core.Map.t
 
-Which is dissapointing b/c the reverse of a multi-map should not be a map
-whose keys are lists. It would be better if we could make the inverse or
-reverse map of a multi_map merely a map from keys to values where the keys
-are not lists. So if a multi-map stored under the key 1 the value ["one","uno"]
-then it would be better if we could make the reverse map store under the
-key "one" the value 1 and under the key "uno" the value 1 again. But how
-to express that with this type system?
+a Bi-Multi-map is implemented in it's own class with it's own
+type parameters. 
