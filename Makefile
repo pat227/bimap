@@ -29,11 +29,8 @@ lib: $(libdir)bimap.ml $(libdir)bimap.mli $(libdir)bimap_multi.ml $(libdir)bimap
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cma
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cmo
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cmx
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.a
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cma
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmo
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_module.cmx
-#ocamlfind ocamlc -thread -o test -package "oUnit core" -linkpkg -g -I $(libdir) $(libdir)bimap.mli $(libdir)bimap.ml $(testdir)bimap_tests.ml
+	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.a
+
 tests: $(testdir)bimap_tests.ml #lib
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core oUnit' -build-dir build -I src/lib src/test/bimap_tests.native
 
@@ -42,6 +39,3 @@ install: lib
 
 uninstall:
 	ocamlfind remove $(PROJECT)
-#only makes sense to run this after copying output file into the src/lib dir
-#test_output: $(builddir)$(maindir)ocaml_mysql_model.native
-#	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'core uint mysql ppx_deriving ppx_deriving.show fieldslib ppx_fields_conv ppx_sexp_conv ppx_deriving.eq ppx_deriving.ord pcre' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/scrapings.cma
