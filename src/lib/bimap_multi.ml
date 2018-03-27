@@ -245,9 +245,9 @@ module Bimap_multi = struct
     method update key ~f =
       let oldvalues = Core.Map.find_exn !forward_map key in
       let () = forward_map := (Core.Map.update !forward_map key ~f) in
-      let newvalues = Core.Map.find_exn !forward_map key in 
-      let () = self#add_inverse_values newvalues key in
-      self#remove_inverse_keys oldvalues
+      let newvalues = Core.Map.find_exn !forward_map key in
+      let () = self#remove_inverse_keys oldvalues in 
+      self#add_inverse_values newvalues key      
   end
 end 
 

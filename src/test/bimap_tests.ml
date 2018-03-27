@@ -674,11 +674,30 @@ module Bimap_tests = struct
       assert_equal None (bim#find_inverse "tres");
       assert_equal (Some 30) (bim#find_inverse "three");
 
-(*      bim#update 30 ~f:(fun l ->
+      bim#update 30 ~f:(fun l ->
 			match l with
-			| Some elems -> 
-			| None ->
-		       )*)
+			| Some elems ->
+			   let elems2 = if not (List.mem "three" elems) then
+					  (*let () = print_n_flush "\nAdding three..." in *)
+					  ("three" :: elems)
+					else elems in
+			   let elems3 = if not (List.mem "tres" elems2) then
+					  (*let () = print_n_flush "\nAdding tres..." in *)
+					  ("tres" :: elems2)
+					else elems2 in
+			   let elems4 = if not (List.mem "triple" elems3) then
+					  (*let () = print_n_flush "\nAdding triple..." in*)
+					  ("triple" :: elems3)
+					else elems3 in
+			   elems4
+			| None -> ["three";"tres";"triple"]
+		       );
+      assert_equal true (List.mem "triple" (bim#find_exn 30));
+      assert_equal true (List.mem "tres" (bim#find_exn 30));
+      assert_equal true (List.mem "three" (bim#find_exn 30));
+      assert_equal (Some 30) (bim#find_inverse "tres");
+      assert_equal (Some 30) (bim#find_inverse "triple");
+      assert_equal (Some 30) (bim#find_inverse "three");
     end 
 
   let suite =
