@@ -637,7 +637,48 @@ module Bimap_tests = struct
       assert_equal true (List.mem "two" (bim#find_exn 20));
       assert_equal true (List.mem "three" (bim#find_exn 30));
 
-      
+      assert_equal (Some (10, ["one"])) (bim#min_elt);
+      assert_equal (10, ["one"]) (bim#min_elt_exn);
+      assert_equal (Some (30, ["triple";"tres";"three"])) (bim#max_elt);
+      assert_equal (30,["triple";"tres";"three"]) (bim#max_elt_exn);
+
+      assert_equal (Some ("dos", 20)) (bim#min_elt_inverse);
+      assert_equal ("dos", 20) (bim#min_elt_exn_inverse);
+      assert_equal (Some ("two", 20)) (bim#max_elt_inverse);
+      assert_equal ("two",20) (bim#max_elt_exn_inverse);
+
+      assert_equal (Some (10, ["one"])) (bim#nth 0);
+      assert_equal (Some (20, ["two";"dos"])) (bim#nth 1);
+      assert_equal (Some (30, ["triple";"tres";"three"])) (bim#nth 2);
+      assert_equal (Some ("dos",20)) (bim#nth_inverse 0);
+      assert_equal (Some ("one",10)) (bim#nth_inverse 1);
+      assert_equal (Some ("three",30)) (bim#nth_inverse 2);
+      assert_equal (Some ("tres",30)) (bim#nth_inverse 3);
+      assert_equal (Some ("triple",30)) (bim#nth_inverse 4);
+      assert_equal (Some ("two",20)) (bim#nth_inverse 5);
+
+      bim#remove ~key:20;
+      assert_equal None (bim#find 20);
+      assert_equal None (bim#find_inverse "two");
+
+      bim#remove_inverse ~key:"triple";
+      assert_equal false (List.mem "triple" (bim#find_exn 30));
+      assert_equal true (List.mem "three" (bim#find_exn 30));
+      assert_equal true (List.mem "tres" (bim#find_exn 30));
+
+      bim#remove_multi ~key:30;
+      assert_equal false (List.mem "triple" (bim#find_exn 30));
+      assert_equal false (List.mem "tres" (bim#find_exn 30));
+      assert_equal true (List.mem "three" (bim#find_exn 30));
+      assert_equal 1 (List.length (bim#find_exn 30));
+      assert_equal None (bim#find_inverse "tres");
+      assert_equal (Some 30) (bim#find_inverse "three");
+
+(*      bim#update 30 ~f:(fun l ->
+			match l with
+			| Some elems -> 
+			| None ->
+		       )*)
     end 
 
   let suite =

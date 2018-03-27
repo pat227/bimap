@@ -64,7 +64,6 @@ module Bimap_multi : sig
 	    method mapi : f:(key:'a -> data:'b list -> 'b list) -> unit
 	    (*----todo----*)
 	    method mapi_inverse : f:(key:'b -> data:'a -> 'a) -> unit
-	    (*----so far tested----*)
 	    method mem : 'a -> bool
             method mem_inverse : 'b -> bool
 	    method min_elt : ('a * 'b list) option
@@ -80,6 +79,7 @@ module Bimap_multi : sig
 	    method remove : key:'a -> unit
             method remove_inverse : key:'b -> unit
 	    method remove_multi : key:'a -> unit
+	    (*----so far tested----*)
 	    method to_alist : ?key_order:[`Increasing | `Decreasing] -> unit -> ('a * 'b list) list 
 	    method update : 'a -> f:('b list option -> 'b list) -> unit
 	  end
