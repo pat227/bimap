@@ -3,18 +3,24 @@
 module Bimap_multi = struct
   class ['a,'b] bimap_multi_class m1 m2 = object(self)
     val mutable forward_map = ref m1
-    val mutable reverse_map = ref m2 
+    val mutable reverse_map = ref m2
+    method private empty_forward_map () =
+      self#iter_keys
+        ~f:(fun k -> forward_map := (Core.Map.remove !forward_map k))
+    method private empty_reverse_map () =
+      self#iter_keys_inverse 
+        ~f:(fun k -> reverse_map := (Core.Map.remove !reverse_map k))
     method add_multi ~(key:'a) ~(data:'b) =
       let () = forward_map := (Core.Map.add_multi !forward_map ~key ~data) in
-      reverse_map := Core.Map.add !reverse_map ~key:data ~data:key
+      reverse_map := Core.Map.set !reverse_map ~key:data ~data:key
     method add_multi_inverse ~(key:'b) ~(data:'a) =
       let () = forward_map := (Core.Map.add_multi !forward_map ~key:data ~data:key) in
-      reverse_map := Core.Map.add !reverse_map ~key ~data
+      reverse_map := Core.Map.set !reverse_map ~key ~data
     method private add_inverse_values klist v =
       let rec add_values k v =
 	match k with
 	| h :: t ->
-	   let () = reverse_map := (Core.Map.add !reverse_map ~key:h ~data:v) in
+	   let () = reverse_map := (Core.Map.set !reverse_map ~key:h ~data:v) in
 	   add_values t v
 	| [] -> () in
       add_values klist v
@@ -50,8 +56,9 @@ module Bimap_multi = struct
       self#add_inverse_values old_fwd_value_list new_fwd_key
 
     method private create_inverse_map_from_forward_map =
-      let () = reverse_map :=
-		 (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map)) in
+      (*let () = reverse_map :=
+		 (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map)) in*)
+      let () = self#empty_reverse_map () in 
       self#iter_keys
 	     ~f:(fun k ->
 		 let values = self#find_exn ~key:k in
@@ -60,12 +67,13 @@ module Bimap_multi = struct
 		   | [] -> ()
 		   | h::t ->
 		      let () = reverse_map :=
-				 Core.Map.add !reverse_map ~key:h ~data:k in
+				 Core.Map.set !reverse_map ~key:h ~data:k in
 		      helper t in
 		 helper values)
     method private create_forward_map_from_reverse_map =
-      let () = forward_map :=
-		 (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in
+      (*let () = forward_map :=
+		 (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in*)
+      let () = self#empty_forward_map () in 
       self#iter_keys_inverse
 	     ~f:(fun k ->
 		 forward_map :=
@@ -82,8 +90,10 @@ module Bimap_multi = struct
     method data_inverse =
       Core.Map.data !reverse_map
     method empty () =
-      let () = forward_map := (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in
-      reverse_map := (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map))
+      (*let () = forward_map := (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in
+      reverse_map := (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map))*)
+      let () = self#empty_forward_map () in
+      self#empty_reverse_map ()
     method exists ~f =
       Core.Map.exists !forward_map ~f
     method exists_inverse ~f =
@@ -162,28 +172,32 @@ module Bimap_multi = struct
       Core.Map.length !forward_map
     method map ~f =
       let () = forward_map := (Core.Map.map !forward_map ~f) in
-      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
+      (*let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in*)
+      let () = self#empty_reverse_map () in 
       Core.Map.iter_keys
 	!forward_map
 	~f:(fun k ->
 	    self#add_inverse_values (Core.Map.find_exn !forward_map k) k)
     method map_inverse ~f =
       let () = reverse_map := (Core.Map.map !reverse_map ~f) in
-      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
+      (*let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in*)
+      let () = self#empty_forward_map () in 
       Core.Map.iter_keys
 	!reverse_map
 	~f:(fun k -> forward_map :=
 		       Core.Map.add_multi !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
     method mapi ~f =
       let () = forward_map := (Core.Map.mapi !forward_map ~f) in
-      let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in
+      (*let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in*)
+      let () = self#empty_reverse_map () in 
       Core.Map.iter_keys
 	!forward_map
 	~f:(fun k ->
 	    self#add_inverse_values (Core.Map.find_exn !forward_map k) k)
     method mapi_inverse ~f =
       let () = reverse_map := (Core.Map.mapi !reverse_map ~f) in
-      let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in
+      (*let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in*)
+      let () = self#empty_forward_map () in 
       Core.Map.iter_keys
 	!reverse_map
 	~f:(fun k -> forward_map :=
@@ -230,7 +244,7 @@ module Bimap_multi = struct
       let fwd_values = self#find_exn ~key:fwd_key in
       let new_fwd_values = (Core.List.filter fwd_values ~f:(fun x -> not (x = key))) in 
       let () = forward_map := (Core.Map.remove !forward_map fwd_key) in
-      forward_map := (Core.Map.add !forward_map  ~key:fwd_key ~data:new_fwd_values)
+      forward_map := (Core.Map.set !forward_map  ~key:fwd_key ~data:new_fwd_values)
     method remove_multi ~key =
       try
 	let values = Core.Map.find_exn !forward_map key in
