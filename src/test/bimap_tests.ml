@@ -43,8 +43,8 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:1 ~data:"one";
-      bim#add ~key:2 ~data:"two";
+      bim#set ~key:1 ~data:"one";
+      bim#set ~key:2 ~data:"two";
       assert_equal 2 (bim#length);
       assert_equal false (bim#is_empty);
       assert_equal "one" (bim#find_exn ~key:1);
@@ -52,7 +52,7 @@ module Bimap_tests = struct
       assert_equal 1 (bim#find_exn_inverse ~key:"one");
       assert_equal 2 (bim#find_exn_inverse ~key:"two");
 
-      bim#add_inverse ~key:"three" ~data:3;
+      bim#set_inverse ~key:"three" ~data:3;
 
       assert_equal "three" (bim#find_exn ~key:3);
       assert_equal 3 (bim#find_exn_inverse ~key:"three");
@@ -79,8 +79,8 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:1 ~data:"one";
-      bim#add ~key:2 ~data:"two";
+      bim#set ~key:1 ~data:"one";
+      bim#set ~key:2 ~data:"two";
       assert_equal 2 (bim#length);
       assert_equal false (bim#is_empty);
       assert_equal (Some "one") (bim#find ~key:1);
@@ -89,7 +89,7 @@ module Bimap_tests = struct
       assert_equal (Some 2) (bim#find_inverse ~key:"two");
       assert_equal None (bim#find ~key:3);
       assert_equal None (bim#find_inverse ~key:"three");
-      bim#add_inverse ~key:"three" ~data:3;
+      bim#set_inverse ~key:"three" ~data:3;
       assert_equal (Some "three") (bim#find ~key:3);
       assert_equal (Some 3) (bim#find_inverse ~key:"three");
 
@@ -125,9 +125,9 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:1 ~data:"single";
-      bim#add ~key:2 ~data:"double";
-      bim#add ~key:3 ~data:"triple";
+      bim#set ~key:1 ~data:"single";
+      bim#set ~key:2 ~data:"double";
+      bim#set ~key:3 ~data:"triple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       assert_equal 3 (bim#length);
       assert_equal 3 (bim#count_inverse ~f:(fun x -> true));
@@ -148,9 +148,9 @@ module Bimap_tests = struct
       assert_equal 0 (bim#count ~f:(fun x -> true));
       assert_equal true (bim#is_empty);
 
-      bim#add ~key:1 ~data:"one";
-      bim#add ~key:2 ~data:"two";
-      bim#add ~key:3 ~data:"three";
+      bim#set ~key:1 ~data:"one";
+      bim#set ~key:2 ~data:"two";
+      bim#set ~key:3 ~data:"three";
       bim#update 1 ~f:(fun x -> match x with
 				  Some s -> Core.String.rev s
 				 | None -> "newentry");
@@ -162,35 +162,35 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:4 ~data:"quadruple";
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:4 ~data:"quadruple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#length);
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter ~f:(fun v -> String.length v > 8);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
 
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter_inverse ~f:(fun v -> v > 4);
       assert_equal 2 (bim#count ~f:(fun x -> true));
-      bim#add ~key:4 ~data:"quadruple";
+      bim#set ~key:4 ~data:"quadruple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter_keys ~f:(fun k -> k < 5);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filter_keys_inverse ~f:(fun v -> String.length v > 8);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
 
-      bim#add ~key:4 ~data:"quadruple";
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:4 ~data:"quadruple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun x -> true));
       bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key <6);
       assert_equal 2 (bim#count ~f:(fun x -> true));
@@ -198,9 +198,9 @@ module Bimap_tests = struct
       assert_equal (Some "pentuple") (bim#find ~key:5);
       assert_equal None (bim#find ~key:6);
       
-      bim#add ~key:4 ~data:"quadruple";
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:4 ~data:"quadruple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       bim#filteri_inverse ~f:(fun ~key ~data -> String.length key > 8 || data <6);
       assert_equal 2 (bim#count ~f:(fun x -> true));
       assert_equal 2 (bim#count_inverse ~f:(fun x -> true));
@@ -211,9 +211,9 @@ module Bimap_tests = struct
       assert_equal (Some 5) (bim#find_inverse ~key:"pentuple");
       assert_equal None (bim#find_inverse ~key:"sextuple");
 
-      bim#add ~key:4 ~data:"quadruple";
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:4 ~data:"quadruple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       bim#filter_map ~f:(fun v -> if String.length v > 8 then (Some "survivor") else None);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
@@ -224,9 +224,9 @@ module Bimap_tests = struct
       assert_equal None (bim#find_inverse ~key:"pentuple");
       assert_equal None (bim#find_inverse ~key:"sextuple");
 
-      bim#add ~key:4 ~data:"quadruple";
-      bim#add ~key:5 ~data:"pentuple";
-      bim#add ~key:6 ~data:"sextuple";
+      bim#set ~key:4 ~data:"quadruple";
+      bim#set ~key:5 ~data:"pentuple";
+      bim#set ~key:6 ~data:"sextuple";
       bim#filter_map_inverse ~f:(fun v -> if v > 5 then (Some (v * 2)) else None);
       assert_equal 1 (bim#count ~f:(fun x -> true));
       assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
@@ -244,9 +244,9 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:1 ~data:"single";
-      bim#add ~key:2 ~data:"double";
-      bim#add ~key:3 ~data:"triple";
+      bim#set ~key:1 ~data:"single";
+      bim#set ~key:2 ~data:"double";
+      bim#set ~key:3 ~data:"triple";
       let concat = bim#fold ~init:"" ~f:(fun ~key ~data init -> if key < 3 then (init ^ data) else init) in
       assert_equal "singledouble" concat;
       let sum = bim#fold_inverse
@@ -280,9 +280,9 @@ module Bimap_tests = struct
     let int_map = Core.Int.Map.empty in 
     let bim = new Bimap.bimap_class int_map string_map in
     begin
-      bim#add ~key:1 ~data:"uno";
-      bim#add ~key:2 ~data:"dos";
-      bim#add ~key:3 ~data:"tres";
+      bim#set ~key:1 ~data:"uno";
+      bim#set ~key:2 ~data:"dos";
+      bim#set ~key:3 ~data:"tres";
       assert_equal true (bim#for_all ~f:(fun v -> (String.length v) > 1));
       assert_equal false (bim#for_all ~f:(fun v -> (String.length v) > 4));
       assert_equal true (bim#for_all_inverse ~f:(fun v -> v < 4));

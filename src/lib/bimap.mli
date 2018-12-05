@@ -5,8 +5,8 @@ module Bimap : sig
 	  object
             val mutable forward_map : ('a, 'b, 'c) Core.Map.t ref
             val mutable reverse_map : ('b, 'a, 'd) Core.Map.t ref
-            method add : key:'a -> data:'b -> unit
-            method add_inverse : key:'b -> data:'a -> unit
+            method set : key:'a -> data:'b -> unit
+            method set_inverse : key:'b -> data:'a -> unit
             method change :
 		     key:'a ->
 		     f:('b option -> 'b option) ->
