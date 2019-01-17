@@ -17,12 +17,8 @@ remove: [[make "uninstall"]
 	 ["rm" "-f" "%{bin}%/bimap.byte"]
 	]
 build-test: [make "tests"]
-#build-doc: [
-#  make "doc"
-#]
 depends: [
-  "core" {>= "v0.11.0"}
-  "core_kernel" {>= "v0.11.0"}
+  "ounit" {>= "2.0.8"}
   "ocamlfind" {>= "1.6.2"}
   "ocamlbuild" {>= "0.12.0"}
 ]
