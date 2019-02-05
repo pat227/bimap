@@ -3,8 +3,8 @@ module Bimap :
     sig
       val empty : unit -> unit
       val is_empty : unit -> bool
-      val mem : MapModule1.key -> bool
-      val mem_reverse : MapModule2.key -> bool
+      val mem : key:MapModule1.key -> bool
+      val mem_reverse : key:MapModule2.key -> bool
       val add : key:MapModule1.key -> data:MapModule2.key -> unit
       val add_reverse : key:MapModule2.key -> data:MapModule1.key -> unit
       val singleton : key:MapModule1.key -> data:MapModule2.key -> unit

@@ -11,10 +11,10 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.is_empty !forward_map
   let is_empty_reverse () =
     MapModule2.is_empty !reverse_map
-  let mem k =
-    MapModule1.mem k !forward_map
-  let mem_reverse k =
-    MapModule2.mem k !reverse_map
+  let mem ~key =
+    MapModule1.mem key !forward_map
+  let mem_reverse ~key =
+    MapModule2.mem key !reverse_map
   let add ~key ~data =
     let () = forward_map := MapModule1.add key data !forward_map in 
     reverse_map := MapModule2.add data key !reverse_map
