@@ -119,14 +119,30 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.bindings !forward_map
   let bindings_reverse () =
     MapModule2.bindings !reverse_map
-  let min_binding () =
+  let min_binding_exn () =
     MapModule1.min_binding !forward_map
-  let min_binding_reverse () =
+  let min_binding_reverse_exn () =
     MapModule2.min_binding !reverse_map
-  let max_binding () =
+  let max_binding_exn () =
     MapModule1.max_binding !forward_map
-  let max_binding_reverse () =
+  let max_binding_reverse_exn () =
     MapModule2.max_binding !reverse_map
+  let min_binding () =
+    try
+      Some (MapModule1.min_binding !forward_map)
+    with _ -> None 
+  let min_binding_reverse () =
+    try 
+      Some (MapModule2.min_binding !reverse_map)
+    with _ -> None
+  let max_binding () =
+    try 
+      Some (MapModule1.max_binding !forward_map)
+    with _ -> None
+  let max_binding_reverse () =
+    try 
+      Some (MapModule2.max_binding !reverse_map)
+    with _ -> None
   let choose () =
     MapModule1.choose !forward_map
   let choose_reverse () =
@@ -139,6 +155,14 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.find key !forward_map
   let find_reverse_exn ~key =
     MapModule2.find key !reverse_map
+  let find ~key =
+    try
+      Some (MapModule1.find key !forward_map)
+    with _ -> None
+  let find_reverse ~key =
+    try
+      Some (MapModule2.find key !reverse_map)
+    with _ -> None
   let map ~f =
     let () = forward_map := MapModule1.map f !forward_map in
     create_reverse_map_from_forward_map ()

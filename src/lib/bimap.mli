@@ -65,10 +65,14 @@ module Bimap :
       val cardinal_reverse : unit -> int
       val bindings : unit -> (MapModule1.key * MapModule2.key) list
       val bindings_reverse : unit -> (MapModule2.key * MapModule1.key) list
-      val min_binding : unit -> MapModule1.key * MapModule2.key
-      val min_binding_reverse : unit -> MapModule2.key * MapModule1.key
-      val max_binding : unit -> MapModule1.key * MapModule2.key
-      val max_binding_reverse : unit -> MapModule2.key * MapModule1.key
+      val min_binding_exn : unit -> MapModule1.key * MapModule2.key
+      val min_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
+      val max_binding_exn : unit -> MapModule1.key * MapModule2.key
+      val max_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
+      val min_binding : unit -> (MapModule1.key * MapModule2.key) option
+      val min_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
+      val max_binding : unit -> (MapModule1.key * MapModule2.key) option
+      val max_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
       val choose : unit -> MapModule1.key * MapModule2.key
       val choose_reverse : unit -> MapModule2.key * MapModule1.key
       val split :
@@ -81,6 +85,8 @@ module Bimap :
         MapModule1.key MapModule2.t
       val find_exn : key:MapModule1.key -> MapModule2.key
       val find_reverse_exn : key:MapModule2.key -> MapModule1.key
+      val find : key:MapModule1.key -> MapModule2.key option
+      val find_reverse : key:MapModule2.key -> MapModule1.key option
       val map : f:(MapModule2.key -> MapModule2.key) -> unit
       val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
       val mapi :

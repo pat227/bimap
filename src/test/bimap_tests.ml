@@ -80,53 +80,49 @@ module Bimap_tests = struct
       Bimap_test1.filter_reverse ~f:(fun y _ -> String.compare y "one" <> 0);
       assert_equal 0 (Bimap_test1.length ());
     end
-(*
+      
   let test2 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap.bimap_class int_map string_map in
+    let module IntMap = Map.Make(Int64) in
+    let module StrMap = Map.Make(String) in
+    let module Bimap_test2 = Bimap(IntMap)(StrMap) in
     begin
-      bim#set ~key:1 ~data:"one";
-      bim#set ~key:2 ~data:"two";
-      assert_equal 2 (bim#length);
-      assert_equal false (bim#is_empty);
-      assert_equal (Some "one") (bim#find ~key:1);
-      assert_equal (Some "two") (bim#find ~key:2);
-      assert_equal (Some 1) (bim#find_inverse ~key:"one");
-      assert_equal (Some 2) (bim#find_inverse ~key:"two");
-      assert_equal None (bim#find ~key:3);
-      assert_equal None (bim#find_inverse ~key:"three");
-      bim#set_inverse ~key:"three" ~data:3;
-      assert_equal (Some "three") (bim#find ~key:3);
-      assert_equal (Some 3) (bim#find_inverse ~key:"three");
+      Bimap_test2.add ~key:(Int64.of_int 1) ~data:"one";
+      Bimap_test2.add ~key:(Int64.of_int 2) ~data:"two";
+      (* 1 -> one | 2 -> two *)
+      assert_equal 2 (Bimap_test2.length ());
+      assert_equal false (Bimap_test2.is_empty ());
+      assert_equal (Some "one") (Bimap_test2.find ~key:(Int64.of_int 1));
+      assert_equal (Some "two") (Bimap_test2.find ~key:(Int64.of_int 2));
+      assert_equal (Some (Int64.of_int 1)) (Bimap_test2.find_reverse ~key:"one");
+      assert_equal (Some (Int64.of_int 2)) (Bimap_test2.find_reverse ~key:"two");
+      assert_equal None (Bimap_test2.find ~key:(Int64.of_int 3));
+      assert_equal None (Bimap_test2.find_reverse ~key:"three");
+      Bimap_test2.add_reverse ~key:"three" ~data:(Int64.of_int 3);
+      (* 1 -> one | 2 -> two | 3 -> three *)
+      assert_equal (Some "three") (Bimap_test2.find ~key:(Int64.of_int 3));
+      assert_equal (Some (Int64.of_int 3)) (Bimap_test2.find_reverse ~key:"three");
 
-      bim#change ~key:3 ~f:(fun x -> (Some "tri"));
+      Bimap_test2.add ~key:(Int64.of_int 3) ~data:"tri";
+      (* 1 -> one | 2 -> two | 3 -> tri *)
+      assert_equal (Int64.of_int 3) (Bimap_test2.find_reverse_exn ~key:"tri");
 
-      assert_equal 3 (bim#find_exn_inverse ~key:"tri");
-
-      bim#change_inverse ~key:"tri" ~f:(fun x -> (Some 4));
-
-      assert_equal (Some 4) (bim#find_inverse ~key:"tri");
-      assert_equal (Some "tri") (bim#find ~key:4);
-      assert_equal true (bim#mem 1);
-      assert_equal true (bim#mem 2);
-      assert_equal true (bim#mem_inverse "tri");
-      assert_equal (Some (1,"one")) (bim#min_elt);
-      assert_equal (Some (4,"tri")) (bim#max_elt);
-      assert_equal (1,"one") (bim#min_elt_exn);
-      assert_equal (4,"tri") (bim#max_elt_exn);
-      assert_equal (Some ("one",1)) (bim#min_elt_inverse);
-      assert_equal (Some ("two",2)) (bim#max_elt_inverse);
-      assert_equal ("one",1) (bim#min_elt_exn_inverse);
-      assert_equal ("two",2) (bim#max_elt_exn_inverse);
-      assert_equal (Some (2,"two")) (bim#nth 1);
-      assert_equal (Some (4,"tri")) (bim#nth 2);
-      assert_equal (Some ("one",1)) (bim#nth_inverse 0);
-      assert_equal (Some ("tri",4)) (bim#nth_inverse 1);
-      assert_equal (Some ("two",2)) (bim#nth_inverse 2);
-      assert_equal None (bim#nth_inverse 3);
+      Bimap_test2.add_reverse ~key:"tri" ~data:(Int64.of_int 4);
+      (* 1 -> one | 2 -> two | 4 -> tri *)
+      assert_equal (Some (Int64.of_int 4)) (Bimap_test2.find_reverse ~key:"tri");
+      assert_equal (Some "tri") (Bimap_test2.find ~key:(Int64.of_int 4));
+      assert_equal true (Bimap_test2.mem (Int64.of_int 1));
+      assert_equal true (Bimap_test2.mem (Int64.of_int 2));
+      assert_equal true (Bimap_test2.mem_reverse "tri");
+      assert_equal (Some ((Int64.of_int 1),"one")) (Bimap_test2.min_binding ());
+      assert_equal (Some ((Int64.of_int 4),"tri")) (Bimap_test2.max_binding ());
+      assert_equal ((Int64.of_int 1),"one") (Bimap_test2.min_binding_exn ());
+      assert_equal ((Int64.of_int 4),"tri") (Bimap_test2.max_binding_exn ());
+      assert_equal (Some ("one",(Int64.of_int 1))) (Bimap_test2.min_binding_reverse ());
+      assert_equal (Some ("two",(Int64.of_int 2))) (Bimap_test2.max_binding_reverse ());
+      assert_equal ("one",(Int64.of_int 1)) (Bimap_test2.min_binding_reverse_exn ());
+      assert_equal ("two",(Int64.of_int 2)) (Bimap_test2.max_binding_reverse_exn ());
     end
-
+(*
   let test3 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
