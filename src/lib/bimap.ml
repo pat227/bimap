@@ -1,9 +1,11 @@
 (*Not using core have to use a functor. A class expects a type, which Core Map does,
-but map.mli only provides a module type ... wait maybe this is possible using the (+a) t type in Map.mli????!!! At any rate, use functor.*)
+but map.mli only provides a module type ... wait maybe this is possible 
+using the (+a) t type in Map.mli????!!! At any rate, use functor.*)
 module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
   let forward_map = ref MapModule1.empty;; 
   let reverse_map = ref MapModule2.empty;;   
-  (*empty, union, merge, map, etc, all mutate the maps, ie, the functions do not return maps unlike counterparts in map.mli*)
+  (*empty, union, merge, map, etc, all mutate the maps, ie, the functions do 
+    not return maps unlike counterparts in map.mli*)
   let empty () =
     let () = forward_map := MapModule1.empty in
     reverse_map := MapModule2.empty
@@ -11,6 +13,20 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.is_empty !forward_map
   let is_empty_reverse () =
     MapModule2.is_empty !reverse_map
+  let length () =
+    let count = ref 0 in 
+    let () = MapModule1.iter
+               (fun k _ ->
+                 count := !count + 1;
+               ) !forward_map in
+    !count
+  let reverse_length () =
+    let count = ref 0 in 
+    let () = MapModule2.iter
+               (fun k _ ->
+                 count := !count + 1;
+               ) !reverse_map in
+    !count
   let mem ~key =
     MapModule1.mem key !forward_map
   let mem_reverse ~key =
@@ -119,9 +135,9 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.split key !forward_map
   let split_reverse ~key =
     MapModule2.split key !reverse_map
-  let find ~key =
+  let find_exn ~key =
     MapModule1.find key !forward_map
-  let find_reverse ~key =
+  let find_reverse_exn ~key =
     MapModule2.find key !reverse_map
   let map ~f =
     let () = forward_map := MapModule1.map f !forward_map in

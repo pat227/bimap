@@ -3,6 +3,8 @@ module Bimap :
     sig
       val empty : unit -> unit
       val is_empty : unit -> bool
+      val length : unit -> int
+      val reverse_length : unit -> int
       val mem : key:MapModule1.key -> bool
       val mem_reverse : key:MapModule2.key -> bool
       val add : key:MapModule1.key -> data:MapModule2.key -> unit
@@ -77,8 +79,8 @@ module Bimap :
         key:MapModule2.key ->
         MapModule1.key MapModule2.t * MapModule1.key option *
         MapModule1.key MapModule2.t
-      val find : key:MapModule1.key -> MapModule2.key
-      val find_reverse : key:MapModule2.key -> MapModule1.key
+      val find_exn : key:MapModule1.key -> MapModule2.key
+      val find_reverse_exn : key:MapModule2.key -> MapModule1.key
       val map : f:(MapModule2.key -> MapModule2.key) -> unit
       val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
       val mapi :
