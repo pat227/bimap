@@ -13,7 +13,7 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.is_empty !forward_map
   let is_empty_reverse () =
     MapModule2.is_empty !reverse_map
-  let length () =
+  (*let length () =
     let count = ref 0 in 
     let () = MapModule1.iter
                (fun k _ ->
@@ -26,17 +26,29 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
                (fun k _ ->
                  count := !count + 1;
                ) !reverse_map in
-    !count
+    !count*)
   let mem ~key =
-    MapModule1.mem key !forward_map
+    MapModule1.mem key !forward_map;;
   let mem_reverse ~key =
-    MapModule2.mem key !reverse_map
+    MapModule2.mem key !reverse_map;;
   let add ~key ~data =
-    let () = forward_map := MapModule1.add key data !forward_map in 
-    reverse_map := MapModule2.add data key !reverse_map
+    if MapModule1.mem key !forward_map then
+      let value = MapModule1.find key !forward_map in
+      let () = reverse_map := MapModule2.remove value !reverse_map in 
+      let () = forward_map := MapModule1.add key data !forward_map in 
+      reverse_map := MapModule2.add data key !reverse_map
+    else
+      let () = forward_map := MapModule1.add key data !forward_map in 
+      reverse_map := MapModule2.add data key !reverse_map;;
   let add_reverse ~key ~data =
-    let () = reverse_map := (MapModule2.add key data !reverse_map) in
-    forward_map := MapModule1.add data key !forward_map
+    if MapModule2.mem key !reverse_map then
+      let value = MapModule2.find key !reverse_map in
+      let () = forward_map := MapModule1.remove value !forward_map in
+      let () = reverse_map := (MapModule2.add key data !reverse_map) in
+      forward_map := MapModule1.add data key !forward_map
+    else
+      let () = reverse_map := (MapModule2.add key data !reverse_map) in
+      forward_map := MapModule1.add data key !forward_map;;
   let singleton ~key ~data =
     let () = empty () in
     add ~key ~data

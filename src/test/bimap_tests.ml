@@ -48,7 +48,10 @@ module Bimap_tests = struct
       Bimap_test1.add ~key:Int64.one ~data:"one";
       Bimap_test1.add ~key:(Int64.of_int 2) ~data:"two";
       (* 1 -> one | 2 -> two *)
-      assert_equal 2 (Bimap_test1.length ());
+      assert_equal 2 (Bimap_test1.cardinal ());
+      assert_equal 2 (Bimap_test1.cardinal_reverse ());
+      assert_equal 2 (Bimap_test1.cardinal ());
+      assert_equal 2 (Bimap_test1.cardinal_reverse ());
       assert_equal false (Bimap_test1.is_empty ());
       assert_equal "one" (Bimap_test1.find_exn ~key:(Int64.of_int 1));
       assert_equal "two" (Bimap_test1.find_exn ~key:(Int64.of_int 2));
@@ -56,6 +59,8 @@ module Bimap_tests = struct
       assert_equal (Int64.of_int 2) (Bimap_test1.find_reverse_exn ~key:"two");
       Bimap_test1.add_reverse ~key:"three" ~data:(Int64.of_int 3);
       (* 1 -> one | 2 -> two | 3 -> three *)
+      assert_equal 3 (Bimap_test1.cardinal ());
+      assert_equal 3 (Bimap_test1.cardinal_reverse ());
       assert_equal "three" (Bimap_test1.find_exn ~key:(Int64.of_int 3));
       assert_equal (Int64.of_int 3) (Bimap_test1.find_reverse_exn ~key:"three");
       assert_equal [((Int64.of_int 1),"one");((Int64.of_int 2),"two");((Int64.of_int 3),"three")] (Bimap_test1.bindings ());
@@ -64,21 +69,21 @@ module Bimap_tests = struct
       assert_equal "tri" (Bimap_test1.find_exn ~key:(Int64.of_int 3));
       assert_equal (Int64.of_int 3) (Bimap_test1.find_reverse_exn ~key:"tri");      
       Bimap_test1.add_reverse ~key:"tri" ~data:(Int64.of_int 4);
-      (* 1 -> one | 2 -> two | 3 -> tri | 4 -> tri *)
+      (* 1 -> one | 2 -> two | 4 -> tri *)
       assert_equal (Int64.of_int 4) (Bimap_test1.find_reverse_exn ~key:"tri");
       assert_equal "tri" (Bimap_test1.find_exn ~key:(Int64.of_int 4));
       Bimap_test1.filter ~f:(fun x _ -> x <> (Int64.of_int 4));
-      (* 1 -> one | 2 -> two | 3 -> tri *)
-      assert_equal 3 (Bimap_test1.length ());
+      (* 1 -> one | 2 -> two *)
+      assert_equal 2 (Bimap_test1.cardinal ());
       Bimap_test1.filter_reverse ~f:(fun y _ -> String.compare y "two" <> 0);
-      (* 1 -> one | 3 -> tri *)
-      assert_equal 2 (Bimap_test1.length ());
+      (* 1 -> one *)
+      assert_equal 1 (Bimap_test1.cardinal ());
       Bimap_test1.filter ~f:(fun x _ -> x <> (Int64.of_int 3));
       (* 1 -> one*)
       assert_equal [((Int64.of_int 1),"one")] (Bimap_test1.bindings ());
-      assert_equal 1 (Bimap_test1.length ());
+      assert_equal 1 (Bimap_test1.cardinal ());
       Bimap_test1.filter_reverse ~f:(fun y _ -> String.compare y "one" <> 0);
-      assert_equal 0 (Bimap_test1.length ());
+      assert_equal 0 (Bimap_test1.cardinal ());
     end
       
   let test2 text_ctx =
@@ -89,7 +94,7 @@ module Bimap_tests = struct
       Bimap_test2.add ~key:(Int64.of_int 1) ~data:"one";
       Bimap_test2.add ~key:(Int64.of_int 2) ~data:"two";
       (* 1 -> one | 2 -> two *)
-      assert_equal 2 (Bimap_test2.length ());
+      assert_equal 2 (Bimap_test2.cardinal ());
       assert_equal false (Bimap_test2.is_empty ());
       assert_equal (Some "one") (Bimap_test2.find ~key:(Int64.of_int 1));
       assert_equal (Some "two") (Bimap_test2.find ~key:(Int64.of_int 2));
@@ -101,11 +106,9 @@ module Bimap_tests = struct
       (* 1 -> one | 2 -> two | 3 -> three *)
       assert_equal (Some "three") (Bimap_test2.find ~key:(Int64.of_int 3));
       assert_equal (Some (Int64.of_int 3)) (Bimap_test2.find_reverse ~key:"three");
-
       Bimap_test2.add ~key:(Int64.of_int 3) ~data:"tri";
       (* 1 -> one | 2 -> two | 3 -> tri *)
       assert_equal (Int64.of_int 3) (Bimap_test2.find_reverse_exn ~key:"tri");
-
       Bimap_test2.add_reverse ~key:"tri" ~data:(Int64.of_int 4);
       (* 1 -> one | 2 -> two | 4 -> tri *)
       assert_equal (Some (Int64.of_int 4)) (Bimap_test2.find_reverse ~key:"tri");
@@ -122,44 +125,60 @@ module Bimap_tests = struct
       assert_equal ("one",(Int64.of_int 1)) (Bimap_test2.min_binding_reverse_exn ());
       assert_equal ("two",(Int64.of_int 2)) (Bimap_test2.max_binding_reverse_exn ());
     end
-(*
+
   let test3 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap.bimap_class int_map string_map in
+    let module IntMap = Map.Make(Int64) in
+    let module StrMap = Map.Make(String) in
+    let module Bimap_test3 = Bimap(IntMap)(StrMap) in
     begin
-      bim#set ~key:1 ~data:"single";
-      bim#set ~key:2 ~data:"double";
-      bim#set ~key:3 ~data:"triple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#length);
-      assert_equal 3 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal 2 (bim#counti ~f:(fun ~key ~data -> if key <= 2 then true else false));
-      assert_equal ["single";"double";"triple"] (bim#data);
-      assert_equal true (List.mem 1 (bim#data_inverse));
-      assert_equal true (List.mem 2 (bim#data_inverse));
-      assert_equal true (List.mem 3 (bim#data_inverse));
-      assert_equal true (bim#exists ~f:(fun x -> x = "double"));
-      assert_equal true (bim#exists ~f:(fun x -> x = "triple"));
-      assert_equal false (bim#exists ~f:(fun x -> x = "quadruple"));
-      assert_equal true (bim#exists_inverse ~f:(fun x -> x = 2));
-      assert_equal false (bim#exists_inverse ~f:(fun x -> x = 4));
-      assert_equal true (bim#existsi ~f:(fun ~key ~data -> key = 3 && data = "triple"));
-      assert_equal true (bim#existsi_inverse ~f:(fun ~key ~data -> key = "double" && data = 2));
-      bim#empty ();
-      assert_equal 0 (bim#length);
-      assert_equal 0 (bim#count ~f:(fun x -> true));
-      assert_equal true (bim#is_empty);
+      Bimap_test3.add ~key:(Int64.of_int 1) ~data:"single";
+      Bimap_test3.add ~key:(Int64.of_int 2) ~data:"double";
+      Bimap_test3.add ~key:(Int64.of_int 3) ~data:"triple";
+      assert_equal 3 (Bimap_test3.cardinal ());
+      assert_equal [((Int64.of_int 1),"single");((Int64.of_int 2),"double");((Int64.of_int 3),"triple")] (Bimap_test3.bindings ());
+      assert_equal true (List.mem ((Int64.of_int 1),"single") (Bimap_test3.bindings ()));
+      assert_equal true (List.mem ("double",(Int64.of_int 2)) (Bimap_test3.bindings_reverse ()));
+      assert_equal true (List.mem ((Int64.of_int 3),"triple") (Bimap_test3.bindings ()));
+      assert_equal true (Bimap_test3.exists ~f:(fun _ y -> (String.compare y "double") = 0));
+      assert_equal true (Bimap_test3.exists ~f:(fun _ y -> y = "triple"));
+      assert_equal false (Bimap_test3.exists ~f:(fun _ y -> y = "quadruple"));
+      assert_equal true (Bimap_test3.exists_reverse ~f:(fun _ y -> y = (Int64.of_int 2)));
+      assert_equal false (Bimap_test3.exists_reverse ~f:(fun _ y -> y = (Int64.of_int 4)));
+      Bimap_test3.empty ();
+      assert_equal 0 (Bimap_test3.cardinal ());
+      assert_equal true (Bimap_test3.is_empty ());
+      Bimap_test3.add ~key:(Int64.of_int 1) ~data:"one";
+      assert_equal "one" (Bimap_test3.find_exn ~key:(Int64.of_int 1));
+      Bimap_test3.add ~key:(Int64.of_int 2) ~data:"two";
+      Bimap_test3.add ~key:(Int64.of_int 3) ~data:"three";
+      Bimap_test3.add ~key:(Int64.of_int 1) ~data:"newentry";
+      
+      assert_equal false (Bimap_test3.is_empty ());
+      assert_equal "newentry" (Bimap_test3.find_exn ~key:(Int64.of_int 1));
+      Bimap_test3.remove ~key:(Int64.of_int 1);
+      assert_equal 2 (Bimap_test3.cardinal ());
+      
+      (*print_n_flush "Reverse cardinal is:";
+      print_n_flush (string_of_int (Bimap_test3.cardinal_reverse ()));*)
+      assert_equal 2 (Bimap_test3.cardinal_reverse ());
+      assert_equal false (Bimap_test3.mem ~key:(Int64.of_int 1));
+      assert_equal true (Bimap_test3.mem ~key:(Int64.of_int 2));
+      assert_equal true (Bimap_test3.mem ~key:(Int64.of_int 3));
+      assert_equal false (Bimap_test3.mem_reverse ~key:"newentry");
+      assert_equal true (Bimap_test3.mem_reverse ~key:"two");
+      assert_equal true (Bimap_test3.mem_reverse ~key:"three");
+      assert_equal None (Bimap_test3.find (Int64.of_int 1));
+      assert_equal None (Bimap_test3.find_reverse "newentry");
 
-      bim#set ~key:1 ~data:"one";
-      bim#set ~key:2 ~data:"two";
-      bim#set ~key:3 ~data:"three";
-      bim#update 1 ~f:(fun x -> match x with
-				  Some s -> Core.String.rev s
-				 | None -> "newentry");
-      assert_equal "eno" (bim#find_exn ~key:1);
+      Bimap_test3.singleton ~key:(Int64.of_int 1) ~data:"uno";
+      assert_equal 1 (Bimap_test3.cardinal ());
+      assert_equal true (Bimap_test3.mem ~key:(Int64.of_int 1));
+      assert_equal (Some "uno") (Bimap_test3.find (Int64.of_int 1));
+      assert_equal 1 (Bimap_test3.cardinal_reverse ());
+      assert_equal (Some (Int64.of_int 1)) (Bimap_test3.find_reverse ("uno"));
+
     end 
-
+(*
   let test3 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
@@ -277,7 +296,7 @@ module Bimap_tests = struct
       assert_equal 0 dividend2;
       assert_equal true (bim#for_all ~f:(fun v -> if (String.length v) > 0 then true else false));
     end
-
+ 
   let test5 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
@@ -706,9 +725,9 @@ module Bimap_tests = struct
   let suite =
     "suite">:::
       ["test1">:: test1;
-(*       "test2">:: test2;
+       "test2">:: test2;
        "test3">:: test3;
-       "test4">:: test4;
+       (*"test4">:: test4;
        "test5">:: test5;
        "test6">:: test6;
        "test7">:: test7;
