@@ -13,20 +13,6 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.is_empty !forward_map
   let is_empty_reverse () =
     MapModule2.is_empty !reverse_map
-  (*let length () =
-    let count = ref 0 in 
-    let () = MapModule1.iter
-               (fun k _ ->
-                 count := !count + 1;
-               ) !forward_map in
-    !count
-  let reverse_length () =
-    let count = ref 0 in 
-    let () = MapModule2.iter
-               (fun k _ ->
-                 count := !count + 1;
-               ) !reverse_map in
-    !count*)
   let mem ~key =
     MapModule1.mem key !forward_map;;
   let mem_reverse ~key =
@@ -38,13 +24,25 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
       let () = forward_map := MapModule1.add key data !forward_map in 
       reverse_map := MapModule2.add data key !reverse_map
     else
-      let () = forward_map := MapModule1.add key data !forward_map in 
-      reverse_map := MapModule2.add data key !reverse_map;;
+      (*enforce only one key <-> value pair; do not permit, for example, 
+        key -> value1 | key -> value2 while in reverse mapping only have 
+        value1 -> key at same time.*)
+      if MapModule2.mem data !reverse_map then
+        let () = reverse_map := MapModule2.remove data !reverse_map in
+        let () = forward_map := MapModule1.add key data !forward_map in 
+        reverse_map := MapModule2.add data key !reverse_map
+      else 
+        let () = forward_map := MapModule1.add key data !forward_map in 
+        reverse_map := MapModule2.add data key !reverse_map;;
   let add_reverse ~key ~data =
     if MapModule2.mem key !reverse_map then
       let value = MapModule2.find key !reverse_map in
       let () = forward_map := MapModule1.remove value !forward_map in
       let () = reverse_map := (MapModule2.add key data !reverse_map) in
+      forward_map := MapModule1.add data key !forward_map
+    else if MapModule1.mem data !forward_map then
+      let () = forward_map := MapModule1.remove data !forward_map in
+      let () = reverse_map := MapModule2.add key data !reverse_map in 
       forward_map := MapModule1.add data key !forward_map
     else
       let () = reverse_map := (MapModule2.add key data !reverse_map) in
@@ -59,14 +57,12 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
       let () = reverse_map := MapModule2.empty in
       MapModule1.iter
 	     (fun k v ->
-	       reverse_map :=
-		 MapModule2.add v k !reverse_map) !forward_map
+	       add_reverse ~key:v ~data:k) !forward_map
   let create_forward_map_from_reverse_map () =
     let () = forward_map := MapModule1.empty in 
     MapModule2.iter
       (fun k v ->
-	forward_map :=
-	  MapModule1.add v k !forward_map) !reverse_map
+	add ~key:v ~data:k) !reverse_map
   let remove ~key =
     let value = MapModule1.find key !forward_map in 
     let () = forward_map := MapModule1.remove key !forward_map in
@@ -75,18 +71,20 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     let fwd_value = MapModule2.find key !reverse_map in 
     let () = reverse_map := MapModule2.remove key !reverse_map in
     forward_map := MapModule1.remove fwd_value !forward_map
+  let get_forward_map () = !forward_map;;
+  let get_reverse_map () = !reverse_map;;
   let merge ~f ~othermap =
     let () = forward_map := MapModule1.merge f !forward_map othermap in
     create_reverse_map_from_forward_map ()
   let merge_reverse ~f ~othermap =
     let () = reverse_map := MapModule2.merge f !reverse_map othermap in
     create_forward_map_from_reverse_map ()
-  let union ~f ~othermap =
+(*  let union ~f ~othermap =
     let () = forward_map := MapModule1.union f !forward_map othermap in
     create_reverse_map_from_forward_map ()
   let union_reverse ~f ~othermap =
     let () = reverse_map := MapModule2.union f !reverse_map othermap in
-    create_forward_map_from_reverse_map ()
+    create_forward_map_from_reverse_map ()*)
   let compare ~f ~othermap =
     MapModule1.compare f !forward_map othermap
   let compare_reverse ~f ~othermap =

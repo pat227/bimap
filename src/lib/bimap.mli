@@ -10,8 +10,10 @@ module Bimap :
       val singleton : key:MapModule1.key -> data:MapModule2.key -> unit
       val singleton_reverse : key:MapModule2.key -> data:MapModule1.key -> unit
       val remove : key:MapModule1.key -> unit
-      val remove_reverse : key:MapModule2.key -> unit                                                   
-
+      val remove_reverse : key:MapModule2.key -> unit
+      (*Needed to get access to the underlying map for use by merge function. Better way to do this?*)
+      val get_forward_map : unit -> MapModule2.key MapModule1.t
+      val get_reverse_map : unit -> MapModule1.key MapModule2.t
       val merge :
         f:(MapModule1.key ->
            MapModule2.key option -> 'a option -> MapModule2.key option) ->
@@ -20,6 +22,7 @@ module Bimap :
         f:(MapModule2.key ->
            MapModule1.key option -> 'a option -> MapModule1.key option) ->
         othermap:'a MapModule2.t -> unit
+(*
       val union :
         f:(MapModule1.key ->
            MapModule2.key -> MapModule2.key -> MapModule2.key option) ->
@@ -28,6 +31,7 @@ module Bimap :
         f:(MapModule2.key ->
            MapModule1.key -> MapModule1.key -> MapModule1.key option) ->
         othermap:MapModule1.key MapModule2.t -> unit
+ *)
       val compare :
         f:(MapModule2.key -> MapModule2.key -> int) ->
         othermap:MapModule2.key MapModule1.t -> int
