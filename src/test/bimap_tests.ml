@@ -238,7 +238,7 @@ module Bimap_tests = struct
       assert_equal None (Bimap_test4_other.find_reverse "tri");
       assert_equal (Some "triple") (Bimap_test4_other.find (Int64.of_int 3));
 
-      (*---good double chekc of merge and merge_reverse functions as well---*)
+      (*---good double check of merge and merge_reverse functions as well---*)
       assert_equal true (0 = (Bimap_test4.compare ~f:(fun x y -> String.compare x y) ~othermap:(Bimap_test4_other.get_forward_map ())));
       assert_equal true (0 = (Bimap_test4.compare_reverse ~f:(fun x y -> Int64.compare x y) ~othermap:(Bimap_test4_other.get_reverse_map ())));
 
@@ -250,6 +250,39 @@ module Bimap_tests = struct
 
       assert_equal true (Bimap_test4.for_all ~f:(fun k v -> ((String.length v) >= 6) && ((Int64.compare k Int64.zero) > 0)));
       assert_equal true (Bimap_test4.for_all_reverse ~f:(fun k v -> ((String.length k) >= 6) && ((Int64.compare v Int64.zero) > 0)));
+
+      let m1,m2 = Bimap_test4.partition ~f:(fun k _v -> (Int64.compare k (Int64.of_int 4) < 0)) in 
+      let () = (assert_equal true (IntMap.mem (Int64.of_int 1) m1)) in
+      let () = (assert_equal true (IntMap.mem (Int64.of_int 2) m1)) in
+      let () = (assert_equal true (IntMap.mem (Int64.of_int 3) m1)) in 
+      let () = (assert_equal true (IntMap.mem (Int64.of_int 5) m2)) in
+      assert_equal true (IntMap.mem (Int64.of_int 6) m2);
+      let m3,m4 = Bimap_test4.partition_reverse ~f:(fun k _v -> (String.length k > 6)) in
+      let () = (assert_equal true (StrMap.mem "pentuple" m3)) in 
+      assert_equal true (StrMap.mem "sextuple" m3);                                                    
+
+      let k,v = Bimap_test4.min_binding_exn () in
+      let () = assert_equal k (Int64.of_int 1) in
+      assert_equal v "single";
+      let k,v = Bimap_test4.max_binding_exn () in
+      let () = assert_equal k (Int64.of_int 6) in
+      assert_equal v "sextuple";
+      
+      let r = Bimap_test4.min_binding () in
+      (match r with
+       | Some (k2,v2) -> 
+          let () = assert_equal k2 (Int64.of_int 1) in
+          assert_equal v2 "single";
+       | None -> assert_equal true false);
+      
+      let r = Bimap_test4.max_binding () in
+      (match r with
+       | Some (k3,v3) -> 
+          let () = assert_equal k3 (Int64.of_int 6) in
+          assert_equal v3 "sextuple"
+       | None -> assert_equal true false
+      )
+                             
     end
 (*
   let test4 text_ctx =
