@@ -85,7 +85,7 @@ module Bimap_tests = struct
       Bimap_test1.filter_reverse ~f:(fun y _ -> String.compare y "one" <> 0);
       assert_equal 0 (Bimap_test1.cardinal ());
     end
-      
+
   let test2 text_ctx =
     let module IntMap = Map.Make(Int64) in
     let module StrMap = Map.Make(String) in
@@ -176,91 +176,81 @@ module Bimap_tests = struct
       assert_equal (Some "uno") (Bimap_test3.find (Int64.of_int 1));
       assert_equal 1 (Bimap_test3.cardinal_reverse ());
       assert_equal (Some (Int64.of_int 1)) (Bimap_test3.find_reverse ("uno"));
-
     end 
-(*
-  let test3 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap.bimap_class int_map string_map in
+
+  let test4 text_ctx =
+    let module IntMap = Map.Make(Int64) in
+    let module StrMap = Map.Make(String) in
+    let module Bimap_test4 = Bimap(IntMap)(StrMap) in
+    let module Bimap_test4_other = Bimap(IntMap)(StrMap) in
     begin
-      bim#set ~key:4 ~data:"quadruple";
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#length);
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      bim#filter ~f:(fun v -> String.length v > 8);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
+      Bimap_test4.add ~key:(Int64.of_int 1) ~data:"single";
+      Bimap_test4.add ~key:(Int64.of_int 2) ~data:"double";
+      Bimap_test4.add ~key:(Int64.of_int 3) ~data:"triple";
+      (*1 -> single | 2 -> double | 3 -> triple *)      
+      Bimap_test4_other.add ~key:(Int64.of_int 3) ~data:"tri";
+      Bimap_test4_other.add ~key:(Int64.of_int 5) ~data:"pentuple";
+      Bimap_test4_other.add ~key:(Int64.of_int 6) ~data:"sextuple";
+      (*3 -> tri | 5 -> pentuple | 6 -> sextuple *)
+      assert_equal 3 (Bimap_test4.cardinal ());
+      assert_equal 3 (Bimap_test4_other.cardinal ());
 
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      bim#filter_inverse ~f:(fun v -> v > 4);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      bim#set ~key:4 ~data:"quadruple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      bim#filter_keys ~f:(fun k -> k < 5);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal false (0 = (Bimap_test4.compare ~f:(fun x y -> String.compare x y) ~othermap:(Bimap_test4_other.get_forward_map ())));
+      assert_equal false (0 = (Bimap_test4.compare_reverse ~f:(fun x y -> Int64.compare x y) ~othermap:(Bimap_test4_other.get_reverse_map ())));
+
+      assert_equal false (Bimap_test4.equal ~f:(fun x y -> (String.compare x y) = 0) ~othermap:(Bimap_test4_other.get_forward_map ()));
+      assert_equal false (Bimap_test4.equal_reverse ~f:(fun x y -> (Int64.compare x y) = 0) ~othermap:(Bimap_test4_other.get_reverse_map ()));
+
+      Bimap_test4.merge
+        ~f:(fun k v1 v2->
+          match v1, v2 with
+          | None, None -> None
+          | Some v1, None -> Some v1
+          | None, Some v2 -> Some v2
+          | Some v1, Some v2 -> Some v1
+        )
+        ~othermap:(Bimap_test4_other.get_forward_map ());
+      (*1 -> single | 2 -> double | 3 -> triple | 5 -> pentuple | 6 -> sextuple *)
+      assert_equal 5 (Bimap_test4.cardinal ());
+      assert_equal 5 (Bimap_test4.cardinal_reverse ());
+      assert_equal (Some "triple") (Bimap_test4.find (Int64.of_int 3));
+
+      Bimap_test4_other.merge_reverse
+        ~f:(fun k v1 v2->
+          match v1, v2 with
+          | None, None -> None
+          | Some v1, None -> Some v1
+          | None, Some v2 -> Some v2
+          | Some v1, Some v2 -> Some v1
+        )
+        ~othermap:(Bimap_test4.get_reverse_map ());
+      (*1 <- single | 2 <- double | 3 <- triple | 3 <- tri | 5 <- pentuple | 6 <- sextuple 
+        1 -> single | 2 -> double | 3 -> triple | 5 <- pentuple | 6 <- sextuple  *)
+      assert_equal 5 (Bimap_test4_other.cardinal ());
+      (*6! B/c while adding to forward_map...we only retain the 3 key once, unlike reverse mapping
+      assert_equal 6 (Bimap_test4_other.cardinal_reverse ());
+      assert_equal (Some (Int64.of_int 3)) (Bimap_test4_other.find_reverse "triple");
+      assert_equal (Some (Int64.of_int 3)) (Bimap_test4_other.find_reverse "tri");
+      assert_equal (Some "triple") (Bimap_test4_other.find (Int64.of_int 3));
+      *)
+      assert_equal 5 (Bimap_test4_other.cardinal_reverse ());
+      assert_equal (Some (Int64.of_int 3)) (Bimap_test4_other.find_reverse "triple");
+      assert_equal None (Bimap_test4_other.find_reverse "tri");
+      assert_equal (Some "triple") (Bimap_test4_other.find (Int64.of_int 3));
+
+      (*---good double chekc of merge and merge_reverse functions as well---*)
+      assert_equal true (0 = (Bimap_test4.compare ~f:(fun x y -> String.compare x y) ~othermap:(Bimap_test4_other.get_forward_map ())));
+      assert_equal true (0 = (Bimap_test4.compare_reverse ~f:(fun x y -> Int64.compare x y) ~othermap:(Bimap_test4_other.get_reverse_map ())));
+
+      assert_equal true (Bimap_test4.equal ~f:(fun x y -> (String.compare x y) = 0) ~othermap:(Bimap_test4_other.get_forward_map ()));
+      assert_equal true (Bimap_test4.equal_reverse ~f:(fun x y -> (Int64.compare x y) = 0) ~othermap:(Bimap_test4_other.get_reverse_map ()));
+
+      Bimap_test4.iter ~f:(fun x y -> ());
+
+      Bimap_test4_other.iter ~f:(fun y x -> ());
       
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      bim#filter_keys_inverse ~f:(fun v -> String.length v > 8);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
-
-      bim#set ~key:4 ~data:"quadruple";
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
-      bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key <6);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal (Some "quadruple") (bim#find ~key:4);
-      assert_equal (Some "pentuple") (bim#find ~key:5);
-      assert_equal None (bim#find ~key:6);
-      
-      bim#set ~key:4 ~data:"quadruple";
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      bim#filteri_inverse ~f:(fun ~key ~data -> String.length key > 8 || data <6);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal 2 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal (Some "quadruple") (bim#find ~key:4);
-      assert_equal (Some "pentuple") (bim#find ~key:5);
-      assert_equal None (bim#find ~key:6);
-      assert_equal (Some 4) (bim#find_inverse ~key:"quadruple");
-      assert_equal (Some 5) (bim#find_inverse ~key:"pentuple");
-      assert_equal None (bim#find_inverse ~key:"sextuple");
-
-      bim#set ~key:4 ~data:"quadruple";
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      bim#filter_map ~f:(fun v -> if String.length v > 8 then (Some "survivor") else None);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal (Some "survivor") (bim#find ~key:4);
-      assert_equal None (bim#find ~key:5);
-      assert_equal None (bim#find ~key:6);
-      assert_equal (Some 4) (bim#find_inverse ~key:"survivor");
-      assert_equal None (bim#find_inverse ~key:"pentuple");
-      assert_equal None (bim#find_inverse ~key:"sextuple");
-
-      bim#set ~key:4 ~data:"quadruple";
-      bim#set ~key:5 ~data:"pentuple";
-      bim#set ~key:6 ~data:"sextuple";
-      bim#filter_map_inverse ~f:(fun v -> if v > 5 then (Some (v * 2)) else None);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal (Some 12) (bim#find_inverse ~key:"sextuple");
-      assert_equal None (bim#find_inverse ~key:"quadruple");
-      assert_equal None (bim#find_inverse ~key:"pentuple");
-      assert_equal None (bim#find ~key:4);
-      assert_equal None (bim#find ~key:5);
-      assert_equal None (bim#find ~key:6);
-      assert_equal (Some "sextuple") (bim#find ~key:12);      
     end
-
+(*
   let test4 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
@@ -727,8 +717,8 @@ module Bimap_tests = struct
       ["test1">:: test1;
        "test2">:: test2;
        "test3">:: test3;
-       (*"test4">:: test4;
-       "test5">:: test5;
+       "test4">:: test4;
+       (*"test5">:: test5;
        "test6">:: test6;
        "test7">:: test7;
        "test8">:: test8;

@@ -22,16 +22,6 @@ module Bimap :
         f:(MapModule2.key ->
            MapModule1.key option -> 'a option -> MapModule1.key option) ->
         othermap:'a MapModule2.t -> unit
-(*
-      val union :
-        f:(MapModule1.key ->
-           MapModule2.key -> MapModule2.key -> MapModule2.key option) ->
-        othermap:MapModule2.key MapModule1.t -> unit
-      val union_reverse :
-        f:(MapModule2.key ->
-           MapModule1.key -> MapModule1.key -> MapModule1.key option) ->
-        othermap:MapModule1.key MapModule2.t -> unit
- *)
       val compare :
         f:(MapModule2.key -> MapModule2.key -> int) ->
         othermap:MapModule2.key MapModule1.t -> int
@@ -44,7 +34,6 @@ module Bimap :
       val equal_reverse :
         f:(MapModule1.key -> MapModule1.key -> bool) ->
         othermap:MapModule1.key MapModule2.t -> bool
-                                                  
       val filter : f:(MapModule1.key -> MapModule2.key -> bool) -> unit
       val filter_reverse :
         f:(MapModule2.key -> MapModule1.key -> bool) -> unit
