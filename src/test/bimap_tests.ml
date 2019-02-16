@@ -245,10 +245,11 @@ module Bimap_tests = struct
       assert_equal true (Bimap_test4.equal ~f:(fun x y -> (String.compare x y) = 0) ~othermap:(Bimap_test4_other.get_forward_map ()));
       assert_equal true (Bimap_test4.equal_reverse ~f:(fun x y -> (Int64.compare x y) = 0) ~othermap:(Bimap_test4_other.get_reverse_map ()));
 
-      Bimap_test4.iter ~f:(fun x y -> ());
+      assert_equal (Int64.of_int 17) (Bimap_test4.fold_reverse ~f:(fun _k v accum -> Int64.add v accum) Int64.zero);
+      assert_equal 34 (Bimap_test4.fold ~f:(fun _k v accum -> (String.length v) + accum) 0);
 
-      Bimap_test4_other.iter ~f:(fun y x -> ());
-      
+      assert_equal true (Bimap_test4.for_all ~f:(fun k v -> ((String.length v) >= 6) && ((Int64.compare k Int64.zero) > 0)));
+      assert_equal true (Bimap_test4.for_all_reverse ~f:(fun k v -> ((String.length k) >= 6) && ((Int64.compare v Int64.zero) > 0)));
     end
 (*
   let test4 text_ctx =

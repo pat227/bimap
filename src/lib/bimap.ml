@@ -105,13 +105,13 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
   let iter_reverse ~f =
     let () = MapModule2.iter f !reverse_map in
     create_forward_map_from_reverse_map ()    
-  let fold f = 
+  let fold ~f = 
     MapModule1.fold f !forward_map
-  let fold_reverse f =
+  let fold_reverse ~f =
     MapModule2.fold f !reverse_map
-  let for_all f =
+  let for_all ~f =
     MapModule1.for_all f !forward_map
-  let for_all_reverse f =
+  let for_all_reverse ~f =
     MapModule2.for_all f !reverse_map
   let exists ~f =
     MapModule1.exists f !forward_map

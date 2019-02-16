@@ -37,16 +37,16 @@ module Bimap :
       val filter : f:(MapModule1.key -> MapModule2.key -> bool) -> unit
       val filter_reverse :
         f:(MapModule2.key -> MapModule1.key -> bool) -> unit
-                                                          
+      (*Not testing this right now*)
       val iter : f:(MapModule1.key -> MapModule2.key -> unit) -> unit
       val iter_reverse : f:(MapModule2.key -> MapModule1.key -> unit) -> unit
-      val fold : (MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
+      (*--------------------------*)
+      val fold : f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
       val fold_reverse :
-        (MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
-      val for_all : (MapModule1.key -> MapModule2.key -> bool) -> bool
+        f:(MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
+      val for_all : f:(MapModule1.key -> MapModule2.key -> bool) -> bool
       val for_all_reverse :
-        (MapModule2.key -> MapModule1.key -> bool) -> bool
-
+        f:(MapModule2.key -> MapModule1.key -> bool) -> bool
       val exists : f:(MapModule1.key -> MapModule2.key -> bool) -> bool
       val exists_reverse :
         f:(MapModule2.key -> MapModule1.key -> bool) -> bool
