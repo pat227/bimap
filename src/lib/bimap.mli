@@ -64,32 +64,34 @@ module Bimap :
       val max_binding_exn : unit -> MapModule1.key * MapModule2.key
       val min_binding : unit -> (MapModule1.key * MapModule2.key) option
       val max_binding : unit -> (MapModule1.key * MapModule2.key) option
-      (*-----------------------untested--------------------------*)
       val min_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
       val max_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
       val min_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
       val max_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
+      (*-----------------------untested--------------------------*)
       val choose : unit -> MapModule1.key * MapModule2.key
       val choose_reverse : unit -> MapModule2.key * MapModule1.key
-      val split :
-        key:MapModule1.key ->
-        MapModule2.key MapModule1.t * MapModule2.key option *
-        MapModule2.key MapModule1.t
       val split_reverse :
         key:MapModule2.key ->
         MapModule1.key MapModule2.t * MapModule1.key option *
         MapModule1.key MapModule2.t
       (*--------------------------------------------------*)
+      val split :
+        key:MapModule1.key ->
+        MapModule2.key MapModule1.t * MapModule2.key option *
+        MapModule2.key MapModule1.t
       val find_exn : key:MapModule1.key -> MapModule2.key
       val find_reverse_exn : key:MapModule2.key -> MapModule1.key
       val find : key:MapModule1.key -> MapModule2.key option
       val find_reverse : key:MapModule2.key -> MapModule1.key option
-      (*--untested--*)
       val map : f:(MapModule2.key -> MapModule2.key) -> unit
+      (*------------------untested------------------*)
+
       val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
       val mapi :
         f:(MapModule1.key -> MapModule2.key -> MapModule2.key) -> unit
       val mapi_reverse :
         f:(MapModule2.key -> MapModule1.key -> MapModule1.key) -> unit
       val set_forward_map : map:(MapModule2.key MapModule1.t) -> unit
+      (*----------------------------------------------*)
     end

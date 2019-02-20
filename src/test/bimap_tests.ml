@@ -195,11 +195,15 @@ module Bimap_tests = struct
       assert_equal 3 (Bimap_test4.cardinal ());
       assert_equal 3 (Bimap_test4_other.cardinal ());
 
-      assert_equal false (0 = (Bimap_test4.compare ~f:(fun x y -> String.compare x y) ~othermap:(Bimap_test4_other.get_forward_map ())));
-      assert_equal false (0 = (Bimap_test4.compare_reverse ~f:(fun x y -> Int64.compare x y) ~othermap:(Bimap_test4_other.get_reverse_map ())));
+      assert_equal false (0 = (Bimap_test4.compare ~f:(fun x y -> String.compare x y)
+                                 ~othermap:(Bimap_test4_other.get_forward_map ())));
+      assert_equal false (0 = (Bimap_test4.compare_reverse ~f:(fun x y -> Int64.compare x y)
+                                 ~othermap:(Bimap_test4_other.get_reverse_map ())));
 
-      assert_equal false (Bimap_test4.equal ~f:(fun x y -> (String.compare x y) = 0) ~othermap:(Bimap_test4_other.get_forward_map ()));
-      assert_equal false (Bimap_test4.equal_reverse ~f:(fun x y -> (Int64.compare x y) = 0) ~othermap:(Bimap_test4_other.get_reverse_map ()));
+      assert_equal false (Bimap_test4.equal ~f:(fun x y -> (String.compare x y) = 0)
+                            ~othermap:(Bimap_test4_other.get_forward_map ()));
+      assert_equal false (Bimap_test4.equal_reverse ~f:(fun x y -> (Int64.compare x y) = 0)
+                            ~othermap:(Bimap_test4_other.get_reverse_map ()));
 
       Bimap_test4.merge
         ~f:(fun k v1 v2->
@@ -281,8 +285,44 @@ module Bimap_tests = struct
           let () = assert_equal k3 (Int64.of_int 6) in
           assert_equal v3 "sextuple"
        | None -> assert_equal true false
-      )
-                             
+      );
+
+      let k,v = Bimap_test4.min_binding_reverse_exn () in
+      let () = assert_equal k "double" in
+      assert_equal v (Int64.of_int 2);
+      let k,v = Bimap_test4.max_binding_reverse_exn () in
+      let () = assert_equal k "triple" in
+      assert_equal v (Int64.of_int 3);
+
+      let l,vopt,r = Bimap_test4.split ~key:(Int64.of_int 3) in
+      let () = assert_equal vopt (Some ("triple")) in
+      let () = assert_equal 2 (IntMap.cardinal l) in
+      assert_equal 2 (IntMap.cardinal r);
+
+      (*--mutate the map--check the reverse bindings!*)
+      let () = Bimap_test4.map ~f:(fun v -> String.concat "+" [v;v]) in
+      let () = assert_equal 5 (Bimap_test4.cardinal ()) in
+      let () = assert_equal 5 (Bimap_test4.cardinal_reverse ()) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 1)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 2)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 3)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 5)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 6)) in
+      let () = assert_equal (Some "triple+triple") (Bimap_test4.find (Int64.of_int 3)) in
+      let () = assert_equal (Some "double+double") (Bimap_test4.find (Int64.of_int 2)) in
+      let () = assert_equal (Some "single+single") (Bimap_test4.find (Int64.of_int 1)) in
+      let () = assert_equal (Some "pentuple+pentuple") (Bimap_test4.find (Int64.of_int 5)) in
+      let () = assert_equal (Some "sextuple+sextuple") (Bimap_test4.find (Int64.of_int 6)) in
+      let () = assert_equal true (Bimap_test4.mem_reverse "double+double") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "triple+triple") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "pentuple+pentuple") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "sextuple+sextuple") in
+      let () = assert_equal (Some (Int64.of_int 3)) (Bimap_test4.find_reverse "triple+triple") in
+      let () = assert_equal (Some (Int64.of_int 2)) (Bimap_test4.find_reverse "double+double") in
+      let () = assert_equal (Some (Int64.of_int 1)) (Bimap_test4.find_reverse "single+single") in
+      let () = assert_equal (Some (Int64.of_int 5)) (Bimap_test4.find_reverse "pentuple+pentuple") in
+      assert_equal (Some (Int64.of_int 6)) (Bimap_test4.find_reverse "sextuple+sextuple");
+      
     end
 (*
   let test4 text_ctx =
