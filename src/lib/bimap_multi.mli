@@ -60,12 +60,12 @@ module Bimap_multi :
       val iter_reverse :
         f:(MapModule2.key -> MapModule1.key list -> unit) -> unit
       val fold :
-        (MapModule1.key -> MapModule2.key list -> 'a -> 'a) -> 'a -> 'a
+        f:(MapModule1.key -> MapModule2.key list -> 'a -> 'a) -> 'a -> 'a
       val fold_reverse :
-        (MapModule2.key -> MapModule1.key list -> 'a -> 'a) -> 'a -> 'a
-      val for_all : (MapModule1.key -> MapModule2.key list -> bool) -> bool
+        f:(MapModule2.key -> MapModule1.key list -> 'a -> 'a) -> 'a -> 'a
+      val for_all : f:(MapModule1.key -> MapModule2.key list -> bool) -> bool
       val for_all_reverse :
-        (MapModule2.key -> MapModule1.key list -> bool) -> bool
+        f:(MapModule2.key -> MapModule1.key list -> bool) -> bool
       val exists : f:(MapModule1.key -> MapModule2.key list -> bool) -> bool
       val exists_reverse :
         f:(MapModule2.key -> MapModule1.key list -> bool) -> bool

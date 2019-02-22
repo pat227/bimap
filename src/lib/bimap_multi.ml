@@ -1,5 +1,4 @@
-module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S)
-  = struct 
+module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S) = struct 
   let forward_map = ref MapModule1.empty;;
   let reverse_map = ref MapModule2.empty;;
   (*empty, union, merge, map, etc, all mutate the maps, ie, the functions 
@@ -72,8 +71,11 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S)
       (fun k v ->
         List.iter
           (fun x ->
-            let rev_list = MapModule2.find x !reverse_map in
-            reverse_map := MapModule2.add x (k::rev_list) !reverse_map
+            if MapModule2.mem x !reverse_map then 
+              let rev_list = MapModule2.find x !reverse_map in
+              reverse_map := MapModule2.add x (k::rev_list) !reverse_map
+            else
+              reverse_map := MapModule2.add x [k] !reverse_map
           ) v)
       !forward_map
       
@@ -83,32 +85,41 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S)
       (fun k v ->
         List.iter
           (fun x ->
-            let fwd_list = MapModule1.find x !forward_map in
-            forward_map := MapModule1.add x (k::fwd_list) !forward_map
+            if MapModule1.mem x !forward_map then 
+              let fwd_list = MapModule1.find x !forward_map in
+              forward_map := MapModule1.add x (k::fwd_list) !forward_map
+            else
+              forward_map := MapModule1.add x [k] !forward_map
           ) v)
       !reverse_map
 
   let remove ~key =
-    let values = MapModule1.find key !forward_map in 
-    let () = forward_map := MapModule1.remove key !forward_map in
-    List.iter
-      (fun x ->
-        let revlist = MapModule2.find x !reverse_map in
-        (*remove only the key from the list*)
-        let newlist = List.filter (fun y -> y != key) revlist in
-        reverse_map := MapModule2.add x newlist !reverse_map
-      )
-      values
+    if MapModule1.mem key !forward_map then 
+      let values = MapModule1.find key !forward_map in 
+      let () = forward_map := MapModule1.remove key !forward_map in
+      List.iter
+        (fun x ->
+          let revlist = MapModule2.find x !reverse_map in
+          (*remove only the key from the list*)
+          let newlist = List.filter (fun y -> y != key) revlist in
+          reverse_map := MapModule2.add x newlist !reverse_map
+        )
+        values
+    else ()
+      
     
   let remove_reverse ~key =
-    let rev_list = MapModule2.find key !reverse_map in 
-    let () = reverse_map := MapModule2.remove key !reverse_map in
-    List.iter
-      (fun x ->
-        let fwd_list = MapModule1.find x !forward_map in
-        let newlist = List.filter (fun y -> y != key) fwd_list in 
-        forward_map := MapModule1.add x newlist !forward_map
-      ) rev_list;;
+    if MapModule2.mem key !reverse_map then 
+      let rev_list = MapModule2.find key !reverse_map in 
+      let () = reverse_map := MapModule2.remove key !reverse_map in
+      List.iter
+        (fun x ->
+          let fwd_list = MapModule1.find x !forward_map in
+          let newlist = List.filter (fun y -> y != key) fwd_list in 
+          forward_map := MapModule1.add x newlist !forward_map
+        ) rev_list
+    else ()      
+  
   let merge ~f ~othermap =
     let () = forward_map := MapModule1.merge f !forward_map othermap in
     create_reverse_map_from_forward_map ()
@@ -141,13 +152,13 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S)
   let iter_reverse ~f =
     let () = MapModule2.iter f !reverse_map in
     create_forward_map_from_reverse_map ()    
-  let fold f = 
+  let fold ~f = 
     MapModule1.fold f !forward_map
-  let fold_reverse f =
+  let fold_reverse ~f =
     MapModule2.fold f !reverse_map
-  let for_all f =
+  let for_all ~f =
     MapModule1.for_all f !forward_map
-  let for_all_reverse f =
+  let for_all_reverse ~f =
     MapModule2.for_all f !reverse_map
   let exists ~f =
     MapModule1.exists f !forward_map
