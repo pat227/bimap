@@ -322,7 +322,29 @@ module Bimap_tests = struct
       let () = assert_equal (Some (Int64.of_int 1)) (Bimap_test4.find_reverse "single+single") in
       let () = assert_equal (Some (Int64.of_int 5)) (Bimap_test4.find_reverse "pentuple+pentuple") in
       assert_equal (Some (Int64.of_int 6)) (Bimap_test4.find_reverse "sextuple+sextuple");
-      
+
+      let () = Bimap_test4.map_reverse ~f:(fun x -> (Int64.mul x (Int64.of_int 2))) in
+      let () = assert_equal 5 (Bimap_test4.cardinal ()) in
+      let () = assert_equal 5 (Bimap_test4.cardinal_reverse ()) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 2)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 4)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 6)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 10)) in
+      let () = assert_equal true (Bimap_test4.mem (Int64.of_int 12)) in
+      let () = assert_equal (Some "triple+triple") (Bimap_test4.find (Int64.of_int 6)) in
+      let () = assert_equal (Some "double+double") (Bimap_test4.find (Int64.of_int 4)) in
+      let () = assert_equal (Some "single+single") (Bimap_test4.find (Int64.of_int 2)) in
+      let () = assert_equal (Some "pentuple+pentuple") (Bimap_test4.find (Int64.of_int 10)) in
+      let () = assert_equal (Some "sextuple+sextuple") (Bimap_test4.find (Int64.of_int 12)) in
+      let () = assert_equal true (Bimap_test4.mem_reverse "double+double") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "triple+triple") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "pentuple+pentuple") in
+      let () = assert_equal true (Bimap_test4.mem_reverse "sextuple+sextuple") in
+      let () = assert_equal (Some (Int64.of_int 6)) (Bimap_test4.find_reverse "triple+triple") in
+      let () = assert_equal (Some (Int64.of_int 4)) (Bimap_test4.find_reverse "double+double") in
+      let () = assert_equal (Some (Int64.of_int 2)) (Bimap_test4.find_reverse "single+single") in
+      let () = assert_equal (Some (Int64.of_int 10)) (Bimap_test4.find_reverse "pentuple+pentuple") in
+      assert_equal (Some (Int64.of_int 12)) (Bimap_test4.find_reverse "sextuple+sextuple");
     end
 (*
   let test4 text_ctx =

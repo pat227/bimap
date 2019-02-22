@@ -11,7 +11,8 @@ module Bimap :
       val singleton_reverse : key:MapModule2.key -> data:MapModule1.key -> unit
       val remove : key:MapModule1.key -> unit
       val remove_reverse : key:MapModule2.key -> unit
-      (*Needed to get access to the underlying map for use by merge function. Better way to do this?*)
+      (*Needed to get access to the underlying map for use by 
+        merge function. Better way to do this?*)
       val get_forward_map : unit -> MapModule2.key MapModule1.t
       val get_reverse_map : unit -> MapModule1.key MapModule2.t
       val merge :
@@ -37,10 +38,10 @@ module Bimap :
       val filter : f:(MapModule1.key -> MapModule2.key -> bool) -> unit
       val filter_reverse :
         f:(MapModule2.key -> MapModule1.key -> bool) -> unit
-      (*Not testing this right now*)
+      (*----Not testing this right now----*)
       val iter : f:(MapModule1.key -> MapModule2.key -> unit) -> unit
       val iter_reverse : f:(MapModule2.key -> MapModule1.key -> unit) -> unit
-      (*--------------------------*)
+      (*----------------------------------*)
       val fold : f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
       val fold_reverse :
         f:(MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
@@ -75,7 +76,7 @@ module Bimap :
         key:MapModule2.key ->
         MapModule1.key MapModule2.t * MapModule1.key option *
         MapModule1.key MapModule2.t
-      (*--------------------------------------------------*)
+      (*---------------------------------------------------------*)
       val split :
         key:MapModule1.key ->
         MapModule2.key MapModule1.t * MapModule2.key option *
@@ -85,9 +86,8 @@ module Bimap :
       val find : key:MapModule1.key -> MapModule2.key option
       val find_reverse : key:MapModule2.key -> MapModule1.key option
       val map : f:(MapModule2.key -> MapModule2.key) -> unit
-      (*------------------untested------------------*)
-
       val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
+      (*---------------------untested------------------*)
       val mapi :
         f:(MapModule1.key -> MapModule2.key -> MapModule2.key) -> unit
       val mapi_reverse :
