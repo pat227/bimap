@@ -38,10 +38,10 @@ module Bimap :
       val filter : f:(MapModule1.key -> MapModule2.key -> bool) -> unit
       val filter_reverse :
         f:(MapModule2.key -> MapModule1.key -> bool) -> unit
-      (*----Not testing this right now----*)
+      (*---------------Not testing these 2 right now---------------*)
       val iter : f:(MapModule1.key -> MapModule2.key -> unit) -> unit
       val iter_reverse : f:(MapModule2.key -> MapModule1.key -> unit) -> unit
-      (*----------------------------------*)
+      (*-----------------------------------------------------------*)
       val fold : f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
       val fold_reverse :
         f:(MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
@@ -69,14 +69,14 @@ module Bimap :
       val max_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
       val min_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
       val max_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
-      (*-----------------------untested--------------------------*)
+      (*-----------------------untested-3-functions-------------------*)
       val choose : unit -> MapModule1.key * MapModule2.key
       val choose_reverse : unit -> MapModule2.key * MapModule1.key
       val split_reverse :
         key:MapModule2.key ->
         MapModule1.key MapModule2.t * MapModule1.key option *
         MapModule1.key MapModule2.t
-      (*---------------------------------------------------------*)
+      (*--------------------------------------------------------------*)
       val split :
         key:MapModule1.key ->
         MapModule2.key MapModule1.t * MapModule2.key option *
@@ -87,11 +87,11 @@ module Bimap :
       val find_reverse : key:MapModule2.key -> MapModule1.key option
       val map : f:(MapModule2.key -> MapModule2.key) -> unit
       val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
-      (*---------------------untested------------------*)
+      (*---------------------untested-3-functions----------------*)
       val mapi :
         f:(MapModule1.key -> MapModule2.key -> MapModule2.key) -> unit
       val mapi_reverse :
         f:(MapModule2.key -> MapModule1.key -> MapModule1.key) -> unit
       val set_forward_map : map:(MapModule2.key MapModule1.t) -> unit
-      (*----------------------------------------------*)
+      (*---------------------------------------------------------*)
     end

@@ -3,6 +3,16 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
   let reverse_map = ref MapModule2.empty;;
   (*empty, union, merge, map, etc, all mutate the maps, ie, the functions 
     do not return maps unlike counterparts in map.mli*)
+  let get_forward_map () =
+    let newmap = ref MapModule1.empty in 
+    let () = MapModule1.iter
+               (fun key values -> newmap := MapModule1.add key values !newmap) !forward_map in
+    !newmap;;
+  let get_reverse_map () =
+    let newmap = ref MapModule2.empty in 
+    let () = MapModule2.iter
+               (fun key values -> newmap := MapModule2.add key values !newmap) !reverse_map in
+    !newmap;;
   let empty () =
     let () = forward_map := MapModule1.empty in
     reverse_map := MapModule2.empty
@@ -192,10 +202,18 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.split key !forward_map
   let split_reverse ~key =
     MapModule2.split key !reverse_map
-  let find ~key =
+  let find_exn ~key =
     MapModule1.find key !forward_map
-  let find_reverse ~key =
+  let find_reverse_exn ~key =
     MapModule2.find key !reverse_map
+  let find ~key =
+    try
+      Some (MapModule1.find key !forward_map)
+    with _ -> None
+  let find_reverse ~key =
+    try
+      Some (MapModule2.find key !reverse_map)
+    with _ -> None 
   let map ~f =
     let () = forward_map := MapModule1.map f !forward_map in
     create_reverse_map_from_forward_map ()

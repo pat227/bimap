@@ -346,174 +346,111 @@ module Bimap_tests = struct
       let () = assert_equal (Some (Int64.of_int 10)) (Bimap_test4.find_reverse "pentuple+pentuple") in
       assert_equal (Some (Int64.of_int 12)) (Bimap_test4.find_reverse "sextuple+sextuple");
     end
-(*
-  let test4 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap.bimap_class int_map string_map in
-    begin
-      bim#set ~key:1 ~data:"single";
-      bim#set ~key:2 ~data:"double";
-      bim#set ~key:3 ~data:"triple";
-      let concat = bim#fold ~init:"" ~f:(fun ~key ~data init -> if key < 3 then (init ^ data) else init) in
-      assert_equal "singledouble" concat;
-      let sum = bim#fold_inverse
-		      ~init:0
-		      ~f:(fun ~key ~data init ->
-			  if key.[0] = 't' || key.[0] = 'd'
-			  then (data + init) else init) in
-      assert_equal 5 sum;
-      let dividend = bim#fold_inverse
-		       ~init:1
-		       ~f:(fun ~key ~data init ->
-			   if key.[0] = 't' || key.[0] = 'd'
-			   then (data / init) else init) in
-      assert_equal 1 dividend;
-      let concat2 =
-	bim#fold_right
-	      ~init:"" ~f:(fun ~key ~data init ->
-			   if key < 3 then (init ^ data) else init) in
-      assert_equal "doublesingle" concat2;
-      let dividend2 =
-	bim#fold_right_inverse
-			 ~init:1 ~f:(fun ~key ~data init ->
-				     if key.[0] ='t' || key.[0]='d'
-				     then (data / init) else init) in
-      assert_equal 0 dividend2;
-      assert_equal true (bim#for_all ~f:(fun v -> if (String.length v) > 0 then true else false));
-    end
- 
+
   let test5 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap.bimap_class int_map string_map in
+    let module IntMap = Map.Make(Int64) in
+    let module StrMap = Map.Make(String) in
+    let module Bimap_test5 = Bimap_multi(IntMap)(StrMap) in
+    let module Bimap_test5_clone = Bimap_multi(IntMap)(StrMap) in
     begin
-      bim#set ~key:1 ~data:"uno";
-      bim#set ~key:2 ~data:"dos";
-      bim#set ~key:3 ~data:"tres";
-      assert_equal true (bim#for_all ~f:(fun v -> (String.length v) > 1));
-      assert_equal false (bim#for_all ~f:(fun v -> (String.length v) > 4));
-      assert_equal true (bim#for_all_inverse ~f:(fun v -> v < 4));
-      assert_equal false (bim#for_all_inverse ~f:(fun v -> v > 3));
-      assert_equal [1;2;3] (bim#keys);
-      assert_equal ["uno";"dos";"tres"] (bim#data);
-      bim#map ~f:(fun v -> Core.String.concat [v;v;]);
-      assert_equal ["unouno";"dosdos";"trestres"] (bim#data);
-      bim#mapi ~f:(fun ~key ~data -> Core.String.concat [(Core.Int.to_string key);"->";data]);
-      assert_equal ["1->unouno";"2->dosdos";"3->trestres"] (bim#data);
-      assert_equal "1->unouno" (bim#find_exn ~key:1);
-      assert_equal "2->dosdos" (bim#find_exn ~key:2);
-      assert_equal 1 (bim#find_exn_inverse ~key:"1->unouno");
-      assert_equal 2 (bim#find_exn_inverse ~key:"2->dosdos");
+      Bimap_test5.add ~key:(Int64.of_int 1) ~data:"one";
+      Bimap_test5.add ~key:(Int64.of_int 2) ~data:"two";
+      Bimap_test5.add ~key:(Int64.of_int 3) ~data:"three";
+      Bimap_test5.add ~key:(Int64.of_int 2) ~data:"dos";
+      Bimap_test5.add ~key:(Int64.of_int 3) ~data:"tres";
+      Bimap_test5.add ~key:(Int64.of_int 3) ~data:"triple";
+      Bimap_test5.add_reverse ~key:"tri" ~data:(Int64.of_int 3);
+      Bimap_test5.add_reverse ~key:"four" ~data:(Int64.of_int 4);
 
-      bim#map_inverse ~f:(fun x -> x*2);
-      assert_equal [2;4;6] (bim#keys);
-      bim#mapi_inverse ~f:(fun ~key ~data -> if key.[0]='1' then
-					       data*1
-					     else
-					       if key.[0]='2' then
-						 data*2
-					       else
-						 data*3);
-      assert_equal [2;8;18] (bim#keys);
-    end
+      assert_equal 4 (Bimap_test5.cardinal ());
 
-  let test6 text_ctx =
-    let string_map = Core.String.Map.empty in
-    let int_map = Core.Int.Map.empty in 
-    let bim = new Bimap_multi.bimap_multi_class int_map string_map in
-    begin
-      bim#add_multi ~key:1 ~data:"one";
-      bim#add_multi ~key:2 ~data:"two";
-      bim#add_multi ~key:3 ~data:"three";
-      bim#add_multi ~key:2 ~data:"dos";
-      bim#add_multi ~key:3 ~data:"tres";
-      bim#add_multi ~key:3 ~data:"triple";
-      bim#add_multi_inverse ~key:"tri" ~data:3;
-      bim#add_multi_inverse ~key:"four" ~data:4;
-      (*==todo change change_inverse*)
-      assert_equal 4 (bim#count ~f:(fun l -> true));
-      assert_equal 4 (bim#counti ~f:(fun ~key ~data -> true));
-      assert_equal 1 (bim#counti ~f:(fun ~key ~data -> key > 3));
-      assert_equal 8 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal 4 (bim#length);
-      assert_equal 1 (List.length (bim#find_exn 1));
-      assert_equal 2 (List.length (bim#find_exn 2));
-      assert_equal 4 (List.length (bim#find_exn 3));
-      assert_equal 1 (List.length (bim#find_exn 4));
-      assert_equal true (List.mem "one" (bim#find_exn 1));
-      assert_equal true (List.mem "two" (bim#find_exn 2));
-      assert_equal true (List.mem "dos" (bim#find_exn 2));
-      assert_equal true (List.mem "three" (bim#find_exn 3));
-      assert_equal true (List.mem "tres" (bim#find_exn 3));
-      assert_equal true (List.mem "triple" (bim#find_exn 3));
-      assert_equal true (List.mem "tri" (bim#find_exn 3));
-      
-      assert_equal 1 (bim#find_exn_inverse "one");
-      assert_equal 2 (bim#find_exn_inverse "two");
-      assert_equal 2 (bim#find_exn_inverse "dos");
-      assert_equal 3 (bim#find_exn_inverse "three");
-      assert_equal 3 (bim#find_exn_inverse "tres");
-      assert_equal 3 (bim#find_exn_inverse "triple");
-      assert_equal 3 (bim#find_exn_inverse "tri");
+      assert_equal 8 (Bimap_test5.cardinal_reverse ());
+      assert_equal 1 (List.length (Bimap_test5.find_exn (Int64.of_int 1)));
+      assert_equal 2 (List.length (Bimap_test5.find_exn (Int64.of_int 2)));
+      assert_equal 4 (List.length (Bimap_test5.find_exn (Int64.of_int 3)));
+      assert_equal 1 (List.length (Bimap_test5.find_exn (Int64.of_int 4)));
 
-      assert_equal (Some 1) (bim#find_inverse "one");
-      assert_equal (Some 2) (bim#find_inverse "two");
-      assert_equal (Some 2) (bim#find_inverse "dos");
-      assert_equal (Some 3) (bim#find_inverse "three");
-      assert_equal (Some 3) (bim#find_inverse "tres");
-      assert_equal (Some 3) (bim#find_inverse "triple");
-      assert_equal 3 (bim#find_exn_inverse "tri");
-      
+      assert_equal true (List.mem "one" (Bimap_test5.find_exn (Int64.of_int 1)));
+      assert_equal true (List.mem "two" (Bimap_test5.find_exn (Int64.of_int 2)));
+      assert_equal true (List.mem "dos" (Bimap_test5.find_exn (Int64.of_int 2)));
+      assert_equal true (List.mem "three" (Bimap_test5.find_exn (Int64.of_int 3)));
+      assert_equal true (List.mem "tres" (Bimap_test5.find_exn (Int64.of_int 3)));
+      assert_equal true (List.mem "triple" (Bimap_test5.find_exn (Int64.of_int 3)));
+      assert_equal true (List.mem "tri" (Bimap_test5.find_exn (Int64.of_int 3)));
+
+      assert_equal true (List.mem (Int64.of_int 1) (Bimap_test5.find_reverse_exn "one"));
+      assert_equal true (List.mem (Int64.of_int 2) (Bimap_test5.find_reverse_exn "two"));
+      assert_equal true (List.mem (Int64.of_int 2) (Bimap_test5.find_reverse_exn "dos"));
+      assert_equal true (List.mem (Int64.of_int 3) (Bimap_test5.find_reverse_exn "three"));
+      assert_equal true (List.mem (Int64.of_int 3) (Bimap_test5.find_reverse_exn "tres"));
+      assert_equal true (List.mem (Int64.of_int 3) (Bimap_test5.find_reverse_exn "triple"));
+      assert_equal true (List.mem (Int64.of_int 3) (Bimap_test5.find_reverse_exn "tri"));
+
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 1) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "one"));
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 2) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "two"));
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 2) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "dos"));
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 3) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "three"));
+                          
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 3) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "tres"));
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 3) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "triple"));
+      assert_equal true ( (fun lo -> match lo with
+                                     | Some l ->  List.mem (Int64.of_int 3) l
+                                     | None -> false
+                          ) (Bimap_test5.find_reverse "tri"));
+
       (*print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);*)
-      assert_equal ([["one"];["dos";"two"];["tri";"triple";"tres";"three"];["four"]]) (bim#data);
+      assert_equal ([ ((Int64.of_int 1),["one"]) ;
+                      (Int64.of_int 2, ["dos";"two"]) ;
+                      ((Int64.of_int 3), ["tri";"triple";"tres";"three"]) ;
+                      ((Int64.of_int 4), ["four"]) ])
+        (Bimap_test5.bindings ());
       (*print_n_flush_alist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_inverse);*)
-      assert_equal 1 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 1 then true else false)));
-      assert_equal 2 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 2 then true else false)));
-      assert_equal 4 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 3 then true else false)));
-      assert_equal 1 (List.length (Core.List.filter (bim#data_inverse) ~f:(fun x -> if x = 4 then true else false)));
+      Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
+      Bimap_test5_clone.filter
+        ~f:(fun x _v -> (Int64.compare (Int64.of_int 1) x) = 0);
+      assert_equal 1 (List.length (Bimap_test5_clone.bindings ()));
 
-      bim#empty ();
-      assert_equal 0 (bim#count ~f:(fun l -> true));
-      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> true));
-      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> key > 3));
-      assert_equal 0 (bim#count_inverse ~f:(fun x -> true));
-      assert_equal 0 (bim#length);
+      Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
+      Bimap_test5_clone.filter
+        ~f:(fun x _v -> (Int64.compare (Int64.of_int 2) x) = 0);
+      assert_equal 1 (List.length (Bimap_test5_clone.bindings ()));
 
-      bim#add_multi ~key:1 ~data:"one";
-      bim#add_multi ~key:2 ~data:"two";
-      bim#add_multi ~key:3 ~data:"three";
-      bim#add_multi ~key:2 ~data:"dos";
-      bim#add_multi ~key:3 ~data:"tres";
-      bim#add_multi ~key:3 ~data:"triple";
-      bim#add_multi_inverse ~key:"tri" ~data:3;
+      Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
+      Bimap_test5_clone.filter
+        ~f:(fun x _v -> (Int64.compare (Int64.of_int 3) x) = 0);
+      assert_equal 4 (List.length (Bimap_test5_clone.bindings ()));
 
-      assert_equal true (bim#exists ~f:(fun x -> List.length x = 1 && Core.String.equal (List.nth x 0) "one"));
-      assert_equal true (bim#exists_inverse ~f:(fun x -> x = 2));
-      assert_equal true (bim#existsi ~f:(fun ~key ~data -> List.length data = 2 && key = 2 && List.mem "two" data));
-      assert_equal false (bim#existsi ~f:(fun ~key ~data -> List.mem "one" data && key = 2));
-      assert_equal true (bim#existsi_inverse ~f:(fun ~key ~data -> key = "tri" && data=3));
+      Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
+      Bimap_test5_clone.filter
+        ~f:(fun x _v -> (Int64.compare (Int64.of_int 4) x) = 0);
+      assert_equal 1 (List.length (Bimap_test5_clone.bindings ()));
 
-      bim#change ~key:3 ~f:(fun x -> (Some ["iii";"tri";"triple";"tres";"three"]));
-      assert_equal (Some 3) (bim#find_inverse "three");
-      assert_equal (Some 3) (bim#find_inverse "tres");
-      assert_equal (Some 3) (bim#find_inverse "tri");
-      assert_equal 3 (bim#find_exn_inverse "triple");
-      assert_equal 3 (bim#find_exn_inverse "iii");
-      assert_equal 5 (List.length (bim#find_exn 3));
-
-      bim#change_inverse ~key:"two" ~f:(fun x -> (Some 4));
-      (*print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
-      print_n_flush_alist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_inverse);*)
-      assert_equal 2 (List.length (bim#find_exn ~key:4));
-      assert_equal true (List.mem "two" (bim#find_exn ~key:4)); 
-      assert_equal true (List.mem "dos" (bim#find_exn ~key:4));
-      assert_equal 4 (bim#find_exn_inverse ~key:"two");
-      assert_equal 4 (bim#find_exn_inverse ~key:"dos");
-      assert_equal None (bim#find ~key:2);
-
+      assert_equal true (Bimap_test5.exists
+                           ~f:(fun _x vs ->
+                             List.length vs = 1 && (String.compare (List.nth vs 0) "one") = 0));
+      assert_equal true (Bimap_test5.exists_reverse
+                           ~f:(fun _x vs ->
+                             List.exists (fun v -> (Int64.compare v (Int64.of_int 2)) = 0) vs));
     end 
-
+(*
   let test7 text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in 
@@ -814,8 +751,8 @@ module Bimap_tests = struct
        "test2">:: test2;
        "test3">:: test3;
        "test4">:: test4;
-       (*"test5">:: test5;
-       "test6">:: test6;
+       "test5">:: test5;
+       (*"test6">:: test6;
        "test7">:: test7;
        "test8">:: test8;
        "test9">:: test9;

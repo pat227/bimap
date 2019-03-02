@@ -1,8 +1,8 @@
 module Bimap_multi :
   functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
     sig
-      (*val forward_map : MapModule2.key list MapModule1.t ref
-      val reverse_map : MapModule1.key list MapModule2.t ref*)
+      val get_forward_map : unit -> MapModule2.key list MapModule1.t
+      val get_reverse_map : unit -> MapModule1.key list MapModule2.t
       val empty : unit -> unit
       val is_empty : unit -> bool
       val is_empty_reverse : unit -> bool
@@ -94,8 +94,10 @@ module Bimap_multi :
         key:MapModule2.key ->
         MapModule1.key list MapModule2.t * MapModule1.key list option *
         MapModule1.key list MapModule2.t
-      val find : key:MapModule1.key -> MapModule2.key list
-      val find_reverse : key:MapModule2.key -> MapModule1.key list
+      val find_exn : key:MapModule1.key -> MapModule2.key list
+      val find_reverse_exn : key:MapModule2.key -> MapModule1.key list
+      val find : key:MapModule1.key -> MapModule2.key list option
+      val find_reverse : key:MapModule2.key -> MapModule1.key list option
       val map : f:(MapModule2.key list -> MapModule2.key list) -> unit
       val map_reverse :
         f:(MapModule1.key list -> MapModule1.key list) -> unit

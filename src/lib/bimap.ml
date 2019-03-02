@@ -71,8 +71,16 @@ module Bimap(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     let fwd_value = MapModule2.find key !reverse_map in 
     let () = reverse_map := MapModule2.remove key !reverse_map in
     forward_map := MapModule1.remove fwd_value !forward_map
-  let get_forward_map () = !forward_map;;
-  let get_reverse_map () = !reverse_map;;
+  let get_forward_map () =
+    let newmap = ref MapModule1.empty in 
+    let () = MapModule1.iter
+               (fun key value -> newmap := MapModule1.add key value !newmap) !forward_map in
+    !newmap;;
+  let get_reverse_map () =
+    let newmap = ref MapModule2.empty in 
+    let () = MapModule2.iter
+               (fun key value -> newmap := MapModule2.add key value !newmap) !reverse_map in
+    !newmap;;
   let merge ~f ~othermap =
     let () = forward_map := MapModule1.merge f !forward_map othermap in
     create_reverse_map_from_forward_map ()
