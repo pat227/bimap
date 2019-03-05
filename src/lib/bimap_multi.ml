@@ -26,48 +26,83 @@ module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule2.mem key !reverse_map
   (*keep private*)
   let mem_data_of_fwd_map ~key ~data =
-    let forward_list = MapModule1.find key !forward_map in
-    if List.length forward_list > 0 then
-      if List.mem data forward_list then true else false
+    if MapModule1.mem key !forward_map then
+      let forward_list = MapModule1.find key !forward_map in
+      if List.length forward_list > 0 then
+        if List.mem data forward_list then true else false
+      else false
     else false
   (*keep private*)
   let mem_data_of_rev_map ~key ~data =
-    let rev_list = MapModule2.find key !reverse_map in
-    if List.length rev_list > 0 then
-      if List.mem data rev_list then true else false
-    else false
-  let add ~key ~data =
-    if mem_data_of_fwd_map ~key ~data then ()
-    else
-      let forward_list = MapModule1.find key !forward_map in
-      let newlist = data::forward_list in
-      let () = forward_map := MapModule1.add key newlist !forward_map in
-      if List.length forward_list > 0 then
-        List.iter
-          (fun x ->
-            let reverse_list = MapModule2.find x !reverse_map in
-            let new_rev_list = key::reverse_list in
-            reverse_map := MapModule2.add x new_rev_list !reverse_map
-          ) forward_list
-      else
-        reverse_map := MapModule2.add data [key] !reverse_map;;
-
-  let add_reverse ~key ~data =
-    if mem_data_of_rev_map ~key ~data then ()
-    else
+    if MapModule2.mem key !reverse_map then
       let rev_list = MapModule2.find key !reverse_map in
-      let newlist = data::rev_list in
-      let () = reverse_map := MapModule2.add key newlist !reverse_map in
+      if List.length rev_list > 0 then
+        if List.mem data rev_list then true else false
+      else false
+    else false
+
+  (*
+        if List.length forward_list > 0 then
+          List.iter
+            (fun x ->
+              let reverse_list = MapModule2.find x !reverse_map in
+              let new_rev_list = key::reverse_list in
+              reverse_map := MapModule2.add x new_rev_list !reverse_map
+            ) forward_list
+        else
+          reverse_map := MapModule2.add data [key] !reverse_map
+*)
+    (*let update_all_fwd_keys ~fwdkey ~rev_list =
       if List.length rev_list > 0 then
         List.iter
           (fun x ->
             let fwd_list = MapModule1.find x !forward_map in
-            let new_fwd_list = key::fwd_list in
+            let new_fwd_list = data::fwd_list in
             forward_map := MapModule1.add data new_fwd_list !forward_map
-          ) rev_list
+          ) rev_list else () in *)       
+  let rec add ~key ~data =
+    if MapModule1.mem key !forward_map then
+      if mem_data_of_fwd_map ~key ~data then ()
       else
-        forward_map := MapModule1.add data [key] !forward_map;;
-    
+        let forward_list = MapModule1.find key !forward_map in
+        let newlist = data::forward_list in
+        let () = forward_map := MapModule1.add key newlist !forward_map in
+        add_reverse ~key:data ~data:key
+    else
+      let () = forward_map := MapModule1.add key [data] !forward_map in
+      add_reverse ~key:data ~data:key
+  and add_reverse ~key ~data =
+    if MapModule2.mem key !reverse_map then
+      if mem_data_of_rev_map ~key ~data then ()
+      else
+        let rev_list = MapModule2.find key !reverse_map in
+        let newlist = data::rev_list in
+        let () = reverse_map := MapModule2.add key newlist !reverse_map in
+        add ~key:data ~data:key
+    else
+      let () = reverse_map := MapModule2.add key [data] !reverse_map in
+      add ~key:data ~data:key
+(*
+    else
+      if MapModule2.mem key !reverse_map then 
+        let rev_list = MapModule2.find key !reverse_map in
+        let newlist = data::rev_list in
+        let () = reverse_map := MapModule2.add key newlist !reverse_map in
+        if List.length rev_list > 0 then
+          List.iter
+            (fun x ->
+              let fwd_list = MapModule1.find x !forward_map in
+              let new_fwd_list = key::fwd_list in
+              forward_map := MapModule1.add data new_fwd_list !forward_map
+            ) rev_list
+        else
+          forward_map := MapModule1.add data [key] !forward_map
+      else
+        let () = reverse_map := MapModule2.add key [data] !reverse_map in
+        forward_map := MapModule1.add data [key] !forward_map 
+
+ *)
+              
   let singleton ~key ~data =
     let () = empty () in
     add ~key ~data

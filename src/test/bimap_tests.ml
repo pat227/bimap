@@ -432,11 +432,17 @@ module Bimap_tests = struct
       Bimap_test5_clone.filter
         ~f:(fun x _v -> (Int64.compare (Int64.of_int 2) x) = 0);
       assert_equal 1 (List.length (Bimap_test5_clone.bindings ()));
+      assert_equal 2 (List.length (snd (List.hd (Bimap_test5_clone.bindings ()))));
+      assert_equal 2 (List.length (Bimap_test5_clone.bindings_reverse ()));
+      assert_equal 1 (List.length (snd (List.hd (Bimap_test5_clone.bindings_reverse ()))));
 
       Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
       Bimap_test5_clone.filter
         ~f:(fun x _v -> (Int64.compare (Int64.of_int 3) x) = 0);
-      assert_equal 4 (List.length (Bimap_test5_clone.bindings ()));
+      assert_equal 1 (List.length (Bimap_test5_clone.bindings ()));
+      assert_equal 4 (List.length (snd (List.hd (Bimap_test5_clone.bindings ()))));
+      assert_equal 4 (List.length (Bimap_test5_clone.bindings_reverse ()));
+      assert_equal 1 (List.length (snd (List.hd (Bimap_test5_clone.bindings_reverse ()))));
 
       Bimap_test5_clone.set_forward_map ~map:(Bimap_test5.get_forward_map ());
       Bimap_test5_clone.filter
