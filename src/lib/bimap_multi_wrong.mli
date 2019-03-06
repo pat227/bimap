@@ -1,7 +1,7 @@
 module Bimap_multi : sig
   class ['a, 'b] bimap_multi_class :
 	  ('a, 'b list, 'c) Core.Map.t ->
-	  ('b, 'a, 'd) Core.Map.t ->
+	  ('b list, 'a, 'd) Core.Map.t ->
 	  object
             val mutable forward_map :
 			  ('a, 'b list, 'c) Core.Map.t ref

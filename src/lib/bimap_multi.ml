@@ -1,26 +1,47 @@
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
-module Bimap_multi = struct
-  class ['a,'b] bimap_multi_class m1 m2 = object(self)
-    val mutable forward_map = ref m1
-    val mutable reverse_map = ref m2
+(*March 2019 -- very dumb mistake in prior commits...not a true bimap.
+  Use a functor so we have access to something satisfying Comparable.S 
+  and force type of map to use 'a list and 'b list.
+*)
+module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
+  class ['a, 'b] bimap_multi_class (m1 : 'a list ModuleA.Map.t) (m2 : 'b list ModuleB.Map.t) = object(self)
+    val mutable forward_map : ('a list ModuleA.Map.t ref) = ref (m1 : 'a list ModuleA.Map.t)
+    val mutable reverse_map : ('b list ModuleB.Map.t ref) = ref (m2 : 'b list ModuleB.Map.t)
     method private empty_forward_map () =
-      self#iter_keys
-        ~f:(fun k -> forward_map := (Core.Map.remove !forward_map k))
+      forward_map := ModuleA.Map.empty
     method private empty_reverse_map () =
-      self#iter_keys_inverse 
-        ~f:(fun k -> reverse_map := (Core.Map.remove !reverse_map k))
-    method add_multi ~(key:'a) ~(data:'b) =
-      let () = forward_map := (Core.Map.add_multi !forward_map ~key ~data) in
-      reverse_map := Core.Map.set !reverse_map ~key:data ~data:key
-    method add_multi_inverse ~(key:'b) ~(data:'a) =
-      let () = forward_map := (Core.Map.add_multi !forward_map ~key:data ~data:key) in
-      reverse_map := Core.Map.set !reverse_map ~key ~data
-    method private add_inverse_values klist v =
+      reverse_map := ModuleB.Map.empty
+    method add_multi ~(key:ModuleA.Map.Key.t) ~(data:ModuleB.Map.Key.t) =
+      let update_maps () =
+        let () = forward_map :=
+                   (ModuleA.Map.add_multi !forward_map ~key ~data) in
+        self#add_multi_inverse ~key:data ~data:key in
+      if ModuleA.Map.mem !forward_map key then
+        if Core.List.mem
+             (ModuleA.Map.find_exn !forward_map key) data
+             ~equal:(ModuleB.equal) then ()
+        else 
+          update_maps ()
+      else
+        update_maps ()
+    method add_multi_inverse ~(key:ModuleB.Map.Key.t) ~(data:ModuleA.Map.Key.t) =
+      let update_maps () =
+        let () = reverse_map := (ModuleB.Map.add_multi !reverse_map ~key ~data) in
+        self#add_multi ~key:data ~data:key in
+      if ModuleB.Map.mem !reverse_map key then
+        if Core.List.mem
+             (ModuleB.Map.find_exn !reverse_map key) data
+             ~equal:(ModuleA.equal) then ()
+        else 
+          update_maps ()
+      else
+        update_maps ()
+(*    method private add_inverse_values klist v =
       let rec add_values k v =
 	match k with
 	| h :: t ->
-	   let () = reverse_map := (Core.Map.set !reverse_map ~key:h ~data:v) in
+	   let () = reverse_map := (Core.Map.add_multi !reverse_map ~key:h ~data:v) in
 	   add_values t v
 	| [] -> () in
       add_values klist v
@@ -44,10 +65,11 @@ module Bimap_multi = struct
       let () = self#remove_inverse_keys old_value_list in
       self#add_inverse_values new_values key 
     method change_inverse ~key ~f =
-      let old_fwd_key = Core.Map.find_exn !reverse_map key in
-      let old_fwd_value_list = Core.Map.find_exn !forward_map old_fwd_key in 
+      let old_fwd_keys = Core.Map.find_exn !reverse_map key in
+      (*let old_fwd_value_list = Core.Map.find_exn !forward_map old_fwd_key in*) 
       let () = reverse_map := (Core.Map.change !reverse_map key ~f) in
-      let new_fwd_key = Core.Map.find_exn !reverse_map key in 
+      let new_fwd_keys = Core.Map.find_exn !reverse_map key in
+      (*===TODO===remove old_fwd_keys ONLY IF they have a list of values of length 1, and then regardless add the new fwd keys and map to *)
       (*let () = forward_map :=
 		 (Core.Map.add_multi !forward_map ~key:new_fwd_key ~data:key) in*)
       let () = forward_map :=
@@ -262,6 +284,7 @@ module Bimap_multi = struct
       let newvalues = Core.Map.find_exn !forward_map key in
       let () = self#remove_inverse_keys oldvalues in 
       self#add_inverse_values newvalues key      
+ *)
   end
 end 
 

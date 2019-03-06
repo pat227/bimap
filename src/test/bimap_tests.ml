@@ -322,16 +322,17 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"tres";
       bim#add_multi ~key:3 ~data:"triple";
       bim#add_multi_inverse ~key:"tri" ~data:3;
+      bim#add_multi_inverse ~key:"iii" ~data:3;
       bim#add_multi_inverse ~key:"four" ~data:4;
       (*==todo change change_inverse*)
       assert_equal 4 (bim#count ~f:(fun l -> true));
       assert_equal 4 (bim#counti ~f:(fun ~key ~data -> true));
       assert_equal 1 (bim#counti ~f:(fun ~key ~data -> key > 3));
-      assert_equal 8 (bim#count_inverse ~f:(fun x -> true));
+      assert_equal 9 (bim#count_inverse ~f:(fun x -> true));
       assert_equal 4 (bim#length);
       assert_equal 1 (List.length (bim#find_exn 1));
       assert_equal 2 (List.length (bim#find_exn 2));
-      assert_equal 4 (List.length (bim#find_exn 3));
+      assert_equal 5 (List.length (bim#find_exn 3));
       assert_equal 1 (List.length (bim#find_exn 4));
       assert_equal true (List.mem "one" (bim#find_exn 1));
       assert_equal true (List.mem "two" (bim#find_exn 2));
@@ -340,6 +341,7 @@ module Bimap_tests = struct
       assert_equal true (List.mem "tres" (bim#find_exn 3));
       assert_equal true (List.mem "triple" (bim#find_exn 3));
       assert_equal true (List.mem "tri" (bim#find_exn 3));
+      assert_equal true (List.mem "iii" (bim#find_exn 3));
       
       assert_equal 1 (bim#find_exn_inverse "one");
       assert_equal 2 (bim#find_exn_inverse "two");
@@ -348,6 +350,7 @@ module Bimap_tests = struct
       assert_equal 3 (bim#find_exn_inverse "tres");
       assert_equal 3 (bim#find_exn_inverse "triple");
       assert_equal 3 (bim#find_exn_inverse "tri");
+      assert_equal 3 (bim#find_exn_inverse "iii");
 
       assert_equal (Some 1) (bim#find_inverse "one");
       assert_equal (Some 2) (bim#find_inverse "two");
