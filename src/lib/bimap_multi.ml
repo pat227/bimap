@@ -2,17 +2,20 @@
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 (*March 2019 -- very dumb mistake in prior commits...not a true bimap.
   Use a functor so we have access to something satisfying Comparable.S 
-  and force type of map to use 'a list and 'b list.
+  and force type of map to use 'a list and 'b list. And fix the functions
+  for adding values, changing values, etc.
 *)
 module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
   class ['a, 'b] bimap_multi_class (m1 : 'a list ModuleA.Map.t) (m2 : 'b list ModuleB.Map.t) = object(self)
     val mutable forward_map : ('a list ModuleA.Map.t ref) = ref (m1 : 'a list ModuleA.Map.t)
     val mutable reverse_map : ('b list ModuleB.Map.t ref) = ref (m2 : 'b list ModuleB.Map.t)
+
     method private empty_forward_map () =
       forward_map := ModuleA.Map.empty
     method private empty_reverse_map () =
       reverse_map := ModuleB.Map.empty
-    method add_multi ~(key:ModuleA.Map.Key.t) ~(data:ModuleB.Map.Key.t) =
+
+    method add_multi ~key ~data =
       let update_maps () =
         let () = forward_map :=
                    (ModuleA.Map.add_multi !forward_map ~key ~data) in
@@ -25,7 +28,8 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
           update_maps ()
       else
         update_maps ()
-    method add_multi_inverse ~(key:ModuleB.Map.Key.t) ~(data:ModuleA.Map.Key.t) =
+
+    method add_multi_inverse ~key ~data =
       let update_maps () =
         let () = reverse_map := (ModuleB.Map.add_multi !reverse_map ~key ~data) in
         self#add_multi ~key:data ~data:key in
@@ -37,49 +41,50 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
           update_maps ()
       else
         update_maps ()
-(*    method private add_inverse_values klist v =
-      let rec add_values k v =
-	match k with
-	| h :: t ->
-	   let () = reverse_map := (Core.Map.add_multi !reverse_map ~key:h ~data:v) in
-	   add_values t v
-	| [] -> () in
-      add_values klist v
-    method private add_fwd_values k vlist =
-      let rec helper k vl =
-	match vl with
-	| [] -> ()
-	| h::t ->
-	   let () = forward_map := (Core.Map.add_multi !forward_map ~key:k ~data:h) in
-	   helper k t in
-(*      let rec helper2 k vll =
-	match vll with
-	| [] -> ()
-	| h :: t -> let () = helper k h in
-		    helper2 k t in *)
-      helper k vlist
-    method change ~key ~f =
-      let old_value_list = Core.Map.find_exn !forward_map key in 
-      let () = forward_map := (Core.Map.change !forward_map key ~f) in
-      let new_values = Core.Map.find_exn !forward_map key in
-      let () = self#remove_inverse_keys old_value_list in
-      self#add_inverse_values new_values key 
-    method change_inverse ~key ~f =
-      let old_fwd_keys = Core.Map.find_exn !reverse_map key in
-      (*let old_fwd_value_list = Core.Map.find_exn !forward_map old_fwd_key in*) 
-      let () = reverse_map := (Core.Map.change !reverse_map key ~f) in
-      let new_fwd_keys = Core.Map.find_exn !reverse_map key in
-      (*===TODO===remove old_fwd_keys ONLY IF they have a list of values of length 1, and then regardless add the new fwd keys and map to *)
-      (*let () = forward_map :=
-		 (Core.Map.add_multi !forward_map ~key:new_fwd_key ~data:key) in*)
-      let () = forward_map :=
-		 (Core.Map.remove !forward_map old_fwd_key) in
-      let () = self#add_fwd_values new_fwd_key old_fwd_value_list in
-      self#add_inverse_values old_fwd_value_list new_fwd_key
 
-    method private create_inverse_map_from_forward_map =
-      (*let () = reverse_map :=
-		 (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map)) in*)
+    method change ~key ~f =
+      (* A -> 1,2,3 | B-> 4,5,6 | C -> 7,8,9 
+         1->A|2->A|3->A|4->B|5->B|6->B ... etc
+         but after some change could end up with
+         A -> 2,4,6 | B-> 4,5,6 | C -> 7,8,9
+         2->A|4->A,B|5->B|6->A,B| ... etc
+      *)
+      let old_value_list = ModuleA.Map.find_exn !forward_map key in 
+      let () = forward_map := (ModuleA.Map.change !forward_map key ~f) in
+      let new_values = ModuleA.Map.find_exn !forward_map key in
+    (*--- now only need to fixup the reverse mapping ---
+       For each old value (key in reverse mapping):
+         a) if the only binding is to ~key provided to this function then remove the old value (key in reverse mapping)
+         b) else filter the list of values to remove the ~key provided to this function*)
+      Core.List.iter new_values
+        ~f:(fun k ->
+          let old_reverse_bindings = ModuleB.Map.find_exn !reverse_map k in
+          if (Core.List.count old_reverse_bindings ~f:(fun _v -> true)) > 1 then
+            let new_reverse_bindings = Core.List.filter old_reverse_bindings ~f:(fun v -> not (v = key)) in
+            let () = reverse_map := ModuleB.Map.remove !reverse_map k in
+            reverse_map :=
+              ModuleB.Map.add_exn !reverse_map ~key:k ~data:new_reverse_bindings
+          else
+            reverse_map := ModuleB.Map.remove !reverse_map k
+        )
+
+    method change_inverse ~key ~f =
+      let old_value_list = ModuleB.Map.find_exn !reverse_map key in 
+      let () = reverse_map := (ModuleB.Map.change !reverse_map key ~f) in
+      let new_values = ModuleB.Map.find_exn !reverse_map key in
+      Core.List.iter new_values
+        ~f:(fun k ->
+          let old_reverse_bindings = ModuleA.Map.find_exn !forward_map k in
+          if (Core.List.count old_reverse_bindings ~f:(fun _v -> true)) > 1 then
+            let new_reverse_bindings = Core.List.filter old_reverse_bindings ~f:(fun v -> not (v = key)) in
+            let () = forward_map := ModuleA.Map.remove !forward_map k in
+            forward_map :=
+              ModuleA.Map.add_exn !forward_map ~key:k ~data:new_reverse_bindings
+          else
+            forward_map := ModuleA.Map.remove !forward_map k
+        )
+        
+    method private create_inverse_map_from_forward_map () =
       let () = self#empty_reverse_map () in 
       self#iter_keys
 	     ~f:(fun k ->
@@ -89,125 +94,129 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
 		   | [] -> ()
 		   | h::t ->
 		      let () = reverse_map :=
-				 Core.Map.set !reverse_map ~key:h ~data:k in
+				 ModuleB.Map.add_exn !reverse_map ~key:h ~data:k in
 		      helper t in
 		 helper values)
-    method private create_forward_map_from_reverse_map =
-      (*let () = forward_map :=
-		 (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in*)
+    method private create_forward_map_from_reverse_map () =
       let () = self#empty_forward_map () in 
       self#iter_keys_inverse
 	     ~f:(fun k ->
-		 forward_map :=
-		   Core.Map.add_multi !forward_map
-				~key:(self#find_exn_inverse ~key:k) ~data:k)
+		 let values = self#find_exn_inverse ~key:k in
+		 let rec helper v2bkeys =
+		   match v2bkeys with
+		   | [] -> ()
+		   | h::t ->
+		      let () = forward_map :=
+				 ModuleA.Map.add_exn !forward_map ~key:h ~data:k in
+		      helper t in
+		 helper values)
     method count ~f =
-      Core.Map.count !forward_map ~f
+      ModuleA.Map.count !forward_map ~f
     method count_inverse ~f =
-      Core.Map.count !reverse_map ~f
+      ModuleB.Map.count !reverse_map ~f
     method counti ~f =
-      Core.Map.counti !forward_map ~f
+      ModuleA.Map.counti !forward_map ~f
     method data =
-      Core.Map.data !forward_map
+      ModuleA.Map.data !forward_map
     method data_inverse =
-      Core.Map.data !reverse_map
+      ModuleB.Map.data !reverse_map
     method empty () =
       (*let () = forward_map := (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in
       reverse_map := (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map))*)
       let () = self#empty_forward_map () in
       self#empty_reverse_map ()
     method exists ~f =
-      Core.Map.exists !forward_map ~f
+      ModuleA.Map.exists !forward_map ~f
     method exists_inverse ~f =
-      Core.Map.exists !reverse_map ~f
+      ModuleB.Map.exists !reverse_map ~f
     method existsi ~f =
-      Core.Map.existsi !forward_map ~f
+      ModuleA.Map.existsi !forward_map ~f
     method existsi_inverse ~f =
-      Core.Map.existsi !reverse_map ~f
+      ModuleB.Map.existsi !reverse_map ~f
     method find ~key =
-      Core.Map.find !forward_map key
+      ModuleA.Map.find !forward_map key
     method find_inverse ~key =
-      Core.Map.find !reverse_map key
+      ModuleB.Map.find !reverse_map key
     method find_exn ~key =
-      Core.Map.find_exn !forward_map key
+      ModuleA.Map.find_exn !forward_map key
     method find_exn_inverse ~key =
       Core.Map.find_exn !reverse_map key
     method filter ~f =
-      let () = forward_map := (Core.Map.filter !forward_map ~f) in
+      let () = forward_map := (ModuleA.Map.filter !forward_map ~f) in
       (*in bimap_multi, unlike bimap, the filter function cannot 
         be applied to the inverse map through filter_keys function*)
       self#create_inverse_map_from_forward_map
     method filter_inverse ~f =
-      let () = reverse_map := (Core.Map.filter !reverse_map ~f) in
+      let () = reverse_map := (ModuleB.Map.filter !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     method filter_keys ~f =
-      let () = forward_map := (Core.Map.filter_keys !forward_map ~f) in
+      let () = forward_map := (ModuleA.Map.filter_keys !forward_map ~f) in
       self#create_inverse_map_from_forward_map
     method filter_keys_inverse ~f =
-      let () = reverse_map := (Core.Map.filter_keys !reverse_map ~f) in
+      let () = reverse_map := (ModuleB.Map.filter_keys !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     method filteri ~f =
-      let () = forward_map := (Core.Map.filteri !forward_map ~f) in
+      let () = forward_map := (ModuleA.Map.filteri !forward_map ~f) in
       self#create_inverse_map_from_forward_map
     method filteri_inverse ~f =
-      let () = reverse_map := (Core.Map.filteri !reverse_map ~f) in
+      let () = reverse_map := (ModuleB.Map.filteri !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     method filter_map ~f =
-      let () = forward_map := (Core.Map.filter_map !forward_map ~f) in
+      let () = forward_map := (ModuleA.Map.filter_map !forward_map ~f) in
       self#create_inverse_map_from_forward_map
     method filter_map_inverse ~f =
-      let () = reverse_map := (Core.Map.filter_map !reverse_map ~f) in
+      let () = reverse_map := (ModuleB.Map.filter_map !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
     method fold : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e = 
-      (fun ~init ~f -> Core.Map.fold !forward_map ~init ~f)
+      (fun ~init ~f -> ModuleA.Map.fold !forward_map ~init ~f)
     method fold_inverse : 'e. init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> Core.Map.fold !reverse_map ~init ~f)
+      (fun ~init ~f -> ModuleB.Map.fold !reverse_map ~init ~f)
 (*    method fold_range_inclusive ~min ~max ~init ~f =
       Core.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
     method fold_right : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> Core.Map.fold_right !forward_map ~init ~f)
+      (fun ~init ~f -> ModuleA.Map.fold_right !forward_map ~init ~f)
     method fold_right_inverse : 'e. init:'e -> f:(key:'b -> data:'a -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> Core.Map.fold_right !reverse_map ~init ~f)
+      (fun ~init ~f -> ModuleB.Map.fold_right !reverse_map ~init ~f)
     method for_all ~f =
-      Core.Map.for_all !forward_map ~f
+      ModuleA.Map.for_all !forward_map ~f
     method for_all_inverse ~f =
-      Core.Map.for_all !reverse_map ~f
+      ModuleB.Map.for_all !reverse_map ~f
     method is_empty =
-      Core.Map.is_empty !forward_map
+      ModuleA.Map.is_empty !forward_map
     method iter_keys ~f =
-      Core.Map.iter_keys !forward_map ~f
+      ModuleA.Map.iter_keys !forward_map ~f
     method iter_keys_inverse ~f =
-      Core.Map.iter_keys !reverse_map ~f
+      ModuleB.Map.iter_keys !reverse_map ~f
     method iter ~f =
-      Core.Map.iter !forward_map ~f
+      ModuleA.Map.iter !forward_map ~f
     method iter_inverse ~f =
-      Core.Map.iter !reverse_map ~f
+      ModuleB.Map.iter !reverse_map ~f
     method iteri ~f =
-      Core.Map.iteri !forward_map ~f
+      ModuleA.Map.iteri !forward_map ~f
     method iteri_inverse ~f =
-      Core.Map.iteri !reverse_map ~f
+      ModuleB.Map.iteri !reverse_map ~f
     method keys =
-      Core.Map.keys !forward_map
+      ModuleA.Map.keys !forward_map
     method keys_inverse =
-      Core.Map.keys !reverse_map
+      ModuleB.Map.keys !reverse_map
     method length =
-      Core.Map.length !forward_map
+      ModuleA.Map.length !forward_map
     method map ~f =
       let () = forward_map := (Core.Map.map !forward_map ~f) in
       (*let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in*)
       let () = self#empty_reverse_map () in 
-      Core.Map.iter_keys
+      ModuleA.Map.iter_keys
 	!forward_map
 	~f:(fun k ->
-	    self#add_inverse_values (Core.Map.find_exn !forward_map k) k)
+	    self#add_inverse_values (ModuleA.Map.find_exn !forward_map k) k)
     method map_inverse ~f =
-      let () = reverse_map := (Core.Map.map !reverse_map ~f) in
+      let () = reverse_map := (ModuleB.Map.map !reverse_map ~f) in
       (*let () = forward_map := Core.Map.empty ~comparator:(Core.Map.comparator !forward_map) in*)
       let () = self#empty_forward_map () in 
-      Core.Map.iter_keys
+      ModuleA.Map.iter_keys
 	!reverse_map
 	~f:(fun k -> forward_map :=
-		       Core.Map.add_multi !forward_map ~key:(Core.Map.find_exn !reverse_map k) ~data:k)
+		       ModuleA.Map.add_multi !forward_map ~key:(ModuleB.Map.find_exn !reverse_map k) ~data:k)
     method mapi ~f =
       let () = forward_map := (Core.Map.mapi !forward_map ~f) in
       (*let () = reverse_map := Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map) in*)
@@ -284,7 +293,6 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
       let newvalues = Core.Map.find_exn !forward_map key in
       let () = self#remove_inverse_keys oldvalues in 
       self#add_inverse_values newvalues key      
- *)
   end
 end 
 
