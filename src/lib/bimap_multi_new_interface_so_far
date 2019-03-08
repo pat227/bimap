@@ -1,0 +1,29 @@
+module Bimap_multi :
+  functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
+    sig
+      class ['a, 'b] bimap_multi_class :
+        'a list ModuleA.Map.t ->
+        'b list ModuleB.Map.t ->
+        object
+          constraint 'a = ModuleB.Map.Key.t
+          constraint 'b = ModuleA.Map.Key.t
+          val mutable forward_map : 'a Core.List.t ModuleA.Map.t ref
+          val mutable reverse_map : 'b Core.List.t ModuleB.Map.t ref
+          method add_multi : key:'b -> data:'a -> unit
+          method add_multi_inverse : key:'a -> data:'b -> unit
+          method change :
+            key:'b ->
+            f:('a Core.List.t option -> 'a Core.List.t option) -> unit
+          method change_inverse :
+            key:'a ->
+            f:('b Core.List.t option -> 'b Core.List.t option) -> unit
+          method private create_forward_map_from_reverse_map : unit -> unit
+          method private create_inverse_map_from_forward_map : unit -> unit
+          method private empty_forward_map : unit -> unit
+          method private empty_reverse_map : unit -> unit
+          method find_exn : key:ModuleA.Map.Key.t -> 'a Core.List.t
+          method find_exn_inverse : key:ModuleB.Map.Key.t -> 'b Core.List.t
+          method iter_keys : f:(ModuleA.Map.Key.t -> unit) -> unit
+          method iter_keys_inverse : f:(ModuleB.Map.Key.t -> unit) -> unit
+        end
+    end
