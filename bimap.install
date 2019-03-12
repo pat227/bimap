@@ -1,0 +1,34 @@
+lib: [
+  "_build/install/default/lib/bimap/META" {"META"}
+  "_build/install/default/lib/bimap/bimap.a" {"bimap.a"}
+  "_build/install/default/lib/bimap/bimap.cma" {"bimap.cma"}
+  "_build/install/default/lib/bimap/bimap.cmi" {"bimap.cmi"}
+  "_build/install/default/lib/bimap/bimap.cmt" {"bimap.cmt"}
+  "_build/install/default/lib/bimap/bimap.cmx" {"bimap.cmx"}
+  "_build/install/default/lib/bimap/bimap.cmxa" {"bimap.cmxa"}
+  "_build/install/default/lib/bimap/bimap.cmxs" {"bimap.cmxs"}
+  "_build/install/default/lib/bimap/bimap.dune" {"bimap.dune"}
+  "_build/install/default/lib/bimap/bimap.ml" {"bimap.ml"}
+  "_build/install/default/lib/bimap/bimap__.cmi" {"bimap__.cmi"}
+  "_build/install/default/lib/bimap/bimap__.cmt" {"bimap__.cmt"}
+  "_build/install/default/lib/bimap/bimap__.cmx" {"bimap__.cmx"}
+  "_build/install/default/lib/bimap/bimap__.ml-gen" {"bimap__.ml-gen"}
+  "_build/install/default/lib/bimap/bimap__Bimap_multi.cmi" {"bimap__Bimap_multi.cmi"}
+  "_build/install/default/lib/bimap/bimap__Bimap_multi.cmt" {"bimap__Bimap_multi.cmt"}
+  "_build/install/default/lib/bimap/bimap__Bimap_multi.cmti" {"bimap__Bimap_multi.cmti"}
+  "_build/install/default/lib/bimap/bimap__Bimap_multi.cmx" {"bimap__Bimap_multi.cmx"}
+  "_build/install/default/lib/bimap/bimap__Bimap_single.cmi" {"bimap__Bimap_single.cmi"}
+  "_build/install/default/lib/bimap/bimap__Bimap_single.cmt" {"bimap__Bimap_single.cmt"}
+  "_build/install/default/lib/bimap/bimap__Bimap_single.cmti" {"bimap__Bimap_single.cmti"}
+  "_build/install/default/lib/bimap/bimap__Bimap_single.cmx" {"bimap__Bimap_single.cmx"}
+  "_build/install/default/lib/bimap/bimap_multi.ml" {"bimap_multi.ml"}
+  "_build/install/default/lib/bimap/bimap_multi.mli" {"bimap_multi.mli"}
+  "_build/install/default/lib/bimap/bimap_single.ml" {"bimap_single.ml"}
+  "_build/install/default/lib/bimap/bimap_single.mli" {"bimap_single.mli"}
+  "_build/install/default/lib/bimap/opam" {"opam"}
+]
+doc: [
+  "_build/install/default/doc/bimap/LICENSE"
+  "_build/install/default/doc/bimap/README"
+  "_build/install/default/doc/bimap/README~"
+]

@@ -112,7 +112,7 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
       ModuleA.Map.iter_keys !forward_map
 	~f:(fun k ->
           let values = ModuleA.Map.find_exn !forward_map k in
-          Core.List.iter values (fun v -> reverse_map := ModuleB.Map.add_multi !reverse_map ~key:v ~data:k)
+          Core.List.iter values ~f:(fun v -> reverse_map := ModuleB.Map.add_multi !reverse_map ~key:v ~data:k)
 	)
 
     method private create_forward_map_from_reverse_map () =
@@ -120,7 +120,7 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
       ModuleB.Map.iter_keys !reverse_map
 	~f:(fun k ->
 	  let values = ModuleB.Map.find_exn !reverse_map k in
-          Core.List.iter values (fun v -> forward_map := ModuleA.Map.add_multi !forward_map ~key:v ~data:k)
+          Core.List.iter values ~f:(fun v -> forward_map := ModuleA.Map.add_multi !forward_map ~key:v ~data:k)
 	)
 
     method count ~f =
@@ -279,7 +279,8 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
 	let () = forward_map := (ModuleA.Map.remove_multi !forward_map key) in
 	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
         self#remove_fwd_key_from_reverse_map ~fwd_values_list:[head_element] ~key
-      with e -> ()
+        (*--TODO--improve exception handling*)
+      with _e -> raise (Failure "bimap_multi::remove_multi() failed")
     method remove_reverse_multi ~key =
       try
 	let values = ModuleB.Map.find_exn !reverse_map key in
@@ -287,7 +288,8 @@ module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = 
 	let () = reverse_map := (ModuleB.Map.remove_multi !reverse_map key) in
 	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
         self#remove_rev_key_from_forward_map ~rev_values_list:[head_element] ~key
-      with e -> ()
+        (*--TODO--improve exception handling*)
+      with _e -> raise (Failure "bimap_multi::remove_reverse_multi() failed")
     method to_alist ?key_order () =
       match Core.Option.is_some key_order with
       | false -> Core.Map.to_alist !forward_map

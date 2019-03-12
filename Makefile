@@ -20,7 +20,7 @@ all: lib
 clean:
 	rm -rvf build
 
-lib: $(libdir)bimap.ml $(libdir)bimap.mli $(libdir)bimap_multi.ml #$(libdir)bimap_multi.mli
+lib: $(libdir)bimap_single.ml $(libdir)bimap_single.mli $(libdir)bimap_multi.ml #$(libdir)bimap_multi.mli
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'base core_kernel core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.a
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'base core_kernel core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cma
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'base core_kernel core' -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmo

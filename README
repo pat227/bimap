@@ -17,9 +17,10 @@ example would be:
 (Core.String.t, Core.Int.t, Core.String.Comparator.t) Core.Map.t
 (Core.Int, Core.String.t, Core.Int.t.Comparator.t) Core.Map.t
 
-However for a multi-map, the types would be:
+For a multi-map, the types would be:
 ('a, 'b list, 'c) Core.Map.t 
-('b, 'a, 'd) Core.Map.t
+('b, 'a list, 'd) Core.Map.t
 
-a Bi-Multi-map is implemented in it's own class with it's own
-type parameters. 
+A Bi-Multi-map is implemented in it's own class with it's own
+type parameters. See the unit test under src/test for examples of
+usage.

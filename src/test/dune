@@ -1,0 +1,7 @@
+(alias
+   (name bimap_tests)
+   (action (run ./bimap_tests.exe))
+)
+;(tests
+;  (names bimap_tests)
+;)

@@ -1,0 +1,13 @@
+module Bimap_single :
+  functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
+    sig
+      class ['a, 'b] bimap_class :
+        'b ModuleA.Map.t ->
+        'a ModuleB.Map.t ->
+        object
+          val mutable forward_map : 'b ModuleA.Map.t ref
+          val mutable reverse_map : 'a ModuleB.Map.t ref
+          method private empty_forward_map : unit -> unit
+          method private empty_reverse_map : unit -> unit
+        end
+    end
