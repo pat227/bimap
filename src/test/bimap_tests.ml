@@ -1,5 +1,4 @@
-module Bimap = Bimap.Bimap_single
-module Bimap_multi = Bimap_multi.Bimap_multi
+module Bimap=Bimap
 open OUnit2
 module Bimap_tests = struct
 
@@ -38,10 +37,10 @@ module Bimap_tests = struct
        if Core.List.mem ~equal:(fun x y -> Core.String.equal x y) h v then true else
 	 list_list_mem t v
  *)    
-  let test1 text_ctx =
+  let test1 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"one";
@@ -60,11 +59,11 @@ module Bimap_tests = struct
       assert_equal [(1,"one");(2,"two");(3,"three")] (bim#to_alist ());
       assert_equal [(3,"three");(2,"two");(1,"one")] (bim#to_alist ~key_order:`Decreasing ());
       
-      bim#change ~key:3 ~f:(fun x -> (Some "tri"));
+      bim#change ~key:3 ~f:(fun _x -> (Some "tri"));
 
       assert_equal "tri" (bim#find_exn ~key:3);
       assert_equal 3 (bim#find_exn_reverse ~key:"tri");      
-      bim#change_reverse ~key:"tri" ~f:(fun x -> (Some 4));
+      bim#change_reverse ~key:"tri" ~f:(fun _x -> (Some 4));
       assert_equal 4 (bim#find_exn_reverse ~key:"tri");
       assert_equal "tri" (bim#find_exn ~key:4);
       bim#remove ~key:1;
@@ -75,10 +74,10 @@ module Bimap_tests = struct
       assert_equal 0 (bim#length);     
     end
 
-  let test2 text_ctx =
+  let test2 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in 
     begin
       bim#set ~key:1 ~data:"one";
@@ -95,11 +94,11 @@ module Bimap_tests = struct
       assert_equal (Some "three") (bim#find ~key:3);
       assert_equal (Some 3) (bim#find_reverse ~key:"three");
 
-      bim#change ~key:3 ~f:(fun x -> (Some "tri"));
+      bim#change ~key:3 ~f:(fun _x -> (Some "tri"));
 
       assert_equal 3 (bim#find_exn_reverse ~key:"tri");
 
-      bim#change_reverse ~key:"tri" ~f:(fun x -> (Some 4));
+      bim#change_reverse ~key:"tri" ~f:(fun _x -> (Some 4));
 
       assert_equal (Some 4) (bim#find_reverse ~key:"tri");
       assert_equal (Some "tri") (bim#find ~key:4);
@@ -122,19 +121,19 @@ module Bimap_tests = struct
       assert_equal None (bim#nth_reverse 3);
     end
 
-  let test3 text_ctx =
+  let test3 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in   
     begin
       bim#set ~key:1 ~data:"single";
       bim#set ~key:2 ~data:"double";
       bim#set ~key:3 ~data:"triple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       assert_equal 3 (bim#length);
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
-      assert_equal 2 (bim#counti ~f:(fun ~key ~data -> if key <= 2 then true else false));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
+      assert_equal 2 (bim#counti ~f:(fun ~key ~data:_data -> if key <= 2 then true else false));
       assert_equal ["single";"double";"triple"] (bim#data);
       assert_equal true (List.mem 1 (bim#data_reverse));
       assert_equal true (List.mem 2 (bim#data_reverse));
@@ -148,7 +147,7 @@ module Bimap_tests = struct
       assert_equal true (bim#existsi_reverse ~f:(fun ~key ~data -> key = "double" && data = 2));
       bim#empty ();
       assert_equal 0 (bim#length);
-      assert_equal 0 (bim#count ~f:(fun x -> true));
+      assert_equal 0 (bim#count ~f:(fun _x -> true));
       assert_equal true (bim#is_empty);
 
       bim#set ~key:1 ~data:"one";
@@ -160,44 +159,44 @@ module Bimap_tests = struct
       assert_equal "eno" (bim#find_exn ~key:1);
     end 
 
-  let test3 text_ctx =
+  let test3b _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in
     begin
       bim#set ~key:4 ~data:"quadruple";
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#length);
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       bim#filter ~f:(fun v -> String.length v > 8);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
 
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       bim#filter_reverse ~f:(fun v -> v > 4);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
       bim#set ~key:4 ~data:"quadruple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       bim#filter_keys ~f:(fun k -> k < 5);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
       
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       bim#filter_keys_reverse ~f:(fun v -> String.length v > 8);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
 
       bim#set ~key:4 ~data:"quadruple";
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
-      assert_equal 3 (bim#count ~f:(fun x -> true));
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
       bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key <6);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
       assert_equal (Some "quadruple") (bim#find ~key:4);
       assert_equal (Some "pentuple") (bim#find ~key:5);
       assert_equal None (bim#find ~key:6);
@@ -206,8 +205,8 @@ module Bimap_tests = struct
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       bim#filteri_reverse ~f:(fun ~key ~data -> String.length key > 8 || data <6);
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal 2 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
+      assert_equal 2 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal (Some "quadruple") (bim#find ~key:4);
       assert_equal (Some "pentuple") (bim#find ~key:5);
       assert_equal None (bim#find ~key:6);
@@ -219,8 +218,8 @@ module Bimap_tests = struct
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       bim#filter_map ~f:(fun v -> if String.length v > 8 then (Some "survivor") else None);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal (Some "survivor") (bim#find ~key:4);
       assert_equal None (bim#find ~key:5);
       assert_equal None (bim#find ~key:6);
@@ -232,8 +231,8 @@ module Bimap_tests = struct
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       bim#filter_map_reverse ~f:(fun v -> if v > 5 then (Some (v * 2)) else None);
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal (Some 12) (bim#find_reverse ~key:"sextuple");
       assert_equal None (bim#find_reverse ~key:"quadruple");
       assert_equal None (bim#find_reverse ~key:"pentuple");
@@ -243,10 +242,10 @@ module Bimap_tests = struct
       assert_equal (Some "sextuple") (bim#find ~key:12);      
     end
 
-  let test4 text_ctx =
+  let test4 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"single";
@@ -280,10 +279,10 @@ module Bimap_tests = struct
       assert_equal true (bim#for_all ~f:(fun v -> if (String.length v) > 0 then true else false));
     end
 
-  let test5 text_ctx =
+  let test5 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap(Core.Int)(Core.String) in
+    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
     let bim = new Bimap_single.bimap_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"uno";
@@ -316,10 +315,10 @@ module Bimap_tests = struct
       assert_equal [2;8;18] (bim#keys);
     end
 
-  let test6 text_ctx =
+  let test6 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap_multi(Core.Int)(Core.String) in
+    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
     let bim = new BimapMulti.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
@@ -332,40 +331,40 @@ module Bimap_tests = struct
       bim#add_multi_reverse ~key:"iii" ~data:3;
       bim#add_multi_reverse ~key:"four" ~data:4;
 
-      assert_equal 4 (bim#count ~f:(fun l -> true));
-      assert_equal 4 (bim#counti ~f:(fun ~key ~data -> true));
-      assert_equal 1 (bim#counti ~f:(fun ~key ~data -> key > 3));
-      assert_equal 9 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 4 (bim#count ~f:(fun _l -> true));
+      assert_equal 4 (bim#counti ~f:(fun ~key:_key ~data:_data -> true));
+      assert_equal 1 (bim#counti ~f:(fun ~key ~data:_data -> key > 3));
+      assert_equal 9 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 4 (bim#length);
-      assert_equal 1 (Core.List.length (bim#find_exn 1));
-      assert_equal 2 (Core.List.length (bim#find_exn 2));
-      assert_equal 5 (Core.List.length (bim#find_exn 3));
-      assert_equal 1 (Core.List.length (bim#find_exn 4));
-      assert_equal true (List.mem "one" (bim#find_exn 1));
-      assert_equal true (List.mem "two" (bim#find_exn 2));
-      assert_equal true (List.mem "dos" (bim#find_exn 2));
-      assert_equal true (List.mem "three" (bim#find_exn 3));
-      assert_equal true (List.mem "tres" (bim#find_exn 3));
-      assert_equal true (List.mem "triple" (bim#find_exn 3));
-      assert_equal true (List.mem "tri" (bim#find_exn 3));
-      assert_equal true (List.mem "iii" (bim#find_exn 3));
+      assert_equal 1 (Core.List.length (bim#find_exn ~key:1));
+      assert_equal 2 (Core.List.length (bim#find_exn ~key:2));
+      assert_equal 5 (Core.List.length (bim#find_exn ~key:3));
+      assert_equal 1 (Core.List.length (bim#find_exn ~key:4));
+      assert_equal true (List.mem "one" (bim#find_exn ~key:1));
+      assert_equal true (List.mem "two" (bim#find_exn ~key:2));
+      assert_equal true (List.mem "dos" (bim#find_exn ~key:2));
+      assert_equal true (List.mem "three" (bim#find_exn ~key:3));
+      assert_equal true (List.mem "tres" (bim#find_exn ~key:3));
+      assert_equal true (List.mem "triple" (bim#find_exn ~key:3));
+      assert_equal true (List.mem "tri" (bim#find_exn ~key:3));
+      assert_equal true (List.mem "iii" (bim#find_exn ~key:3));
       
-      assert_equal [1] (bim#find_exn_reverse "one");
-      assert_equal [2] (bim#find_exn_reverse "two");
-      assert_equal [2] (bim#find_exn_reverse "dos");
-      assert_equal [3] (bim#find_exn_reverse "three");
-      assert_equal [3] (bim#find_exn_reverse "tres");
-      assert_equal [3] (bim#find_exn_reverse "triple");
-      assert_equal [3] (bim#find_exn_reverse "tri");
-      assert_equal [3] (bim#find_exn_reverse "iii");
+      assert_equal [1] (bim#find_exn_reverse ~key:"one");
+      assert_equal [2] (bim#find_exn_reverse ~key:"two");
+      assert_equal [2] (bim#find_exn_reverse ~key:"dos");
+      assert_equal [3] (bim#find_exn_reverse ~key:"three");
+      assert_equal [3] (bim#find_exn_reverse ~key:"tres");
+      assert_equal [3] (bim#find_exn_reverse ~key:"triple");
+      assert_equal [3] (bim#find_exn_reverse ~key:"tri");
+      assert_equal [3] (bim#find_exn_reverse ~key:"iii");
 
-      assert_equal (Some [1]) (bim#find_reverse "one");
-      assert_equal (Some [2]) (bim#find_reverse "two");
-      assert_equal (Some [2]) (bim#find_reverse "dos");
-      assert_equal (Some [3]) (bim#find_reverse "three");
-      assert_equal (Some [3]) (bim#find_reverse "tres");
-      assert_equal (Some [3]) (bim#find_reverse "triple");
-      assert_equal [3] (bim#find_exn_reverse "tri");
+      assert_equal (Some [1]) (bim#find_reverse ~key:"one");
+      assert_equal (Some [2]) (bim#find_reverse ~key:"two");
+      assert_equal (Some [2]) (bim#find_reverse ~key:"dos");
+      assert_equal (Some [3]) (bim#find_reverse ~key:"three");
+      assert_equal (Some [3]) (bim#find_reverse ~key:"tres");
+      assert_equal (Some [3]) (bim#find_reverse ~key:"triple");
+      assert_equal [3] (bim#find_exn_reverse ~key:"tri");
       
       (*print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);*)
       assert_equal ([["one"];["dos";"two"];["iii";"tri";"triple";"tres";"three"];["four"]]) (bim#data);
@@ -376,10 +375,10 @@ module Bimap_tests = struct
       assert_equal 1 (Core.List.length (Core.List.filter (bim#data_reverse) ~f:(fun x -> if x = [4] then true else false)));
 
       bim#empty ();
-      assert_equal 0 (bim#count ~f:(fun l -> true));
-      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> true));
-      assert_equal 0 (bim#counti ~f:(fun ~key ~data -> key > 3));
-      assert_equal 0 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 0 (bim#count ~f:(fun _l -> true));
+      assert_equal 0 (bim#counti ~f:(fun ~key:_key ~data:_data -> true));
+      assert_equal 0 (bim#counti ~f:(fun ~key ~data:_data -> key > 3));
+      assert_equal 0 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 0 (bim#length);
 
       bim#add_multi ~key:1 ~data:"one";
@@ -396,15 +395,15 @@ module Bimap_tests = struct
       assert_equal false (bim#existsi ~f:(fun ~key ~data -> List.mem "one" data && key = 2));
       assert_equal true (bim#existsi_reverse ~f:(fun ~key ~data -> key = "tri" && data = [3]));
  
-      bim#change ~key:3 ~f:(fun x -> (Some ["iii";"tri";"triple";"tres";"three"]));
-      assert_equal (Some [3]) (bim#find_reverse "three");
-      assert_equal (Some [3]) (bim#find_reverse "tres");
-      assert_equal (Some [3]) (bim#find_reverse "tri");
-      assert_equal [3] (bim#find_exn_reverse "triple");
-      assert_equal [3] (bim#find_exn_reverse "iii");
-      assert_equal 5 (Core.List.length (bim#find_exn 3));
+      bim#change ~key:3 ~f:(fun _x -> (Some ["iii";"tri";"triple";"tres";"three"]));
+      assert_equal (Some [3]) (bim#find_reverse ~key:"three");
+      assert_equal (Some [3]) (bim#find_reverse ~key:"tres");
+      assert_equal (Some [3]) (bim#find_reverse ~key:"tri");
+      assert_equal [3] (bim#find_exn_reverse ~key:"triple");
+      assert_equal [3] (bim#find_exn_reverse ~key:"iii");
+      assert_equal 5 (Core.List.length (bim#find_exn ~key:3));
 
-      bim#change_reverse ~key:"two" ~f:(fun x -> (Some [4]));
+      bim#change_reverse ~key:"two" ~f:(fun _x -> (Some [4]));
       print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
       print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);
       assert_equal 1 (Core.List.length (bim#find_exn ~key:4));
@@ -414,7 +413,7 @@ module Bimap_tests = struct
       assert_equal [2] (bim#find_exn_reverse ~key:"dos");
       assert_equal ["dos"] (bim#find_exn ~key:2);
 
-      bim#change_reverse ~key:"two" ~f:(fun x -> (Some [2;4]));
+      bim#change_reverse ~key:"two" ~f:(fun _x -> (Some [2;4]));
       print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
       print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);
       assert_equal 1 (Core.List.length (bim#find_exn ~key:4));
@@ -428,10 +427,10 @@ module Bimap_tests = struct
       assert_equal true (List.mem "dos" (bim#find_exn ~key:2));
     end 
 
-  let test7 text_ctx =
+  let test7 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap_multi(Core.Int)(Core.String) in
+    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
     let bim = new BimapMulti.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
@@ -442,23 +441,23 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       bim#filter ~f:(fun v -> (Core.List.length v) < 3) ();
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 2 (bim#length);
 
       bim#filter_reverse ~f:(fun kl ->
           let max = Core.List.fold ~init:0 ~f:(fun accum v -> if v > accum then v else accum) kl in
           max < 2
         ) ();
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 1 (bim#length);
     end
 
-  let test8 text_ctx =
+  let test8 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap_multi(Core.Int)(Core.String) in
+    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
     let bim = new BimapMulti.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
@@ -469,8 +468,8 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       bim#filteri ~f:(fun ~key ~data -> key < 3 && (Core.List.length data) > 1) ();
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 2 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 2 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 1 (bim#length);
 
       bim#empty ();
@@ -484,8 +483,8 @@ module Bimap_tests = struct
       bim#filteri_reverse ~f:(fun ~key ~data ->
           let max = Core.List.fold ~init:0 ~f:(fun accum v -> if v > accum then v else accum) data in
           key.[0] = 't' && max < 3) ();
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 1 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 1 (bim#length);
 
       bim#empty ();
@@ -497,8 +496,8 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       bim#filter_keys ~f:(fun k -> k > 2) ();
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 1 (bim#length);
 
       bim#empty ();
@@ -510,8 +509,8 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       bim#filter_keys_reverse ~f:(fun k -> (String.length k) > 3) ();
-      assert_equal 1 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 1 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 1 (bim#length);
 
       bim#empty ();
@@ -523,8 +522,8 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       bim#filter_map ~f:(fun vlist -> if Core.List.length vlist < 3 then Some vlist else None) ();
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 2 (bim#length);
 
       bim#empty ();
@@ -544,8 +543,8 @@ module Bimap_tests = struct
           else
             None
         ) ();
-      assert_equal 2 (bim#count ~f:(fun x -> true));
-      assert_equal 3 (bim#count_reverse ~f:(fun x -> true));
+      assert_equal 2 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal 2 (bim#length);
       assert_equal 1 (Core.List.length (bim#find_exn ~key:2));
       assert_equal 2 (Core.List.length (bim#find_exn ~key:3));
@@ -559,10 +558,10 @@ module Bimap_tests = struct
     end 
 
 
-  let test9 text_ctx =
+  let test9 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap_multi(Core.Int)(Core.String) in
+    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
     let bim = new BimapMulti.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
@@ -573,19 +572,19 @@ module Bimap_tests = struct
       bim#add_multi ~key:3 ~data:"triple";
 
       let total_chars =
-	bim#fold ~init:0 ~f:(fun ~key ~data accum ->
+	bim#fold ~init:0 ~f:(fun ~key:_key ~data accum ->
 			     (Core.List.fold data ~init:accum
 					     ~f:(fun accum data -> (String.length data) + accum))) in
       assert_equal 24 total_chars;
       let keys_times_num_values =
-	bim#fold_reverse ~init:0 ~f:(fun ~key ~data accum ->
+	bim#fold_reverse ~init:0 ~f:(fun ~key:_key ~data accum ->
             let subtotal = Core.List.fold data ~init:0 ~f:(fun accum x -> accum + x) in 
 	    accum + subtotal) in
       assert_equal 14 keys_times_num_values;
       (*fold over keys in decreasing order instead of increasing--in this case reverse alphabetical order*)
       let folded_right =
 	bim#fold_right ~init:None
-		       ~f:(fun ~key ~data accum ->
+		       ~f:(fun ~key ~data:_data accum ->
 			   match accum with
 			   | None -> Some key
 			   | Some i -> Some (i - key)
@@ -593,7 +592,7 @@ module Bimap_tests = struct
       assert_equal (Some 0) folded_right;
       let folded_right_reverse = bim#fold_right_reverse
 				       ~init:[]
-				       ~f:(fun ~key ~data accum ->
+				       ~f:(fun ~key ~data:_data accum ->
 					   key::accum
 					  ) in
       (*print_n_flush_alist ~sep:"|" ~to_string_func:(fun x -> x) folded_right_reverse;*)
@@ -625,7 +624,7 @@ module Bimap_tests = struct
       assert_equal [1;2;3] (bim#keys);
       (*let () print_n_flush_alist ~sep:"," ~to_string_func:(fun x -> x) reverse_keys in *)
       assert_equal true (List.mem "dos" (bim#keys_reverse));
-      assert_equal 1 (Core.List.length (Core.List.filter (bim#keys_reverse) (fun x -> String.equal x "dos")));
+      assert_equal 1 (Core.List.length (Core.List.filter (bim#keys_reverse) ~f:(fun x -> String.equal x "dos")));
       assert_equal true (List.mem "one" (bim#keys_reverse));
       assert_equal true (List.mem "three" (bim#keys_reverse));
       assert_equal true (List.mem "tres" (bim#keys_reverse));
@@ -640,24 +639,24 @@ module Bimap_tests = struct
 			   | 2 -> ["2"]@l
 			   | 3 -> ["3"]@l
 			   | _ -> ["unexpectedlen"]@l);
-      assert_equal 2 (Core.List.length (bim#find_exn 1));
-      assert_equal true (List.mem "1" (bim#find_exn 1));
-      assert_equal 3 (Core.List.length (bim#find_exn 2));
-      assert_equal true (List.mem "2" (bim#find_exn 2));
-      assert_equal 4 (Core.List.length (bim#find_exn 3));
-      assert_equal true (List.mem "3" (bim#find_exn 3));
-      assert_equal [1] (bim#find_exn_reverse "1");
-      assert_equal [2] (bim#find_exn_reverse "2");
-      assert_equal [3] (bim#find_exn_reverse "3");
-      assert_equal [1] (bim#find_exn_reverse "one");
-      assert_equal [2] (bim#find_exn_reverse "two");
-      assert_equal [3] (bim#find_exn_reverse "three");
+      assert_equal 2 (Core.List.length (bim#find_exn ~key:1));
+      assert_equal true (List.mem "1" (bim#find_exn ~key:1));
+      assert_equal 3 (Core.List.length (bim#find_exn ~key:2));
+      assert_equal true (List.mem "2" (bim#find_exn ~key:2));
+      assert_equal 4 (Core.List.length (bim#find_exn ~key:3));
+      assert_equal true (List.mem "3" (bim#find_exn ~key:3));
+      assert_equal [1] (bim#find_exn_reverse ~key:"1");
+      assert_equal [2] (bim#find_exn_reverse ~key:"2");
+      assert_equal [3] (bim#find_exn_reverse ~key:"3");
+      assert_equal [1] (bim#find_exn_reverse ~key:"one");
+      assert_equal [2] (bim#find_exn_reverse ~key:"two");
+      assert_equal [3] (bim#find_exn_reverse ~key:"three");
     end
 
-  let test10 text_ctx =
+  let test10 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap_multi(Core.Int)(Core.String) in
+    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
     let bim = new BimapMulti.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
@@ -676,15 +675,15 @@ module Bimap_tests = struct
       
       bim#map_reverse ~f:(fun x ->
           Core.List.map x ~f:(fun v -> v * 10));
-      assert_equal [10] (bim#find_exn_reverse "one");
-      assert_equal [20] (bim#find_exn_reverse "two");
-      assert_equal [30] (bim#find_exn_reverse "three");
-      assert_equal None (bim#find 1);
-      assert_equal None (bim#find 2);
-      assert_equal None (bim#find 3);
-      assert_equal true (List.mem "one" (bim#find_exn 10));
-      assert_equal true (List.mem "two" (bim#find_exn 20));
-      assert_equal true (List.mem "three" (bim#find_exn 30));
+      assert_equal [10] (bim#find_exn_reverse ~key:"one");
+      assert_equal [20] (bim#find_exn_reverse ~key:"two");
+      assert_equal [30] (bim#find_exn_reverse ~key:"three");
+      assert_equal None (bim#find ~key:1);
+      assert_equal None (bim#find ~key:2);
+      assert_equal None (bim#find ~key:3);
+      assert_equal true (List.mem "one" (bim#find_exn ~key:10));
+      assert_equal true (List.mem "two" (bim#find_exn ~key:20));
+      assert_equal true (List.mem "three" (bim#find_exn ~key:30));
 
       assert_equal (Some (10, ["one"])) (bim#min_elt);
       assert_equal (10, ["one"]) (bim#min_elt_exn);
@@ -707,21 +706,21 @@ module Bimap_tests = struct
       assert_equal (Some ("two",[20])) (bim#nth_reverse 5);
 
       bim#remove ~key:20;
-      assert_equal None (bim#find 20);
-      assert_equal None (bim#find_reverse "two");
+      assert_equal None (bim#find ~key:20);
+      assert_equal None (bim#find_reverse ~key:"two");
 
       bim#remove_reverse ~key:"triple";
-      assert_equal false (List.mem "triple" (bim#find_exn 30));
-      assert_equal true (List.mem "three" (bim#find_exn 30));
-      assert_equal true (List.mem "tres" (bim#find_exn 30));
+      assert_equal false (List.mem "triple" (bim#find_exn ~key:30));
+      assert_equal true (List.mem "three" (bim#find_exn ~key:30));
+      assert_equal true (List.mem "tres" (bim#find_exn ~key:30));
 
       bim#remove_multi ~key:30;
-      assert_equal false (List.mem "triple" (bim#find_exn 30));
-      assert_equal false (List.mem "tres" (bim#find_exn 30));
-      assert_equal true (List.mem "three" (bim#find_exn 30));
-      assert_equal 1 (Core.List.length (bim#find_exn 30));
-      assert_equal None (bim#find_reverse "tres");
-      assert_equal (Some [30]) (bim#find_reverse "three");
+      assert_equal false (List.mem "triple" (bim#find_exn ~key:30));
+      assert_equal false (List.mem "tres" (bim#find_exn ~key:30));
+      assert_equal true (List.mem "three" (bim#find_exn ~key:30));
+      assert_equal 1 (Core.List.length (bim#find_exn ~key:30));
+      assert_equal None (bim#find_reverse ~key:"tres");
+      assert_equal (Some [30]) (bim#find_reverse ~key:"three");
 
       bim#update ~key:30 ~f:(fun l ->
 			match l with
@@ -741,12 +740,12 @@ module Bimap_tests = struct
 			   elems4
 			| None -> ["three";"tres";"triple"]
 		       );
-      assert_equal true (List.mem "triple" (bim#find_exn 30));
-      assert_equal true (List.mem "tres" (bim#find_exn 30));
-      assert_equal true (List.mem "three" (bim#find_exn 30));
-      assert_equal (Some [30]) (bim#find_reverse "tres");
-      assert_equal (Some [30]) (bim#find_reverse "triple");
-      assert_equal (Some [30]) (bim#find_reverse "three");
+      assert_equal true (List.mem "triple" (bim#find_exn ~key:30));
+      assert_equal true (List.mem "tres" (bim#find_exn ~key:30));
+      assert_equal true (List.mem "three" (bim#find_exn ~key:30));
+      assert_equal (Some [30]) (bim#find_reverse ~key:"tres");
+      assert_equal (Some [30]) (bim#find_reverse ~key:"triple");
+      assert_equal (Some [30]) (bim#find_reverse ~key:"three");
     end 
 
   let suite =
@@ -754,6 +753,7 @@ module Bimap_tests = struct
       ["test-1">:: test1;
        "test-2">:: test2;
        "test-3">:: test3;
+       "test-3b">:: test3b;
        "test-4">:: test4;
        "test-5">:: test5;
        "test-6">:: test6;

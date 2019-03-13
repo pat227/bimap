@@ -1,7 +1,8 @@
 (alias
-   (name bimap_tests)
+   (name runtest)
    (action (run ./bimap_tests.exe))
 )
-;(tests
-;  (names bimap_tests)
-;)
+(executable
+  (name bimap_tests)
+  (libraries core oUnit bimap)
+)
