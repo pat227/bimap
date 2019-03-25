@@ -31,35 +31,28 @@ sig
   val filter_map_reverse : t -> f:(ModuleA.Map.Key.t list -> ModuleA.Map.Key.t list option) -> t
   val filteri : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> bool) -> t
   val filteri_reverse : t -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> bool) -> t
-  val find : t -> key:ModuleA.Map.Key.t -> 'b Core.List.t option
-  val find_exn : t -> key:ModuleA.Map.Key.t -> 'b Core.List.t
-  (*          method find_exn_reverse : key:ModuleB.Map.Key.t -> 'a Core.List.t
-            method find_reverse :
-                     key:ModuleB.Map.Key.t -> 'a Core.List.t option
-            method fold :
-                     init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
-            method fold_reverse :
-                     init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e
-            method fold_right :
-                     init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
-            method fold_right_reverse :
-                     init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e
-            method for_all : f:('b Core.List.t -> bool) -> bool
-            method for_all_reverse : f:('a Core.List.t -> bool) -> bool
-            method is_empty : bool
-            method iter : f:('b Core.List.t -> unit) -> unit
-            method iter_keys : f:(ModuleA.Map.Key.t -> unit) -> unit
-            method iter_keys_reverse : f:(ModuleB.Map.Key.t -> unit) -> unit
-            method iter_reverse : f:('a Core.List.t -> unit) -> unit
-            method iteri :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> unit) -> unit
-            method iteri_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> unit) -> unit
-            method keys : ModuleA.Map.Key.t list
-            method keys_reverse : ModuleB.Map.Key.t list
-            method length : int
-            method map : f:('b Core.List.t -> 'b Core.List.t) -> unit
-            method map_reverse : f:('a Core.List.t -> 'a Core.List.t) -> unit
+  val find : t -> key:ModuleA.Map.Key.t -> ModuleB.Map.Key.t list option
+  val find_exn : t -> key:ModuleA.Map.Key.t -> ModuleB.Map.Key.t list
+  val find_exn_reverse : t -> key:ModuleB.Map.Key.t -> ModuleA.Map.Key.t list
+  val find_reverse : t -> key:ModuleB.Map.Key.t -> ModuleA.Map.Key.t list option
+  val fold : t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> 'e -> 'e) -> 'e
+  val fold_reverse : t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> 'e -> 'e) -> 'e
+  val fold_right : t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> 'e -> 'e) -> 'e
+  val fold_right_reverse : t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> 'e -> 'e) -> 'e
+  val for_all : t -> f:(ModuleB.Map.Key.t Core.List.t -> bool) -> bool
+  val for_all_reverse : t -> f:(ModuleA.Map.Key.t Core.List.t -> bool) -> bool
+  val is_empty : t -> bool
+  val iter : t -> f:(ModuleB.Map.Key.t list -> unit) -> unit
+  val iter_keys : t -> f:(ModuleA.Map.Key.t -> unit) -> unit
+  val iter_keys_reverse : t -> f:(ModuleB.Map.Key.t -> unit) -> unit
+  val iter_reverse : t -> f:(ModuleA.Map.Key.t list -> unit) -> unit
+  val iteri : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> unit) -> unit
+  val iteri_reverse : t -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> unit) -> unit
+  val keys : t -> ModuleA.Map.Key.t list
+  val keys_reverse : t-> ModuleB.Map.Key.t list
+  val length : t -> int
+  val map : t -> f:(ModuleB.Map.Key.t list -> ModuleB.Map.Key.t list) -> t
+(*            method map_reverse : f:('a Core.List.t -> 'a Core.List.t) -> unit
             method mapi :
                      f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> 'b Core.List.t) ->
                      unit

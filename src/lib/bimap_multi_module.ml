@@ -181,54 +181,41 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
       let new_reverse_map = ModuleB.Map.filteri t.revmap ~f in
       let newfwdmap = create_forward_map_from_reverse_map ~reverse_map:new_reverse_map in 
       { fwdmap = newfwdmap; revmap = new_reverse_map }
-
-(*    method find ~key =
-      ModuleA.Map.find !forward_map key
-    method find_reverse ~key =
-      ModuleB.Map.find !reverse_map key 
-    method find_exn ~(key:ModuleA.Map.Key.t) =
-      ModuleA.Map.find_exn !forward_map key
-    method find_exn_reverse ~key =
-      Core.Map.find_exn !reverse_map key
-
-    method fold : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e = 
-      (fun ~init ~f -> ModuleA.Map.fold !forward_map ~init ~f)
-    method fold_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleB.Map.fold !reverse_map ~init ~f)
-(*    method fold_range_inclusive ~min ~max ~init ~f =
+    let find t ~key =
+      ModuleA.Map.find t.fwdmap key
+    let find_reverse t ~key =
+      ModuleB.Map.find t.revmap key 
+    let find_exn t ~key =
+      ModuleA.Map.find_exn t.fwdmap key
+    let find_exn_reverse t ~key =
+      ModuleB.Map.find_exn t.revmap key
+    let fold : 'e. t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> 'e -> 'e) -> 'e = 
+      (fun t ~init ~f -> ModuleA.Map.fold t.fwdmap ~init ~f)
+    let fold_reverse : 'e. t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> 'e -> 'e) -> 'e =
+      (fun t ~init ~f -> ModuleB.Map.fold t.revmap ~init ~f)
+(*  method fold_range_inclusive ~min ~max ~init ~f =
       Core.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
-    method fold_right : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleA.Map.fold_right !forward_map ~init ~f)
-    method fold_right_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleB.Map.fold_right !reverse_map ~init ~f)
-    method for_all ~f =
-      ModuleA.Map.for_all !forward_map ~f
-    method for_all_reverse ~f =
-      ModuleB.Map.for_all !reverse_map ~f
-    method is_empty =
-      ModuleA.Map.is_empty !forward_map
-    method iter_keys ~f =
-      ModuleA.Map.iter_keys !forward_map ~f
-    method iter_keys_reverse ~f =
-      ModuleB.Map.iter_keys !reverse_map ~f
-    method iter ~f =
-      ModuleA.Map.iter !forward_map ~f
-    method iter_reverse ~f =
-      ModuleB.Map.iter !reverse_map ~f
-    method iteri ~f =
-      ModuleA.Map.iteri !forward_map ~f
-    method iteri_reverse ~f =
-      ModuleB.Map.iteri !reverse_map ~f
-    method keys =
-      ModuleA.Map.keys !forward_map
-    method keys_reverse =
-      ModuleB.Map.keys !reverse_map
-    method length =
-      ModuleA.Map.length !forward_map
-    method map ~f =
-      let () = forward_map := (ModuleA.Map.map !forward_map ~f) in
-      self#create_reverse_map_from_forward_map ()
-    method map_reverse ~f =
+    let fold_right : 'e. t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> 'e -> 'e) -> 'e =
+      (fun t ~init ~f -> ModuleA.Map.fold_right t.fwdmap ~init ~f)
+    let fold_right_reverse : 'e. t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> 'e -> 'e) -> 'e =
+      (fun t ~init ~f -> ModuleB.Map.fold_right t.revmap ~init ~f)
+    let for_all t ~f = ModuleA.Map.for_all t.fwdmap ~f
+    let for_all_reverse t ~f = ModuleB.Map.for_all t.revmap ~f
+    let is_empty t = ModuleA.Map.is_empty t.fwdmap
+    let iter t ~f = ModuleA.Map.iter t.fwdmap ~f
+    let iter_keys t ~f = ModuleA.Map.iter_keys t.fwdmap ~f
+    let iter_keys_reverse t ~f = ModuleB.Map.iter_keys t.revmap ~f
+    let iter_reverse t ~f = ModuleB.Map.iter t.revmap ~f
+    let iteri t ~f = ModuleA.Map.iteri t.fwdmap ~f
+    let iteri_reverse t ~f = ModuleB.Map.iteri t.revmap ~f
+    let keys t = ModuleA.Map.keys t.fwdmap
+    let keys_reverse t = ModuleB.Map.keys t.revmap
+    let length t = ModuleA.Map.length t.fwdmap
+    let map t ~f =
+      let newfwdmap = ModuleA.Map.map t.fwdmap ~f in
+      let newrevmap = create_reverse_map_from_forward_map ~forward_map:newfwdmap in
+      { fwdmap=newfwdmap; revmap = newrevmap }
+(*    method map_reverse ~f =
       let () = reverse_map := (ModuleB.Map.map !reverse_map ~f) in
       self#create_forward_map_from_reverse_map () 
     method mapi ~f =
