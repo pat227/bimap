@@ -52,47 +52,32 @@ sig
   val keys_reverse : t-> ModuleB.Map.Key.t list
   val length : t -> int
   val map : t -> f:(ModuleB.Map.Key.t list -> ModuleB.Map.Key.t list) -> t
-(*            method map_reverse : f:('a Core.List.t -> 'a Core.List.t) -> unit
-            method mapi :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> 'b Core.List.t) ->
-                     unit
-            method mapi_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> 'a Core.List.t) ->
-                     unit
-            method max_elt :
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method max_elt_exn : ModuleA.Map.Key.t * 'b Core.List.t
-            method max_elt_exn_reverse : ModuleB.Map.Key.t * 'a Core.List.t
-            method max_elt_reverse :
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method mem : ModuleA.Map.Key.t -> Core_kernel__.Import.bool
-            method mem_reverse : ModuleB.Map.Key.t -> Core_kernel__.Import.bool
-            method min_elt :
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method min_elt_exn : ModuleA.Map.Key.t * 'b Core.List.t
-            method min_elt_exn_reverse : ModuleB.Map.Key.t * 'a Core.List.t
-            method min_elt_reverse :
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method nth :
-                     Core_kernel__.Import.int ->
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method nth_reverse :
-                     Core_kernel__.Import.int ->
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method remove : key:ModuleA.Map.Key.t -> unit
-            (*        method private remove_fwd_key_from_reverse_map :
-            fwd_values_list:'b Core.List.t -> key:'a -> unit *)
-            method remove_multi : key:'a -> unit
-            (*        method private remove_rev_key_from_forward_map :
-            rev_values_list:'a Core.List.t -> key:'b -> unit  *)
-            method remove_reverse : key:'b -> unit
-            (*        method private remove_reverse_keys : 'b Core.List.t -> unit *)
-            method remove_reverse_multi : key:'b -> unit
-            method to_alist :
-                     ?key_order:[ `Decreasing | `Increasing ] ->
-                     unit ->
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.list
-            method update :
-                     key:'a -> f:('b Core.List.t option -> 'b Core.List.t) -> unit
- *)
+  val map_reverse : t -> f:(ModuleA.Map.Key.t list -> ModuleA.Map.Key.t list) -> t
+  val mapi : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> ModuleB.Map.Key.t list) -> t
+  val mapi_reverse : t -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> ModuleA.Map.Key.t list) -> t
+  val max_elt : t -> (ModuleA.Map.Key.t * ModuleB.Map.Key.t list) option
+  val max_elt_exn : t -> ModuleA.Map.Key.t * ModuleB.Map.Key.t list
+  val max_elt_exn_reverse : t -> ModuleB.Map.Key.t * ModuleA.Map.Key.t list
+  val max_elt_reverse : t -> (ModuleB.Map.Key.t * ModuleA.Map.Key.t list) option
+                                                                          
+  val mem : t -> key:ModuleA.Map.Key.t -> bool
+  val mem_reverse : t -> key:ModuleB.Map.Key.t -> bool
+
+  val min_elt : t -> (ModuleA.Map.Key.t * ModuleB.Map.Key.t list) option
+  val min_elt_exn : t -> ModuleA.Map.Key.t * ModuleB.Map.Key.t list
+  val min_elt_exn_reverse : t -> ModuleB.Map.Key.t * ModuleA.Map.Key.t list
+  val min_elt_reverse : t -> (ModuleB.Map.Key.t * ModuleA.Map.Key.t list) option
+  val nth : t -> int -> (ModuleA.Map.Key.t * ModuleB.Map.Key.t list) option
+  val nth_reverse : t -> int -> (ModuleB.Map.Key.t * ModuleA.Map.Key.t list) option
+  val remove : t -> key:ModuleA.Map.Key.t -> t
+  val remove_reverse : t -> key:ModuleB.Map.Key.t -> t
+  val remove_multi : t -> key:ModuleA.Map.Key.t-> t
+  val remove_reverse_multi : t -> key:ModuleB.Map.Key.t -> t
+  val to_alist : t -> ?key_order:[ `Decreasing | `Increasing ] -> unit ->
+                 (ModuleA.Map.Key.t * ModuleB.Map.Key.t list) list
+  val update : t -> key:ModuleA.Map.Key.t -> f:(ModuleB.Map.Key.t list option -> ModuleB.Map.Key.t list) -> t
+(*  val remove_fwd_key_from_reverse_map : fwd_values_list:ModuleB.Map.Key.t list -> key:ModuleA.Map.Key.t -> t*)
+(*        method private remove_rev_key_from_forward_map :
+          rev_values_list:'a Core.List.t -> key:'b -> unit  *)
+(*        method private remove_reverse_keys : 'b Core.List.t -> unit *)
 end

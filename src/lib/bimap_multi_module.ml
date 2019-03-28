@@ -214,96 +214,113 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
     let map t ~f =
       let newfwdmap = ModuleA.Map.map t.fwdmap ~f in
       let newrevmap = create_reverse_map_from_forward_map ~forward_map:newfwdmap in
-      { fwdmap=newfwdmap; revmap = newrevmap }
-(*    method map_reverse ~f =
-      let () = reverse_map := (ModuleB.Map.map !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map () 
-    method mapi ~f =
-      let () = forward_map := (Core.Map.mapi !forward_map ~f) in
-      self#create_reverse_map_from_forward_map ()
-    method mapi_reverse ~f =
-      let () = reverse_map := (Core.Map.mapi !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map ()     
-    method mem key =
-      Core.Map.mem !forward_map key
-    method mem_reverse key =
-      Core.Map.mem !reverse_map key
-    method min_elt =
-      Core.Map.min_elt !forward_map
-    method min_elt_exn =
-      Core.Map.min_elt_exn !forward_map
-    method min_elt_reverse =
-      Core.Map.min_elt !reverse_map
-    method min_elt_exn_reverse =
-      Core.Map.min_elt_exn !reverse_map
-    method max_elt =
-      Core.Map.max_elt !forward_map
-    method max_elt_exn =
-      Core.Map.max_elt_exn !forward_map
-    method max_elt_reverse =
-      Core.Map.max_elt !reverse_map
-    method max_elt_exn_reverse =
-      Core.Map.max_elt_exn !reverse_map
-    method nth int =
-      Core.Map.nth !forward_map int
-    method nth_reverse int =
-      Core.Map.nth !reverse_map int
-    method remove ~key =
-      let reverse_keys = Core.Map.find_exn !forward_map key in 
-      let () = forward_map := (Core.Map.remove !forward_map key) in
-      self#remove_reverse_keys reverse_keys
-    method private remove_reverse_keys klist = 
-      let rec remove_keys k =
-	match k with
-	| h :: t ->
-	   let () = reverse_map := (Core.Map.remove !reverse_map h) in
-	   remove_keys t
-	| [] -> () in
-      remove_keys klist
-    method remove_reverse ~key =
-      let fwd_keys = Core.Map.find_exn !reverse_map key in 
-      let () = reverse_map := (Core.Map.remove !reverse_map key) in
-      Core.List.iter fwd_keys
-        ~f:(fun k ->
-          let fwd_values = self#find_exn ~key:k in
-          let new_fwd_values = (Core.List.filter fwd_values ~f:(fun x -> not (x = key))) in
-          let () = forward_map := (Core.Map.remove !forward_map k) in
-          forward_map := (Core.Map.set !forward_map  ~key:k ~data:new_fwd_values)
-        )
-    method remove_multi ~key =
+      { fwdmap = newfwdmap; revmap = newrevmap }
+    let map_reverse t ~f =
+      let newreversemap = ModuleB.Map.map t.revmap ~f in
+      let newfwdmap = create_forward_map_from_reverse_map ~reverse_map:newreversemap in
+      { fwdmap = newfwdmap ; revmap = newreversemap }
+    let mapi t ~f =
+      let newforwardmap = Core.Map.mapi t.fwdmap ~f in
+      let newreversemap = create_reverse_map_from_forward_map ~forward_map:newforwardmap in
+      { fwdmap = newforwardmap ; revmap = newreversemap }
+    let mapi_reverse t ~f =
+      let newreverse_map = Core.Map.mapi t.revmap ~f in
+      let newfwdmap = create_forward_map_from_reverse_map ~reverse_map:newreverse_map in
+      { fwdmap = newfwdmap; revmap=newreverse_map }
+    let max_elt t = ModuleA.Map.max_elt t.fwdmap
+    let max_elt_exn t = ModuleA.Map.max_elt_exn t.fwdmap
+    let max_elt_exn_reverse t = ModuleB.Map.max_elt_exn t.revmap
+    let max_elt_reverse t = ModuleB.Map.max_elt t.revmap
+
+    let mem t ~key = ModuleA.Map.mem t.fwdmap key
+    let mem_reverse t ~key = ModuleB.Map.mem t.revmap key
+                                             
+    let min_elt t = ModuleA.Map.min_elt t.fwdmap
+    let min_elt_exn t = ModuleA.Map.min_elt_exn t.fwdmap
+    let min_elt_exn_reverse t = ModuleB.Map.min_elt_exn t.revmap
+    let min_elt_reverse t = ModuleB.Map.min_elt t.revmap
+    let nth t n = ModuleA.Map.nth t.fwdmap n
+    let nth_reverse t n = Core.Map.nth t.revmap n
+    let rec remove_reverse_keys klist revmap = 
+      match klist with
+      | [] -> revmap
+      | h :: tl ->
+	 let new_reverse_map = ModuleB.Map.remove revmap h in
+         remove_reverse_keys tl new_reverse_map;;
+    let rec remove_forward_keys klist fwdmap = 
+      match klist with
+      | [] -> fwdmap
+      | h :: tl ->
+	 let new_fwd_map = ModuleA.Map.remove fwdmap h in
+         remove_forward_keys tl new_fwd_map;;
+    let remove t ~key =
+      let reverse_keys = ModuleA.Map.find_exn t.fwdmap key in 
+      let new_forward_map = (ModuleA.Map.remove t.fwdmap key) in
+      let rec helper revmap ks = 
+        match ks with
+        | [] -> revmap
+        | h :: t -> 
+           let rev_values = ModuleB.Map.find_exn revmap h in
+           let new_rev_values = (Core.List.filter rev_values ~f:(fun x -> not (x = key))) in
+           let new_revmap = (ModuleB.Map.remove revmap h) in
+           let newrevmap = ModuleB.Map.set new_revmap ~key:h ~data:new_rev_values in
+           helper newrevmap t in
+      let newrevmap = helper t.revmap reverse_keys in
+      { fwdmap=new_forward_map; revmap=newrevmap }
+    let remove_reverse t ~key =
+      let fwd_keys = ModuleB.Map.find_exn t.revmap key in 
+      let new_reverse_map = ModuleB.Map.remove t.revmap key in
+      let rec helper fwdmap ks = 
+        match ks with
+        | [] -> fwdmap
+        | h :: tl -> 
+           let fwd_values = ModuleA.Map.find_exn fwdmap h in
+           let new_fwd_values = (Core.List.filter fwd_values ~f:(fun x -> not (x = key))) in
+           let new_forward_map = ModuleA.Map.remove fwdmap h in
+           let newfwdmap = ModuleA.Map.set new_forward_map ~key:h ~data:new_fwd_values in
+           helper newfwdmap tl in
+      let newfwdmap = helper t.fwdmap fwd_keys in
+      { fwdmap=newfwdmap; revmap=new_reverse_map }
+    let remove_multi t ~key =
       try
-	let values = ModuleA.Map.find_exn !forward_map key in
-	let head_element = Core.List.nth_exn values 0 in 
-	let () = forward_map := (ModuleA.Map.remove_multi !forward_map key) in
+	let values = ModuleA.Map.find_exn t.fwdmap key in
+	let head_element = Core.List.hd_exn values in 
+	let new_forward_map = ModuleA.Map.remove_multi t.fwdmap key in
 	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
-        self#remove_fwd_key_from_reverse_map ~fwd_values_list:[head_element] ~key
-        (*--TODO--improve exception handling*)
+        let tempt = { fwdmap=new_forward_map ; revmap=t.revmap } in 
+        remove_fwd_key_from_reverse_map tempt ~fwd_values_list:[head_element] ~key
+                                        (*--TODO--improve exception handling*)
       with _e -> raise (Failure "bimap_multi::remove_multi() failed")
-    method remove_reverse_multi ~key =
+    let remove_reverse_multi t ~key =
       try
-	let values = ModuleB.Map.find_exn !reverse_map key in
-	let head_element = Core.List.nth_exn values 0 in 
-	let () = reverse_map := (ModuleB.Map.remove_multi !reverse_map key) in
+	let values = ModuleB.Map.find_exn t.revmap key in
+	let head_element = Core.List.hd_exn values in 
+	let new_reverse_map = ModuleB.Map.remove_multi t.revmap key in
+        let tempt = { fwdmap=t.fwdmap; revmap=new_reverse_map } in 
 	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
-        self#remove_rev_key_from_forward_map ~rev_values_list:[head_element] ~key
-        (*--TODO--improve exception handling*)
+        remove_rev_key_from_forward_map tempt ~rev_values_list:[head_element] ~key
+                                        (*--TODO--improve exception handling*)
       with _e -> raise (Failure "bimap_multi::remove_reverse_multi() failed")
-    method to_alist ?key_order () =
-      match Core.Option.is_some key_order with
-      | false -> Core.Map.to_alist !forward_map
-      | true -> Core.Map.to_alist ~key_order:(Core.Option.value_exn key_order) !forward_map
+    let to_alist t ?key_order () =
+      match key_order with
+      | None -> Core.Map.to_alist t.fwdmap
+      | Some order -> ModuleA.Map.to_alist ~key_order:order t.fwdmap
     (*update and change are identical except that the function f must be of a different type; see Core.Map documentation.*)
-    method update ~key ~f =
-      let oldvalues = ModuleA.Map.find_exn !forward_map key in
-      let () = forward_map := (ModuleA.Map.update !forward_map key ~f) in
-      let newvalues = ModuleA.Map.find_exn !forward_map key in
+    let update t ~key ~f =
+      let oldvalues = ModuleA.Map.find_exn t.fwdmap key in
+      let new_forward_map = ModuleA.Map.update t.fwdmap key ~f in
+      let newvalues = ModuleA.Map.find_exn new_forward_map key in
+      let tempt = { fwdmap=new_forward_map; revmap=t.revmap } in 
       (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-      let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
-      Core.List.iter newvalues
-        ~f:(fun v -> 
-          reverse_map := ModuleB.Map.add_multi !reverse_map ~key:v ~data:key
-        )
- *)
+      let newt = remove_fwd_key_from_reverse_map tempt ~fwd_values_list:oldvalues ~key in
+      let rec helper t l =
+        match l with
+        | [] -> t
+        | h :: tl ->
+           let newrevmap = ModuleB.Map.add_multi t.revmap ~key:h ~data:key in
+           let newt = { fwdmap=t.fwdmap; revmap=newrevmap } in
+           helper newt tl in 
+      helper newt newvalues
 end
 
 (*
