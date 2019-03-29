@@ -1,3 +1,8 @@
+(*===Tests 1 - 5 target the bimap implemented as a class with single values per key.
+     Tests 6 - 10 target the bimap implemented as a class with multiple values per key.
+     Tests 11 -15 target the bimap implemented as a module with single values per key.
+     Tests 16  20 target the bimap implemented as a module with multiple values per key.
+*)
 module Bimap=Bimap
 open OUnit2
 module Bimap_tests = struct
@@ -404,8 +409,8 @@ module Bimap_tests = struct
       assert_equal 5 (Core.List.length (bim#find_exn ~key:3));
 
       bim#change_reverse ~key:"two" ~f:(fun _x -> (Some [4]));
-      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
-      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);
+      (*print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
+      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);*)
       assert_equal 1 (Core.List.length (bim#find_exn ~key:4));
       assert_equal true (List.mem "two" (bim#find_exn ~key:4)); 
       assert_equal false (List.mem "dos" (bim#find_exn ~key:4));
@@ -414,8 +419,8 @@ module Bimap_tests = struct
       assert_equal ["dos"] (bim#find_exn ~key:2);
 
       bim#change_reverse ~key:"two" ~f:(fun _x -> (Some [2;4]));
-      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
-      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);
+      (*print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> x) (bim#data);
+      print_n_flush_alistlist ~sep:" | " ~to_string_func:(fun x -> Core.Int.to_string x) (bim#data_reverse);*)
       assert_equal 1 (Core.List.length (bim#find_exn ~key:4));
       assert_equal true (List.mem "two" (bim#find_exn ~key:4));
       assert_equal true (List.mem "two" (bim#find_exn ~key:2));
@@ -748,6 +753,109 @@ module Bimap_tests = struct
       assert_equal (Some [30]) (bim#find_reverse ~key:"three");
     end 
 
+  let test11 _text_ctx =
+    let module Bimap_single_module = Bimap.Bimap_single_module(Core.Int)(Core.String) in
+    let t = { Bimap_single_module.fwdmap=Core.Int.Map.empty; revmap=Core.String.Map.empty } in 
+    let t1 = Bimap_single_module.set t ~key:1 ~data:"one" in 
+    let t2 = Bimap_single_module.set t1 ~key:2 ~data:"two" in 
+    let () = assert_equal 2 (Bimap_single_module.length t2) in 
+    let () = assert_equal false (Bimap_single_module.is_empty t2) in 
+    let () = assert_equal "one" (Bimap_single_module.find_exn t2 ~key:1) in 
+    let () = assert_equal "two" (Bimap_single_module.find_exn t2 ~key:2) in
+    let () = assert_equal 1 (Bimap_single_module.find_exn_reverse t2 ~key:"one") in
+    let () = assert_equal 2 (Bimap_single_module.find_exn_reverse t2 ~key:"two") in 
+    let t3 = Bimap_single_module.set_reverse t2 ~key:"three" ~data:3 in 
+    let () = assert_equal "three" (Bimap_single_module.find_exn t3 ~key:3) in
+    let () = assert_equal 3 (Bimap_single_module.find_exn_reverse t3 ~key:"three") in
+    let () = assert_equal [(1,"one");(2,"two");(3,"three")] (Bimap_single_module.to_alist t3) in 
+    let () = assert_equal [(3,"three");(2,"two");(1,"one")] (Bimap_single_module.to_alist t3 ~key_order:`Decreasing) in
+    let t4 = Bimap_single_module.change t3 ~key:3 ~f:(fun _x -> (Some "tri")) in
+    let () = assert_equal "tri" (Bimap_single_module.find_exn t4 ~key:3) in 
+    let () = assert_equal 3 (Bimap_single_module.find_exn_reverse t4 ~key:"tri") in
+    let t5 = Bimap_single_module.change_reverse t4 ~key:"tri" ~f:(fun _x -> (Some 4)) in
+    let () = assert_equal 4 (Bimap_single_module.find_exn_reverse t5 ~key:"tri") in 
+    let () = assert_equal "tri" (Bimap_single_module.find_exn t5 ~key:4) in
+    let t6 = Bimap_single_module.remove t5 ~key:1 in
+    let () = assert_equal 2 (Bimap_single_module.length t6) in 
+    let t7 = Bimap_single_module.remove_reverse t6 ~key:"two" in 
+    let () = assert_equal 1 (Bimap_single_module.length t7) in
+    let t8 = Bimap_single_module.remove t7 ~key:4 in
+    assert_equal 0 (Bimap_single_module.length t8);;
+
+  let test12 _text_ctx =
+    let module Bimap_single_module = Bimap.Bimap_single_module(Core.Int)(Core.String) in
+    let t = { Bimap_single_module.fwdmap=Core.Int.Map.empty; revmap=Core.String.Map.empty } in 
+    let t2 = Bimap_single_module.set t ~key:1 ~data:"one" in 
+    let t3 = Bimap_single_module.set t2 ~key:2 ~data:"two" in
+    let () = assert_equal 2 (Bimap_single_module.length t3) in
+    let () = assert_equal false (Bimap_single_module.is_empty t3) in
+    let () = assert_equal (Some "one") (Bimap_single_module.find t3 ~key:1) in
+    let () = assert_equal (Some "two") (Bimap_single_module.find t3 ~key:2) in
+    let () = assert_equal (Some 1) (Bimap_single_module.find_reverse t3 ~key:"one") in
+    let () = assert_equal (Some 2) (Bimap_single_module.find_reverse t3 ~key:"two") in
+    let () = assert_equal None (Bimap_single_module.find t3 ~key:3) in
+    let () = assert_equal None (Bimap_single_module.find_reverse t3 ~key:"three") in
+    let t4 = Bimap_single_module.set_reverse t3 ~key:"three" ~data:3 in
+    let () = assert_equal (Some "three") (Bimap_single_module.find t4 ~key:3) in
+    let () = assert_equal (Some 3) (Bimap_single_module.find_reverse t4 ~key:"three") in 
+    let t5 = Bimap_single_module.change t4 ~key:3 ~f:(fun _x -> (Some "tri")) in 
+    let () = assert_equal 3 (Bimap_single_module.find_exn_reverse t5 ~key:"tri") in
+    let t6 = Bimap_single_module.change_reverse t5 ~key:"tri" ~f:(fun _x -> (Some 4)) in 
+    let () = assert_equal (Some 4) (Bimap_single_module.find_reverse t6 ~key:"tri") in 
+    let () = assert_equal (Some "tri") (Bimap_single_module.find t6 ~key:4) in 
+    let () = assert_equal true (Bimap_single_module.mem t6 1) in 
+    let () = assert_equal true (Bimap_single_module.mem t6 2) in 
+    let () = assert_equal true (Bimap_single_module.mem_reverse t6 "tri") in
+    let () = assert_equal (Some (1,"one")) (Bimap_single_module.min_elt t6) in
+    let () = assert_equal (Some (4,"tri")) (Bimap_single_module.max_elt t6) in
+    let () = assert_equal (1,"one") (Bimap_single_module.min_elt_exn t6) in
+    let () = assert_equal (4,"tri") (Bimap_single_module.max_elt_exn t6) in
+    let () = assert_equal (Some ("one",1)) (Bimap_single_module.min_elt_reverse t6) in
+    let () = assert_equal (Some ("two",2)) (Bimap_single_module.max_elt_reverse t6) in
+    let () = assert_equal ("one",1) (Bimap_single_module.min_elt_exn_reverse t6) in
+    let () = assert_equal ("two",2) (Bimap_single_module.max_elt_exn_reverse t6) in
+    let () = assert_equal (Some (2,"two")) (Bimap_single_module.nth t6 1) in
+    let () = assert_equal (Some (4,"tri")) (Bimap_single_module.nth t6 2) in
+    let () = assert_equal (Some ("one",1)) (Bimap_single_module.nth_reverse t6 0) in
+    let () = assert_equal (Some ("tri",4)) (Bimap_single_module.nth_reverse t6 1) in 
+    let () = assert_equal (Some ("two",2)) (Bimap_single_module.nth_reverse t6 2) in
+    assert_equal None (Bimap_single_module.nth_reverse t6 3);;
+
+
+  let test13 _text_ctx =
+    let module Bimap_single_module = Bimap.Bimap_single_module(Core.Int)(Core.String) in
+    let t = { Bimap_single_module.fwdmap=Core.Int.Map.empty; revmap=Core.String.Map.empty } in 
+    let t2 = Bimap_single_module.set t ~key:1 ~data:"single" in 
+    let t3 = Bimap_single_module.set t2 ~key:2 ~data:"double" in 
+    let t4 = Bimap_single_module.set t3 ~key:3 ~data:"triple" in
+    let () = assert_equal 3 (Bimap_single_module.count t4 ~f:(fun _x -> true)) in 
+    let () = assert_equal 3 (Bimap_single_module.length t4) in 
+    let () = assert_equal 3 (Bimap_single_module.count_reverse t4 ~f:(fun _x -> true)) in 
+    let () = assert_equal 2 (Bimap_single_module.counti t4 ~f:(fun ~key ~data:_data -> if key <= 2 then true else false)) in
+    let () = assert_equal ["single";"double";"triple"] (Bimap_single_module.data t4) in 
+    let () = assert_equal true (List.mem 1 (Bimap_single_module.data_reverse t4)) in
+    let () = assert_equal true (List.mem 2 (Bimap_single_module.data_reverse t4)) in 
+    let () = assert_equal true (List.mem 3 (Bimap_single_module.data_reverse t4)) in
+    let () = assert_equal true (Bimap_single_module.exists t4 ~f:(fun x -> x = "double")) in 
+    let () = assert_equal true (Bimap_single_module.exists t4 ~f:(fun x -> x = "triple")) in
+    let () = assert_equal false (Bimap_single_module.exists t4 ~f:(fun x -> x = "quadruple")) in
+    let () = assert_equal true (Bimap_single_module.exists_reverse t4 ~f:(fun x -> x = 2)) in 
+    let () = assert_equal false (Bimap_single_module.exists_reverse t4 ~f:(fun x -> x = 4)) in 
+    let () = assert_equal true (Bimap_single_module.existsi t4 ~f:(fun ~key ~data -> key = 3 && data = "triple")) in 
+    let () = assert_equal true (Bimap_single_module.existsi_reverse t4 ~f:(fun ~key ~data -> key = "double" && data = 2)) in 
+    let t5 = Bimap_single_module.empty () in
+    let () = assert_equal 0 (Bimap_single_module.length t5) in 
+    let () = assert_equal 0 (Bimap_single_module.count t5 ~f:(fun _x -> true)) in 
+    let () = assert_equal true (Bimap_single_module.is_empty t5) in 
+    let t6 = Bimap_single_module.set t5 ~key:1 ~data:"one" in 
+    let t7 = Bimap_single_module.set t6 ~key:2 ~data:"two" in 
+    let t8 = Bimap_single_module.set t7 ~key:3 ~data:"three" in
+    let t9 = Bimap_single_module.update t8 ~key:1
+               ~f:(fun x -> match x with
+			      Some s -> Core.String.rev s
+			    | None -> "newentry") in 
+    assert_equal "eno" (Bimap_single_module.find_exn t9 ~key:1);;
+
   let suite =
     "suite">:::
       ["test-1">:: test1;
@@ -760,7 +868,9 @@ module Bimap_tests = struct
        "test-7">:: test7;
        "test-8">:: test8;
        "test-9">:: test9;
-       "test-10">:: test10];;
+       "test-10">:: test10;
+       "test-11">:: test11;
+       "test-12">:: test12];;
 
   let () =
     run_test_tt_main suite
