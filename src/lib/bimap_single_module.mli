@@ -1,15 +1,10 @@
 module Bimap_single :
 functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
 sig
-  (*better than passing tuples around and possibly getting order 
-   backwards somewhere, after which all bets are off; so we saddle 
-   client code writers with this type*)
-  type t = {
-      fwdmap : ModuleB.Map.Key.t ModuleA.Map.t;
-      revmap : ModuleA.Map.Key.t ModuleB.Map.t
-    }
+  type t
+  val empty :t
   val set : t -> key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> t
-            
+                                                                      
   val set_reverse : t -> key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t -> t
 
   val change : t -> key:ModuleA.Map.Key.t ->
@@ -28,7 +23,6 @@ sig
   val counti : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> bool) -> int
   val data : t -> ModuleB.Map.Key.t list
   val data_reverse : t -> ModuleA.Map.Key.t list
-  val empty : unit -> t
   val exists : t -> f:(ModuleB.Map.Key.t -> bool) -> bool
   val exists_reverse : t -> f:(ModuleA.Map.Key.t -> bool) -> bool
   val existsi : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> bool) -> bool
