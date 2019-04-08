@@ -261,10 +261,15 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
         | [] -> revmap
         | h :: t -> 
            let rev_values = ModuleB.Map.find_exn revmap h in
-           let new_rev_values = (Core.List.filter rev_values ~f:(fun x -> not (x = key))) in
-           let new_revmap = (ModuleB.Map.remove revmap h) in
-           let newrevmap = ModuleB.Map.set new_revmap ~key:h ~data:new_rev_values in
-           helper newrevmap t in
+           (*if there is only one value we don't want the key to remain mapping to an empty list*)
+           if Core.List.length rev_values = 1 then
+             let new_revmap = ModuleB.Map.remove revmap h in
+             helper new_revmap t
+           else 
+             let new_rev_values = (Core.List.filter rev_values ~f:(fun x -> not (x = key))) in
+             let new_revmap = (ModuleB.Map.remove revmap h) in
+             let newrevmap = ModuleB.Map.set new_revmap ~key:h ~data:new_rev_values in
+             helper newrevmap t in
       let newrevmap = helper t.revmap reverse_keys in
       { fwdmap=new_forward_map; revmap=newrevmap }
     let remove_reverse t ~key =

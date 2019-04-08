@@ -1417,7 +1417,7 @@ module Bimap_tests = struct
       let () = assert_equal true (List.mem "tres" (Bimap_multi_module.find_exn t11 ~key:30)) in 
       let () = assert_equal true (List.mem "three" (Bimap_multi_module.find_exn t11 ~key:30)) in 
       let () = assert_equal (Some [30]) (Bimap_multi_module.find_reverse t11 ~key:"tres") in 
-      let () = assert_equal (Some [30]) (Bimap_multi_module.find_reverse t11 ~key:"triple") in
+      let () = assert_equal (Some [30]) (Bimap_multi_module.find_reverse t11 ~key:"triple") in 
       assert_equal (Some [30]) (Bimap_multi_module.find_reverse t11 ~key:"three");;
 
                    
