@@ -1,0 +1,25 @@
+opam-version: "2.0.0"
+name: "bimap"
+version: "0.1"
+maintainer: "papatangonyc@gmail.com"
+authors: [ "papatangonyc@gmail.com" ]
+license: "GPLv3"
+homepage: "https://github.com/pat227/bimap.git"
+doc: "None"
+bug-reports: "papatangonyc@gmail.com"
+dev-repo: "~/libraries/ocaml_libs/bimap/.git"
+build: [
+  ["dune" "subst"]{pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+remove: []
+build-test: ["dune" "runtests" "--profile=release"]
+#build-doc: [
+#  make "doc"
+#]
+depends: [
+  "core" {>= "v0.11.3"}
+  "ocamlfind" {>= "1.8"}
+  "dune" {>= "1.2.1"}
+]
+available: [ ocaml-version >= "4.04.1" & opam-version >= "2.0.0" ]
