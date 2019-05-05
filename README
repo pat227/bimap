@@ -1,26 +1,16 @@
-Implementation of a bi-map; see com.google.guava.bimap. Implemented
-here for re-use using two maps under the hood. Also supports multi-bi-map,
-in which a key is mapped to multiple values as in a multi-map and
-the inverse view is supported as well under which any one of the values
-will provide the key.
+Bimaps allow clients to find not just a value given a key, but to find a
+key given a value. Inspired by com.google.guava.bimap. Implemented
+here using functors and two maps in two ways: as a class and as a module.
+Also supports multi-bi-map, in which a key is mapped to multiple values
+as in a multi-map and the inverse view is supported as well under which
+any one of the values will provide the key.
 
-The parameterized class holds two mutable maps. Each method ensures us
-that both maps are updated properly, alleviating the user or client code
-from performing the correct operations on both maps when interacting
-with either one of them.
+Each method ensures us that both maps are updated properly, alleviating
+the user or client code from performing the correct operations on both
+maps when interacting with either one of them.
 
-The types of the maps are parameterized as follows: 
-('a, 'b, 'c) Core.Map.t 
-('b, 'a, 'd) Core.Map.t
-This allows a forward map and a reverse map to be defined easily. An
-example would be:
-(Core.String.t, Core.Int.t, Core.String.Comparator.t) Core.Map.t
-(Core.Int, Core.String.t, Core.Int.t.Comparator.t) Core.Map.t
+See the unit test under src/test for examples of usage.
 
-For a multi-map, the types would be:
-('a, 'b list, 'c) Core.Map.t 
-('b, 'a list, 'd) Core.Map.t
-
-A Bi-Multi-map is implemented in it's own class with it's own
-type parameters. See the unit test under src/test for examples of
-usage.
+                            Single values Map     v   Multi-map 
+Implemented as a module | Bimap_single_module.ml  | Bimap_multi_module
+ Implemented as a class |    Bimap_single.ml      |   Bimap_multi.ml
