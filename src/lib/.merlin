@@ -64,4 +64,4 @@ S /home/paul/.opam/4.06.0/lib/stdio
 S /home/paul/.opam/4.06.0/lib/typerep
 S /home/paul/.opam/4.06.0/lib/variantslib
 S .
-FLG -open Bimap__ -w -40
+FLG -open Bimap__ -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs
