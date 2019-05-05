@@ -1,4 +1,4 @@
-opam-version: "1.2.2"
+opam-version: "2.0"
 name: "bimap"
 version: "0.1"
 maintainer: "papatangonyc@gmail.com"
@@ -7,7 +7,7 @@ license: "GPLv3"
 homepage: "https://github.com/pat227/bimap.git"
 doc: "None"
 bug-reports: "papatangonyc@gmail.com"
-dev-repo: "~/libraries/ocaml_libs/ocaml-db-model/.git"
+dev-repo: "git+https://github.com/pat227/bimap.git"
 build: [
        [make]
 ]
@@ -16,10 +16,11 @@ remove: [[make "uninstall"]
 	 ["rm" "-f" "%{bin}%/bimap.native"]
 	 ["rm" "-f" "%{bin}%/bimap.byte"]
 	]
-build-test: [make "tests"]
+with-test: [make "tests"]
 depends: [
+  "ocaml" {>= "4.06.0"}
   "ounit" {>= "2.0.8"}
   "ocamlfind" {>= "1.6.2"}
   "ocamlbuild" {>= "0.12.0"}
 ]
-available: [ ocaml-version >= "4.04.1" & opam-version >= "1.2.2" ]
+#available: [ ocaml-version >= "4.06.1" & opam-version >= "2.0" ]
