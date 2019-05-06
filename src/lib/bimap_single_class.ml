@@ -1,8 +1,8 @@
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 (*Should made this a functor building on Comparable.S ... next version todo*)
-module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
-  class ['a, 'b] bimap_class (m1 : 'b ModuleA.Map.t) (m2 : 'a ModuleB.Map.t) = object(self)
+module Bimap_single_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
+  class ['a, 'b] bimap_single_class (m1 : 'b ModuleA.Map.t) (m2 : 'a ModuleB.Map.t) = object(self)
     val mutable forward_map : ('b ModuleA.Map.t ref) = ref (m1 : 'b ModuleA.Map.t)
     val mutable reverse_map : ('a ModuleB.Map.t ref) = ref (m2 : 'a ModuleB.Map.t)
 

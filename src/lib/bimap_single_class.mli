@@ -1,7 +1,7 @@
-module Bimap_single :
+module Bimap_single_class :
 functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
 sig
-  class ['a, 'b] bimap_class :
+  class ['a, 'b] bimap_single_class :
 	  'b ModuleA.Map.t ->
 	  'a ModuleB.Map.t ->
 	  object

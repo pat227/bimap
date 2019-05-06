@@ -1,4 +1,4 @@
-module Bimap_multi :
+module Bimap_multi_class :
 functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
 sig
   class ['a, 'b] bimap_multi_class :

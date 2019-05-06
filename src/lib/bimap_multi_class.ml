@@ -3,7 +3,7 @@
 (*March 2019 -- prior commits...not a true bimap.
   Use a functor so we have access to something satisfying Comparable.S 
   and force type of map to use 'a list and 'b list.*)
-module Bimap_multi (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
+module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
   class ['a, 'b] bimap_multi_class (m1 : 'b list ModuleA.Map.t) (m2 : 'a list ModuleB.Map.t) = object(self)
     val mutable forward_map : ('b list ModuleA.Map.t ref) = ref (m1 : 'b list ModuleA.Map.t)
     val mutable reverse_map : ('a list ModuleB.Map.t ref) = ref (m2 : 'a list ModuleB.Map.t)

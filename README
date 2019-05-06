@@ -12,5 +12,5 @@ maps when interacting with either one of them.
 See the unit test under src/test for examples of usage.
 
                             Single values Map     v   Multi-map 
-Implemented as a module | Bimap_single_module.ml  | Bimap_multi_module
- Implemented as a class |    Bimap_single.ml      |   Bimap_multi.ml
+Implemented as a module | Bimap_single_module.ml  | Bimap_multi_module.ml
+ Implemented as a class | Bimap_single_class.ml   | Bimap_multi_class.ml
