@@ -1,7 +1,7 @@
-module Bimap_class :
+module Bimap_single_class :
   functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
     sig
-      class bimap_class :
+      class bimap_single_class :
         object
           val mutable forward_map : MapModule2.key MapModule1.t ref
           val mutable reverse_map : MapModule1.key MapModule2.t ref

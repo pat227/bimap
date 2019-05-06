@@ -1,5 +1,5 @@
-module Bimap_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
-  class bimap_class = object(self)
+module Bimap_single_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
+  class bimap_single_class = object(self)
     val mutable forward_map = ref MapModule1.empty
     val mutable reverse_map = ref MapModule2.empty
     method private empty_forward_map () =

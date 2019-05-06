@@ -1,5 +1,5 @@
-module Bimap = Bimap.Bimap
-module Bimap_multi = Bimap_multi.Bimap_multi
+module Bimap = Bimap.Bimap_single_module
+module Bimap_multi = Bimap_multi_module.Bimap_multi_module
 open OUnit2
 module Bimap_tests = struct
 

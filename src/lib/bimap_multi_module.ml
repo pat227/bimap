@@ -1,4 +1,4 @@
-module Bimap_multi(MapModule1 : Map.S)(MapModule2 : Map.S) = struct 
+module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct 
   let forward_map = ref MapModule1.empty;;
   let reverse_map = ref MapModule2.empty;;
   (*empty, union, merge, map, etc, all mutate the maps, ie, the functions 

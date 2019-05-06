@@ -20,16 +20,10 @@ all: lib
 clean:
 	rm -rvf build
 
-lib: $(libdir)bimap.ml $(libdir)bimap.mli $(libdir)bimap_multi.ml $(libdir)bimap_multi.mli $(libdir)bimap_class.ml $(libdir)bimap_class.mli
+lib: $(libdir)bimap.ml $(libdir)bimap_single_module.ml $(libdir)bimap_single_module.mli $(libdir)bimap_multi_module.ml $(libdir)bimap_multi_module.mli $(libdir)bimap_single_class.ml $(libdir)bimap_single_class.mli
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.a
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cma
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap.cmxa
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_class.a
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_class.cma
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_class.cmxa
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.a
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cma
-	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -build-dir build -I src/lib -I src/main -I build/src/lib src/lib/bimap_multi.cmxa
 
 tests: $(testdir)bimap_tests.ml #lib
 	ocamlbuild -classic-display -use-ocamlfind -j 1 -tag thread -tag principal -r -package 'oUnit' -build-dir build -I src/lib src/test/bimap_tests.byte

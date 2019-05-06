@@ -1,4 +1,4 @@
-module Bimap :
+module Bimap_single_module :
   functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
     sig
       val empty : unit -> unit

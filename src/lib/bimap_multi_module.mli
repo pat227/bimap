@@ -1,4 +1,4 @@
-module Bimap_multi :
+module Bimap_multi_module :
   functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
     sig
       val get_forward_map : unit -> MapModule2.key list MapModule1.t
