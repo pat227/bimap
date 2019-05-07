@@ -1,26 +1,21 @@
 module Bimap_multi_class :
-functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
+functor (ModuleA : Map.S) (ModuleB : Map.S) ->
 sig
   class ['a, 'b] bimap_multi_class :
-          'b list ModuleA.Map.t ->
-          'a list ModuleB.Map.t ->
+          'b list ModuleA.t ->
+          'a list ModuleB.t ->
           object
-            constraint 'a = ModuleA.Map.Key.t
-            constraint 'b = ModuleB.Map.Key.t
-            val mutable forward_map : 'b Core.List.t ModuleA.Map.t ref
-            val mutable reverse_map : 'a Core.List.t ModuleB.Map.t ref
+            constraint 'a = ModuleA.key
+            constraint 'b = ModuleB.key
+            val mutable forward_map : 'b list ModuleA.t ref
+            val mutable reverse_map : 'a list ModuleB.t ref
             method add_multi : key:'a -> data:'b -> unit
             method add_multi_reverse : key:'b -> data:'a -> unit
-            method change :
-                     key:'a ->
-                     f:('b Core.List.t option -> 'b Core.List.t option) -> unit
-            method change_reverse :
-                     key:'b ->
-                     f:('a Core.List.t option -> 'a Core.List.t option) -> unit
-            method count : f:('b Core.List.t -> bool) -> int
-            method count_reverse : f:('a Core.List.t -> bool) -> int
+            method cardinal : unit -> int
+            method cardinal_reverse : unit -> int
+(*                                                
             method counti :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> bool) -> int
+                     f:(key:'a -> data:'b list -> bool) -> int
             (*        method private create_forward_map_from_reverse_map : unit -> unit
           method private create_reverse_map_from_forward_map : unit -> unit *)
             method data : 'b Core.List.t list
@@ -119,5 +114,6 @@ sig
                      (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.list
             method update :
                      key:'a -> f:('b Core.List.t option -> 'b Core.List.t) -> unit
+                                                                              *)
           end
 end
