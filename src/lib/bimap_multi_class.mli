@@ -1,18 +1,24 @@
 module Bimap_multi_class :
 functor (ModuleA : Map.S) (ModuleB : Map.S) ->
 sig
-  class ['a, 'b] bimap_multi_class :
-          'b list ModuleA.t ->
-          'a list ModuleB.t ->
-          object
-            constraint 'a = ModuleA.key
-            constraint 'b = ModuleB.key
-            val mutable forward_map : 'b list ModuleA.t ref
-            val mutable reverse_map : 'a list ModuleB.t ref
-            method add_multi : key:'a -> data:'b -> unit
-            method add_multi_reverse : key:'b -> data:'a -> unit
-            method cardinal : unit -> int
-            method cardinal_reverse : unit -> int
+  class bimap_multi_class :
+  object
+    val mutable forward_map : ModuleB.key list ModuleA.t ref
+    val mutable reverse_map : ModuleA.key list ModuleB.t ref
+    method add_multi : key:ModuleA.key -> data:ModuleB.key -> unit
+    method add_multi_reverse :
+             key:ModuleB.key -> data:ModuleA.key -> unit
+    method cardinal : unit -> int
+    method cardinal_reverse : unit -> int
+    method private create_forward_map_from_reverse_map : unit -> unit
+    method private create_reverse_map_from_forward_map : unit -> unit
+    method private empty_forward_map : unit -> unit
+    method private empty_reverse_map : unit -> unit
+    method private remove_fwd_key_from_reverse_map :
+                     fwd_values_list:ModuleB.key list -> key:ModuleA.key -> unit
+    method private remove_rev_key_from_forward_map :
+                     rev_values_list:ModuleA.key list -> key:ModuleB.key -> unit
+
 (*                                                
             method counti :
                      f:(key:'a -> data:'b list -> bool) -> int

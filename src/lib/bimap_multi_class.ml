@@ -7,41 +7,40 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
     method private empty_reverse_map () =
       reverse_map := ModuleB.empty
 
-    method add ~key ~data =
+    method add_multi ~key ~data =
       let update_maps () =
         if ModuleA.mem key !forward_map then
           let oldvs = ModuleA.find key !forward_map in
           let newvs = (data::oldvs) in 
           let () = forward_map :=
                      (ModuleA.add key newvs !forward_map) in
-          self#add_reverse ~key:data ~data:key
+          self#add_multi_reverse ~key:data ~data:key
         else
           let () = forward_map :=
                      (ModuleA.add key [data] !forward_map) in
-          self#add_reverse ~key:data ~data:key in 
+          self#add_multi_reverse ~key:data ~data:key in 
       if ModuleA.mem key !forward_map then
-        if List.mem
-             (ModuleA.find key !forward_map) data then ()
+        if List.mem data (ModuleA.find key !forward_map) then ()
         else 
           update_maps ()
       else
         update_maps ()
 
-    method add_reverse ~key ~data =
+    method add_multi_reverse ~key ~data =
       let update_maps () =
-        if ModuleB.mem !reverse_map key then
+        if ModuleB.mem key !reverse_map then
           let oldvs = ModuleB.find key !reverse_map in
           let newvs = (data::oldvs) in 
           let () = reverse_map :=
-                     (ModuleB.add !reverse_map ~key ~data) in
-          self#add ~key:data ~data:key 
+                     (ModuleB.add key newvs !reverse_map) in
+          self#add_multi ~key:data ~data:key 
         else
           let () = reverse_map :=
-                     (ModuleB.add !reverse_map ~key ~data) in
-          self#add ~key:data ~data:key in 
-      if ModuleB.mem !reverse_map key then
-        if List.mem
-             (ModuleB.find key !reverse_map) data
+                     (ModuleB.add key [data] !reverse_map) in
+          self#add_multi ~key:data ~data:key in 
+      if ModuleB.mem key !reverse_map then
+        if List.mem data
+             (ModuleB.find key !reverse_map)
              then ()
         else 
           update_maps ()
@@ -56,39 +55,42 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
           | Some old_reverse_bindings -> 
              if ((List.length old_reverse_bindings) > 1) then
                let new_reverse_bindings = List.filter (fun v -> not (v = key)) old_reverse_bindings in
-               let () = reverse_map := ModuleB.remove !reverse_map k in
+               let () = reverse_map := ModuleB.remove k !reverse_map in
                reverse_map :=
-                 ModuleB.add !reverse_map ~key:k ~data:new_reverse_bindings
+                 ModuleB.add k new_reverse_bindings !reverse_map
              else
-               reverse_map := ModuleB.remove !reverse_map k
+               reverse_map := ModuleB.remove k !reverse_map
           | None -> ()
         ) fwd_values_list
 
     method private remove_rev_key_from_forward_map ~rev_values_list ~key =
       List.iter
         (fun k ->
-          let old_fwd_bindings = ModuleA.find_opt k !forward_map in
-          if (List.length old_fwd_bindings) > 1 then
-            let new_fwd_bindings = List.filter (fun v -> not (v = key)) old_fwd_bindings in
-            let () = forward_map := ModuleA.remove !forward_map k in
-            forward_map :=
-              ModuleA.add_exn !forward_map ~key:k ~data:new_fwd_bindings
-          else
-            forward_map := ModuleA.remove !forward_map k
+          let old_fwd_bindings_opt = ModuleA.find_opt k !forward_map in
+          match old_fwd_bindings_opt with
+          | Some old_fwd_bindings -> 
+             if (List.length old_fwd_bindings) > 1 then
+               let new_fwd_bindings = List.filter (fun v -> not (v = key)) old_fwd_bindings in
+               let () = forward_map := ModuleA.remove k !forward_map in
+               forward_map :=
+                 ModuleA.add k new_fwd_bindings !forward_map
+             else
+               forward_map := ModuleA.remove k !forward_map
+          | None -> ()             
         ) rev_values_list
 
     method private create_reverse_map_from_forward_map () =
       let () = self#empty_reverse_map () in 
       ModuleA.iter
 	(fun k v ->
-          List.iter (fun v -> self#add_reverse ~key:v ~data:k) v
+          List.iter (fun v -> self#add_multi_reverse ~key:v ~data:k) v
 	) !forward_map
 
     method private create_forward_map_from_reverse_map () =
       let () = self#empty_forward_map () in 
       ModuleB.iter
 	(fun k v ->
-          List.iter (fun v -> self#add ~key:v ~data:k) v
+          List.iter (fun v -> self#add_multi ~key:v ~data:k) v
 	) !reverse_map
 
     method cardinal () =
