@@ -97,7 +97,27 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       ModuleA.cardinal !forward_map
     method cardinal_reverse () =
       ModuleB.cardinal !reverse_map
-(*
+    method empty () =
+      let () = self#empty_forward_map () in
+      self#empty_reverse_map ()
+    method mem key =
+      ModuleA.mem key !forward_map
+    method mem_reverse key =
+      ModuleB.mem key !reverse_map
+    method update ~key ~f =
+      if ModuleA.mem key !forward_map then 
+        let oldvalues = ModuleA.find key !forward_map in
+        let () = forward_map := (ModuleA.update key f !forward_map) in
+        let newvalues = ModuleA.find key !forward_map in
+        (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
+        let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
+        List.iter 
+          (fun v ->
+            self#add_multi_reverse ~key:v ~data:key
+          ) newvalues
+      else ()
+        
+  (*
     method counti ~f =
       ModuleA.counti !forward_map ~f
     method data =
@@ -197,10 +217,7 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
     method mapi_reverse ~f =
       let () = reverse_map := (Core.mapi !reverse_map ~f) in
       self#create_forward_map_from_reverse_map ()     
-    method mem key =
-      Core.mem !forward_map key
-    method mem_reverse key =
-      Core.mem !reverse_map key
+
     method min_elt =
       Core.min_elt !forward_map
     method min_elt_exn =
@@ -265,17 +282,7 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       match Core.Option.is_some key_order with
       | false -> Core.to_alist !forward_map
       | true -> Core.to_alist ~key_order:(Core.Option.value_exn key_order) !forward_map
-    (*update and change are identical except that the function f must be of a different type; see Core.Map documentation.*)
-    method update ~key ~f =
-      let oldvalues = ModuleA.find_exn !forward_map key in
-      let () = forward_map := (ModuleA.update !forward_map key ~f) in
-      let newvalues = ModuleA.find_exn !forward_map key in
-      (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-      let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
-      Core.List.iter newvalues
-        ~f:(fun v -> 
-          reverse_map := ModuleB.add_multi !reverse_map ~key:v ~data:key
-        )
+
       *)
   end
 end

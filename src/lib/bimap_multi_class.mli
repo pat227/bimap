@@ -18,7 +18,10 @@ sig
                      fwd_values_list:ModuleB.key list -> key:ModuleA.key -> unit
     method private remove_rev_key_from_forward_map :
                      rev_values_list:ModuleA.key list -> key:ModuleB.key -> unit
-
+    method empty : unit -> unit
+    method mem : ModuleA.key -> bool
+    method mem_reverse : ModuleB.key -> bool
+    method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit                                          
 (*                                                
             method counti :
                      f:(key:'a -> data:'b list -> bool) -> int
@@ -91,8 +94,7 @@ sig
             method max_elt_exn_reverse : ModuleB.Map.Key.t * 'a Core.List.t
             method max_elt_reverse :
                      (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method mem : ModuleA.Map.Key.t -> Core_kernel__.Import.bool
-            method mem_reverse : ModuleB.Map.Key.t -> Core_kernel__.Import.bool
+
             method min_elt :
                      (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
             method min_elt_exn : ModuleA.Map.Key.t * 'b Core.List.t
@@ -118,8 +120,7 @@ sig
                      ?key_order:[ `Decreasing | `Increasing ] ->
                      unit ->
                      (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.list
-            method update :
-                     key:'a -> f:('b Core.List.t option -> 'b Core.List.t) -> unit
+
                                                                               *)
           end
 end
