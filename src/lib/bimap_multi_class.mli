@@ -21,8 +21,16 @@ sig
     method empty : unit -> unit
     method mem : ModuleA.key -> bool
     method mem_reverse : ModuleB.key -> bool
-    method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit                                          
-(*                                                
+    method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit
+    method update_reverse : key:ModuleB.key -> f:(ModuleA.key list option -> ModuleA.key list option) -> unit
+    method singleton : key:ModuleA.key -> data:ModuleB.key -> unit
+    method singleton_reverse : key:ModuleB.key -> data:ModuleA.key -> unit
+    method remove : key:ModuleA.key -> unit
+    method remove_multi : key:ModuleB.key -> unit
+    method remove_reverse : key:ModuleB.key -> unit
+    method remove_reverse_multi : key:ModuleB.key -> unit
+
+  (*                                                
             method counti :
                      f:(key:'a -> data:'b list -> bool) -> int
             (*        method private create_forward_map_from_reverse_map : unit -> unit
@@ -107,15 +115,6 @@ sig
             method nth_reverse :
                      Core_kernel__.Import.int ->
                      (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method remove : key:ModuleA.Map.Key.t -> unit
-            (*        method private remove_fwd_key_from_reverse_map :
-            fwd_values_list:'b Core.List.t -> key:'a -> unit *)
-            method remove_multi : key:'a -> unit
-            (*        method private remove_rev_key_from_forward_map :
-            rev_values_list:'a Core.List.t -> key:'b -> unit  *)
-            method remove_reverse : key:'b -> unit
-            (*        method private remove_reverse_keys : 'b Core.List.t -> unit *)
-            method remove_reverse_multi : key:'b -> unit
             method to_alist :
                      ?key_order:[ `Decreasing | `Increasing ] ->
                      unit ->

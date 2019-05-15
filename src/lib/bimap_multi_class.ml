@@ -116,7 +116,30 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
             self#add_multi_reverse ~key:v ~data:key
           ) newvalues
       else ()
-        
+
+    method update_reverse ~key ~f =
+      if ModuleB.mem key !reverse_map then 
+        let oldvalues = ModuleB.find key !reverse_map in
+        let () = reverse_map := (ModuleB.update key f !reverse_map) in
+        let newvalues = ModuleB.find key !reverse_map in
+        (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
+        let () = self#remove_rev_key_from_forward_map ~rev_values_list:oldvalues ~key in
+        List.iter 
+          (fun v ->
+            self#add_multi ~key:v ~data:key
+          ) newvalues
+      else ()
+
+    method singleton ~key ~data =
+      let () = self#empty_forward_map () in
+      let () = self#empty_reverse_map () in
+      self#add_multi ~key ~data
+
+    method singleton_reverse ~key ~data =
+      let () = self#empty_forward_map () in
+      let () = self#empty_reverse_map () in
+      self#add_multi_reverse ~key ~data
+             
   (*
     method counti ~f =
       ModuleA.counti !forward_map ~f
