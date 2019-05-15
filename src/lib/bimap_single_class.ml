@@ -1,18 +1,22 @@
+module Bimap_single_pure=Bimap_single_module.Bimap_single
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 (*Should made this a functor building on Comparable.S ... next version todo*)
 module Bimap_single_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
+  module Bimap_single_module = Bimap_single_pure(ModuleA)(ModuleB)
   class ['a, 'b] bimap_single_class (m1 : 'b ModuleA.Map.t) (m2 : 'a ModuleB.Map.t) = object(self)
     val mutable forward_map : ('b ModuleA.Map.t ref) = ref (m1 : 'b ModuleA.Map.t)
     val mutable reverse_map : ('a ModuleB.Map.t ref) = ref (m2 : 'a ModuleB.Map.t)
-
+                                                           
     method private empty_forward_map () =
       forward_map := ModuleA.Map.empty
     method private empty_reverse_map () =
       reverse_map := ModuleB.Map.empty
     method set ~key ~data =
-      let () = forward_map := ModuleA.Map.set !forward_map ~key ~data in
-      reverse_map := ModuleB.Map.set !reverse_map ~key:data ~data:key
+      let t = Bimap_single_module.make_t ~fwd_map:!forward_map ~rev_map:!reverse_map in
+      let t2 = Bimap_single_module.set t ~key ~data in
+      let () = forward_map := Bimap_single_module.get_fwd_map t2 in (*ModuleA.Map.set !forward_map ~key ~data in*)
+      reverse_map := Bimap_single_module.get_rev_map t2 (*ModuleB.Map.set !reverse_map ~key:data ~data:key*)
     method set_reverse ~key ~data =
       let () = reverse_map := (ModuleB.Map.set !reverse_map ~key ~data) in
       forward_map := ModuleA.Map.set !forward_map ~key:data ~data:key

@@ -8,8 +8,11 @@ module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) =
       fwdmap : ModuleB.Map.Key.t ModuleA.Map.t;
       revmap : ModuleA.Map.Key.t ModuleB.Map.t
     }
+  let make_t ~fwd_map ~rev_map = { fwdmap=fwd_map; revmap=rev_map }
   (*    let empty_forward_map () = ModuleA.Map.empty
     let empty_reverse_map () = ModuleB.Map.empty*)
+  let get_rev_map t = t.revmap
+  let get_fwd_map t = t.fwdmap
   let set t ~key ~data  =
     let newfmap = ModuleA.Map.set t.fwdmap ~key ~data in
     let newrmap = ModuleB.Map.set t.revmap ~key:data ~data:key in

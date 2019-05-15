@@ -2,6 +2,9 @@ module Bimap_single :
 functor (ModuleA : Core.Comparable.S) (ModuleB : Core.Comparable.S) ->
 sig
   type t
+  val make_t : fwd_map:ModuleB.Map.Key.t ModuleA.Map.t -> rev_map:ModuleA.Map.Key.t ModuleB.Map.t -> t
+  val get_fwd_map : t -> ModuleB.Map.Key.t ModuleA.Map.t
+  val get_rev_map : t -> ModuleA.Map.Key.t ModuleB.Map.t
   val empty :t
   val set : t -> key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> t
                                                                       
