@@ -129,17 +129,49 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
             self#add_multi ~key:v ~data:key
           ) newvalues
       else ()
-
     method singleton ~key ~data =
       let () = self#empty_forward_map () in
       let () = self#empty_reverse_map () in
       self#add_multi ~key ~data
-
     method singleton_reverse ~key ~data =
       let () = self#empty_forward_map () in
       let () = self#empty_reverse_map () in
       self#add_multi_reverse ~key ~data
-             
+                             
+    method remove ~key =
+      if ModuleA.mem key !forward_map then 
+        let fwd_values_list = ModuleA.find key !forward_map in 
+        let () = forward_map := (ModuleA.remove key !forward_map) in
+        self#remove_fwd_key_from_reverse_map ~fwd_values_list ~key
+      else ()
+
+    method remove_reverse ~key =
+      if ModuleB.mem key !reverse_map then 
+        let rev_values_list = ModuleB.find key !reverse_map in 
+        let () = reverse_map := (ModuleB.remove key !reverse_map) in
+        self#remove_rev_key_from_forward_map ~rev_values_list ~key
+      else ()
+
+    method merge f ~(othermap:ModuleB.key list ModuleA.t) =
+      let () = forward_map := ModuleA.merge f !forward_map othermap in
+      self#create_reverse_map_from_forward_map ()
+    method merge_reverse f ~(othermap:ModuleA.key list ModuleB.t) =
+      let () = reverse_map := ModuleB.merge f !reverse_map othermap in
+      self#create_forward_map_from_reverse_map ()
+    method union f ~(othermap:ModuleB.key list ModuleA.t) =
+      let () = forward_map := ModuleA.union f !forward_map othermap in
+      self#create_reverse_map_from_forward_map ()
+    method union_reverse f ~(othermap:ModuleA.key list ModuleB.t) =
+      let () = reverse_map := ModuleB.union f !reverse_map othermap in
+      self#create_forward_map_from_reverse_map ()
+    method compare f ~othermap =
+      ModuleA.compare f !forward_map othermap
+    method compare_reverse f ~othermap =
+      ModuleB.compare f !reverse_map othermap
+    method equal f ~othermap =
+      ModuleA.equal f !forward_map othermap
+    method equal_reverse f ~othermap =
+      ModuleB.equal f !reverse_map othermap
   (*
     method counti ~f =
       ModuleA.counti !forward_map ~f
@@ -261,28 +293,7 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       Core.nth !forward_map int
     method nth_reverse int =
       Core.nth !reverse_map int
-    method remove ~key =
-      let reverse_keys = Core.find_exn !forward_map key in 
-      let () = forward_map := (Core.remove !forward_map key) in
-      self#remove_reverse_keys reverse_keys
-    method private remove_reverse_keys klist = 
-      let rec remove_keys k =
-	match k with
-	| h :: t ->
-	   let () = reverse_map := (Core.remove !reverse_map h) in
-	   remove_keys t
-	| [] -> () in
-      remove_keys klist
-    method remove_reverse ~key =
-      let fwd_keys = Core.find_exn !reverse_map key in 
-      let () = reverse_map := (Core.remove !reverse_map key) in
-      Core.List.iter fwd_keys
-        ~f:(fun k ->
-          let fwd_values = self#find_exn ~key:k in
-          let new_fwd_values = (Core.List.filter fwd_values ~f:(fun x -> not (x = key))) in
-          let () = forward_map := (Core.remove !forward_map k) in
-          forward_map := (Core.set !forward_map  ~key:k ~data:new_fwd_values)
-        )
+
     method remove_multi ~key =
       try
 	let values = ModuleA.find_exn !forward_map key in

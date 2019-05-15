@@ -26,11 +26,20 @@ sig
     method singleton : key:ModuleA.key -> data:ModuleB.key -> unit
     method singleton_reverse : key:ModuleB.key -> data:ModuleA.key -> unit
     method remove : key:ModuleA.key -> unit
-    method remove_multi : key:ModuleB.key -> unit
     method remove_reverse : key:ModuleB.key -> unit
-    method remove_reverse_multi : key:ModuleB.key -> unit
-
-  (*                                                
+    method merge : (ModuleA.key -> ModuleB.key list option -> ModuleB.key list option -> ModuleB.key list option) ->
+                   othermap:ModuleB.key list ModuleA.t -> unit
+    method merge_reverse : (ModuleB.key -> ModuleA.key list option -> ModuleA.key list option -> ModuleA.key list option) ->
+                           othermap:ModuleA.key list ModuleB.t -> unit
+    method union : (ModuleA.key -> ModuleB.key list -> ModuleB.key list -> ModuleB.key list option) ->
+                   othermap:ModuleB.key list ModuleA.t -> unit
+    method union_reverse : (ModuleB.key -> ModuleA.key list -> ModuleA.key list -> ModuleA.key list option) ->
+                           othermap:ModuleA.key list ModuleB.t -> unit
+    method compare : (ModuleB.key list -> ModuleB.key list -> int) -> othermap:ModuleB.key list ModuleA.t -> int
+    method compare_reverse : (ModuleA.key list -> ModuleA.key list -> int) -> othermap:ModuleA.key list ModuleB.t -> int
+    method equal : (ModuleB.key list -> ModuleB.key list -> bool) -> othermap:ModuleB.key list ModuleA.t -> bool
+    method equal_reverse : (ModuleA.key list -> ModuleA.key list -> bool) -> othermap:ModuleA.key list ModuleB.t -> bool
+ (*
             method counti :
                      f:(key:'a -> data:'b list -> bool) -> int
             (*        method private create_forward_map_from_reverse_map : unit -> unit

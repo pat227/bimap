@@ -1,3 +1,4 @@
+(*===TODO===redo this to be immutable, functional, ie, return a value not unit for all functions*)
 module Bimap_single_module :
   functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
     sig
@@ -23,6 +24,8 @@ module Bimap_single_module :
         f:(MapModule2.key ->
            MapModule1.key option -> 'a option -> MapModule1.key option) ->
         othermap:'a MapModule2.t -> unit
+      (*val union : (ModuleA.key -> ModuleB.key -> ModuleB.key -> ModuleB.key option) ->
+                  MapModule2.key MapModule1.t -> MapModule2.key MapModule1.t -> unit*)
       val compare :
         f:(MapModule2.key -> MapModule2.key -> int) ->
         othermap:MapModule2.key MapModule1.t -> int
