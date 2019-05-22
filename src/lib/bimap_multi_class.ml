@@ -1,9 +1,11 @@
+module Bimap_multi_pure=Bimap_multi_module.Bimap_multi_module
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
 (*March 2019 -- prior commits...not a true bimap.
   Use a functor so we have access to something satisfying Comparable.S 
   and force type of map to use 'a list and 'b list.*)
 module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
+  module Bimap_multi_module = Bimap_multi_pure(ModuleA)(ModuleB)
   class ['a, 'b] bimap_multi_class (m1 : 'b list ModuleA.Map.t) (m2 : 'a list ModuleB.Map.t) = object(self)
     val mutable forward_map : ('b list ModuleA.Map.t ref) = ref (m1 : 'b list ModuleA.Map.t)
     val mutable reverse_map : ('a list ModuleB.Map.t ref) = ref (m2 : 'a list ModuleB.Map.t)
@@ -12,33 +14,19 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
       forward_map := ModuleA.Map.empty
     method private empty_reverse_map () =
       reverse_map := ModuleB.Map.empty
+    method private set_mutable_maps new_t =
+      let () = forward_map := Bimap_multi_module.get_fwd_map new_t in
+      reverse_map := Bimap_multi_module.get_rev_map new_t
 
     method add_multi ~key ~data =
-      let update_maps () =
-        let () = forward_map :=
-                   (ModuleA.Map.add_multi !forward_map ~key ~data) in
-        self#add_multi_reverse ~key:data ~data:key in
-      if ModuleA.Map.mem !forward_map key then
-        if Core.List.mem
-             (ModuleA.Map.find_exn !forward_map key) data
-             ~equal:(ModuleB.equal) then ()
-        else 
-          update_maps ()
-      else
-        update_maps ()
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.add_multi t_ ~key ~data in
+      self#set_mutable_maps new_t
 
     method add_multi_reverse ~key ~data =
-      let update_maps () =
-        let () = reverse_map := (ModuleB.Map.add_multi !reverse_map ~key ~data) in
-        self#add_multi ~key:data ~data:key in
-      if ModuleB.Map.mem !reverse_map key then
-        if Core.List.mem
-             (ModuleB.Map.find_exn !reverse_map key) data
-             ~equal:(ModuleA.equal) then ()
-        else 
-          update_maps ()
-      else
-        update_maps ()
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.add_multi_reverse t_ ~key ~data in
+      self#set_mutable_maps new_t
 
     method private remove_fwd_key_from_reverse_map ~fwd_values_list ~key =
       Core.List.iter fwd_values_list

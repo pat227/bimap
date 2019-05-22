@@ -7,7 +7,8 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
              
   let empty =
       {fwdmap=ModuleA.Map.empty; revmap=ModuleB.Map.empty}
-        
+
+  let create_t ~fwdmap ~revmap = { fwdmap=fwdmap;  revmap=revmap }
   let rec add_multi t ~key ~data =
     let update_maps t ~key ~data =
       let new_forward_map =
@@ -201,6 +202,8 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
       (fun t ~init ~f -> ModuleB.Map.fold_right t.revmap ~init ~f)
     let for_all t ~f = ModuleA.Map.for_all t.fwdmap ~f
     let for_all_reverse t ~f = ModuleB.Map.for_all t.revmap ~f
+    let get_fwd_map t = t.fwdmap
+    let get_rev_map t = t.revmap
     let is_empty t = ModuleA.Map.is_empty t.fwdmap
     let iter t ~f = ModuleA.Map.iter t.fwdmap ~f
     let iter_keys t ~f = ModuleA.Map.iter_keys t.fwdmap ~f

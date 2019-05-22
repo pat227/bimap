@@ -14,6 +14,7 @@ sig
   val counti : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> bool) -> int
 (*        method private create_forward_map_from_reverse_map : unit -> unit
           method private create_reverse_map_from_forward_map : unit -> unit *)
+  val create_t : fwdmap:ModuleB.Map.Key.t list ModuleA.Map.t -> revmap:ModuleA.Map.Key.t list ModuleB.Map.t -> t
   val data : t -> ModuleB.Map.Key.t list list
   val data_reverse : t-> ModuleA.Map.Key.t list list
   val empty : t
@@ -41,6 +42,8 @@ sig
   val fold_right_reverse : t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t list -> 'e -> 'e) -> 'e
   val for_all : t -> f:(ModuleB.Map.Key.t Core.List.t -> bool) -> bool
   val for_all_reverse : t -> f:(ModuleA.Map.Key.t Core.List.t -> bool) -> bool
+  val get_fwd_map : t -> ModuleB.Map.Key.t list ModuleA.Map.t
+  val get_rev_map : t -> ModuleA.Map.Key.t list ModuleB.Map.t
   val is_empty : t -> bool
   val iter : t -> f:(ModuleB.Map.Key.t list -> unit) -> unit
   val iter_keys : t -> f:(ModuleA.Map.Key.t -> unit) -> unit
