@@ -73,7 +73,11 @@ sig
   val nth : t -> int -> (ModuleA.Map.Key.t * ModuleB.Map.Key.t list) option
   val nth_reverse : t -> int -> (ModuleB.Map.Key.t * ModuleA.Map.Key.t list) option
   val remove : t -> key:ModuleA.Map.Key.t -> t
+  (*exposed for use in the class implementation*)
+  val remove_fwd_key_from_reverse_map : t -> fwd_values_list:ModuleB.Map.Key.t list -> key:ModuleA.Map.Key.t -> t
   val remove_reverse : t -> key:ModuleB.Map.Key.t -> t
+  (*exposed for use in the class implementation*)
+  val remove_rev_key_from_forward_map : t -> rev_values_list:ModuleA.Map.Key.t list -> key:ModuleB.Map.Key.t -> t
   val remove_multi : t -> key:ModuleA.Map.Key.t-> t
   val remove_reverse_multi : t -> key:ModuleB.Map.Key.t -> t
   val to_alist : t -> ?key_order:[ `Decreasing | `Increasing ] -> unit ->

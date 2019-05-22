@@ -29,71 +29,30 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
       self#set_mutable_maps new_t
 
     method private remove_fwd_key_from_reverse_map ~fwd_values_list ~key =
-      Core.List.iter fwd_values_list
-        ~f:(fun k ->
-          let old_reverse_bindings = ModuleB.Map.find_exn !reverse_map k in
-          if (Core.List.count old_reverse_bindings ~f:(fun _v -> true)) > 1 then
-            let new_reverse_bindings = Core.List.filter old_reverse_bindings ~f:(fun v -> not (v = key)) in
-            let () = reverse_map := ModuleB.Map.remove !reverse_map k in
-            reverse_map :=
-              ModuleB.Map.add_exn !reverse_map ~key:k ~data:new_reverse_bindings
-          else
-            reverse_map := ModuleB.Map.remove !reverse_map k
-        )
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.remove_fwd_key_from_reverse_map t_ ~fwd_values_list ~key in
+      self#set_mutable_maps new_t
 
     method private remove_rev_key_from_forward_map ~rev_values_list ~key =
-      Core.List.iter rev_values_list
-        ~f:(fun k ->
-          let old_fwd_bindings = ModuleA.Map.find_exn !forward_map k in
-          if (Core.List.count old_fwd_bindings ~f:(fun _v -> true)) > 1 then
-            let new_fwd_bindings = Core.List.filter old_fwd_bindings ~f:(fun v -> not (v = key)) in
-            let () = forward_map := ModuleA.Map.remove !forward_map k in
-            forward_map :=
-              ModuleA.Map.add_exn !forward_map ~key:k ~data:new_fwd_bindings
-          else
-            forward_map := ModuleA.Map.remove !forward_map k
-        )
-                    
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.remove_rev_key_from_forward_map t_ ~rev_values_list ~key in
+      self#set_mutable_maps new_t
+
     method change ~key ~f =
       (* A -> 1,2,3 | B-> 4,5,6 | C -> 7,8,9 
          1->A|2->A|3->A|4->B|5->B|6->B ... etc
          but after some change could end up with
          A -> 2,4,6 | B-> 4,5,6 | C -> 7,8,9
          2->A|4->A,B|5->B|6->A,B| ... etc
-      *)
-      let old_value_list = ModuleA.Map.find_exn !forward_map key in 
-      let () = forward_map := (ModuleA.Map.change !forward_map key ~f) in
-      let new_values = ModuleA.Map.find_exn !forward_map key in
-    (*--- now only need to fixup the reverse mapping ---
-       For each old value (key in reverse mapping):
-         a) if the only binding is to ~key provided to this function then remove the old value (key in reverse mapping)
-         b) else filter the list of values to remove the ~key provided to this function
-       And then for each new value, add them to reverse mapping  *)
-      let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:old_value_list ~key in
-      Core.List.iter new_values
-        ~f:(fun k -> 
-          reverse_map := ModuleB.Map.add_multi !reverse_map ~key:k ~data:key 
-        )
+       *)
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.change t_ ~key ~f in
+      self#set_mutable_maps new_t
 
     method change_reverse ~key ~f =
-      let old_value_list = ModuleB.Map.find_exn !reverse_map key in 
-      let () = reverse_map := (ModuleB.Map.change !reverse_map key ~f) in
-      let new_values = ModuleB.Map.find_exn !reverse_map key in
-      let () = Core.List.iter old_value_list
-                 ~f:(fun k ->
-                   let old_reverse_bindings = ModuleA.Map.find_exn !forward_map k in
-                   if (Core.List.count old_reverse_bindings ~f:(fun _v -> true)) > 1 then
-                     let new_reverse_bindings = Core.List.filter old_reverse_bindings ~f:(fun v -> not (v = key)) in
-                     let () = forward_map := ModuleA.Map.remove !forward_map k in
-                     forward_map :=
-                       ModuleA.Map.add_exn !forward_map ~key:k ~data:new_reverse_bindings
-                   else
-                     forward_map := ModuleA.Map.remove !forward_map k
-                 )  in
-      Core.List.iter new_values
-        ~f:(fun k -> 
-          forward_map := ModuleA.Map.add_multi !forward_map ~key:k ~data:key 
-        )
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.change_reverse t_ ~key ~f in
+      self#set_mutable_maps new_t
 
     method private create_reverse_map_from_forward_map () =
       let () = self#empty_reverse_map () in 
@@ -145,7 +104,7 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
     method filter ~f =
       let () = forward_map := (ModuleA.Map.filter !forward_map ~f) in
       (*Since each map is a multi map of 'a list or 'b list, with 'b or 'a as keys, respectively, the ~f used to 
-        filter keys in one map cannot be used to filter values in the other.*)
+        filter keys in one map cannot be used to filter values in the other...at least not by the filter function*)
       self#create_reverse_map_from_forward_map
     method filter_reverse ~f =
       let () = reverse_map := (ModuleB.Map.filter !reverse_map ~f) in
