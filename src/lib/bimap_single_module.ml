@@ -119,8 +119,8 @@ module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) =
     ModuleA.Map.fold t.fwdmap ~init ~f
   let fold_reverse t ~init ~f =
     ModuleB.Map.fold t.revmap ~init ~f
-  (*    let fold_range_inclusive ~min ~max ~init ~f =
-      Core.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
+  let fold_range_inclusive t ~min ~max ~init ~f =
+    ModuleA.Map.fold_range_inclusive t.fwdmap ~min ~max ~init ~f
   let fold_right t ~init ~f =
     ModuleA.Map.fold_right t.fwdmap ~init ~f
   let fold_right_reverse t ~init ~f =

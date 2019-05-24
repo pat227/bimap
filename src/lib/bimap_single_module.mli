@@ -46,7 +46,7 @@ sig
   (*	val forward_map : ('a,'b,_) Core.Map.t*)
   val fold : t -> init:'a -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> 'a -> 'a) -> 'a
   val fold_reverse : t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t -> 'e -> 'e) -> 'e
-	    (*val fold_range_inclusive : min:'a -> max:'a -> init:'b -> f:(key:'a -> data:'b -> 'b) -> 'b*)
+  val fold_range_inclusive : t -> min:ModuleA.Map.Key.t -> max:ModuleA.Map.Key.t -> init:'a -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> 'a -> 'a) -> 'a
   val fold_right : t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> 'e -> 'e) -> 'e
   val fold_right_reverse : t -> init:'e -> f:(key:ModuleB.Map.Key.t -> data:ModuleA.Map.Key.t -> 'e -> 'e) -> 'e
   val for_all : t -> f:(ModuleB.Map.Key.t -> bool) -> bool
@@ -81,8 +81,4 @@ sig
 	    (*	val reverse_map : ('b, 'a, _) Core.Map.t*)
   val to_alist : ?key_order:[`Increasing | `Decreasing] -> t -> (ModuleA.Map.Key.t * ModuleB.Map.Key.t) list 
   val update : t -> key:ModuleA.Map.Key.t -> f:(ModuleB.Map.Key.t option -> ModuleB.Map.Key.t) -> t
-	  
-(*  type ('a, 'b) t = ('a, 'b) bimap_class
-  val make : ('a, 'b, 'c) Core.Map.t -> ('b, 'a, 'd) Core.Map.t -> ('a, 'b) t*)
-
 end

@@ -81,8 +81,6 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
     method data_reverse =
       ModuleB.Map.data !reverse_map
     method empty () =
-      (*let () = forward_map := (Core.Map.empty ~comparator:(Core.Map.comparator !forward_map)) in
-      reverse_map := (Core.Map.empty ~comparator:(Core.Map.comparator !reverse_map))*)
       let () = self#empty_forward_map () in
       self#empty_reverse_map ()
     method exists ~f =
@@ -220,23 +218,14 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
           forward_map := (Core.Map.set !forward_map  ~key:k ~data:new_fwd_values)
         )
     method remove_multi ~key =
-      try
-	let values = ModuleA.Map.find_exn !forward_map key in
-	let head_element = Core.List.nth_exn values 0 in 
-	let () = forward_map := (ModuleA.Map.remove_multi !forward_map key) in
-	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
-        self#remove_fwd_key_from_reverse_map ~fwd_values_list:[head_element] ~key
-        (*--TODO--improve exception handling*)
-      with _e -> raise (Failure "bimap_multi::remove_multi() failed")
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.remove_multi t_ ~key in
+      self#set_mutable_maps new_t
+      
     method remove_reverse_multi ~key =
-      try
-	let values = ModuleB.Map.find_exn !reverse_map key in
-	let head_element = Core.List.nth_exn values 0 in 
-	let () = reverse_map := (ModuleB.Map.remove_multi !reverse_map key) in
-	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
-        self#remove_rev_key_from_forward_map ~rev_values_list:[head_element] ~key
-        (*--TODO--improve exception handling*)
-      with _e -> raise (Failure "bimap_multi::remove_reverse_multi() failed")
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.remove_reverse_multi t_ ~key in
+      self#set_mutable_maps new_t
     method to_alist ?key_order () =
       match Core.Option.is_some key_order with
       | false -> Core.Map.to_alist !forward_map
