@@ -129,8 +129,9 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
       (fun ~init ~f -> ModuleA.Map.fold !forward_map ~init ~f)
     method fold_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
       (fun ~init ~f -> ModuleB.Map.fold !reverse_map ~init ~f)
-(*    method fold_range_inclusive ~min ~max ~init ~f =
-      Core.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
+    (*method fold_range_inclusive ~min ~max ~init ~f =*)
+(*    method fold_range_inclusive : 'e. min:ModuleA.Map.Key.t -> max:ModuleA.Map.Key.t -> init:'e -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t list -> 'e -> 'e) -> 'e =
+      ModuleA.Map.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
     method fold_right : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e =
       (fun ~init ~f -> ModuleA.Map.fold_right !forward_map ~init ~f)
     method fold_right_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
@@ -226,37 +227,15 @@ module Bimap_multi_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable
       let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
       let new_t = Bimap_multi_module.remove_reverse_multi t_ ~key in
       self#set_mutable_maps new_t
+
     method to_alist ?key_order () =
       match Core.Option.is_some key_order with
       | false -> Core.Map.to_alist !forward_map
       | true -> Core.Map.to_alist ~key_order:(Core.Option.value_exn key_order) !forward_map
     (*update and change are identical except that the function f must be of a different type; see Core.Map documentation.*)
     method update ~key ~f =
-      let oldvalues = ModuleA.Map.find_exn !forward_map key in
-      let () = forward_map := (ModuleA.Map.update !forward_map key ~f) in
-      let newvalues = ModuleA.Map.find_exn !forward_map key in
-      (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-      let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
-      Core.List.iter newvalues
-        ~f:(fun v -> 
-          reverse_map := ModuleB.Map.add_multi !reverse_map ~key:v ~data:key
-        )
+      let t_ = Bimap_multi_module.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let new_t = Bimap_multi_module.update t_ ~key ~f in
+      self#set_mutable_maps new_t
   end
 end
-
-(*
-    method equal f ~other_fwd_map =
-      Core.Map.equal f !forward_map !other_fwd_map *)
-
-(*  UNBOUND 'e --- how to write these?
-    method fold ~init ~f =
-      Core.Map.fold !forward_map ~init ~f
-    method fold_reverse ~init ~f =
-      Core.Map.fold !reverse_map ~init ~f*)
-(*
-Cannot do these right now--type 'c the compraator is unbound
-    method comparator () =
-      Core.Map.comparator !forward_map
-    method comparator_reverse () =
-      Core.Map.comparator !reverse_map
-*)

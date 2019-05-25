@@ -330,20 +330,3 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
            helper newt tl in 
       helper newt newvalues
 end
-
-(*
-    method equal f ~other_fwd_map =
-      Core.Map.equal f !forward_map !other_fwd_map *)
-
-(*  UNBOUND 'e --- how to write these?
-    method fold ~init ~f =
-      Core.Map.fold !forward_map ~init ~f
-    method fold_reverse ~init ~f =
-      Core.Map.fold !reverse_map ~init ~f*)
-(*
-Cannot do these right now--type 'c the compraator is unbound
-    method comparator () =
-      Core.Map.comparator !forward_map
-    method comparator_reverse () =
-      Core.Map.comparator !reverse_map
-*)

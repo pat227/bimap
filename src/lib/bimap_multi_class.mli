@@ -62,6 +62,11 @@ sig
                      init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
             method fold_right_reverse :
                      init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e
+            (*method fold_range_inclusive :
+                     min:ModuleA.Map.Key.t ->
+                     max:ModuleA.Map.Key.t ->
+                     init:'e ->
+                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> 'e -> 'e) -> 'e*)
             method for_all : f:('b Core.List.t -> bool) -> bool
             method for_all_reverse : f:('a Core.List.t -> bool) -> bool
             method is_empty : bool
