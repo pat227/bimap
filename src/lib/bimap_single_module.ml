@@ -1,69 +1,74 @@
-(*Not using core have to use a functor. A class expects a type, which Core Map does,
-but map.mli only provides a module type ... wait maybe this is possible 
-using the (+a) t type in Map.mli????!!! At any rate, use functor.*)
 module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
-  let forward_map = ref MapModule1.empty;; 
-  let reverse_map = ref MapModule2.empty;;   
-  (*empty, union, merge, map, etc, all mutate the maps, ie, the functions do 
-    not return maps unlike counterparts in map.mli*)
+
+  type t = { fwdmap:MapModule2.key MapModule1.t; revmap:MapModule1.key MapModule2.t}
+
   let empty () =
-    let () = forward_map := MapModule1.empty in
-    reverse_map := MapModule2.empty
-  let is_empty () =
-    MapModule1.is_empty !forward_map
-  let is_empty_reverse () =
-    MapModule2.is_empty !reverse_map
-  let mem ~key =
-    MapModule1.mem key !forward_map;;
-  let mem_reverse ~key =
-    MapModule2.mem key !reverse_map;;
-  let add ~key ~data =
-    if MapModule1.mem key !forward_map then
-      let value = MapModule1.find key !forward_map in
-      let () = reverse_map := MapModule2.remove value !reverse_map in 
-      let () = forward_map := MapModule1.add key data !forward_map in 
-      reverse_map := MapModule2.add data key !reverse_map
+    { fwdmap=MapModule1.empty; revmap=MapModule2.empty }
+  let is_empty t =
+    MapModule1.is_empty t.fwdmap
+  let is_empty_reverse t =
+    MapModule2.is_empty t.revmap
+  let mem t ~key =
+    MapModule1.mem key t.fwdmap
+  let mem_reverse t ~key =
+    MapModule2.mem key t.revmap;;
+  let add t ~key ~data =
+    if MapModule1.mem key t.fwdmap then
+      let value = MapModule1.find key t.fwdmap in
+      let new_reverse_map = MapModule2.remove value t.revmap in 
+      let new_forward_map = MapModule1.add key data t.fwdmap in 
+      { fwdmap=new_forward_map; revmap=new_reverse_map }
     else
       (*enforce only one key <-> value pair; do not permit, for example, 
         key -> value1 | key -> value2 while in reverse mapping only have 
         value1 -> key at same time.*)
-      if MapModule2.mem data !reverse_map then
-        let () = reverse_map := MapModule2.remove data !reverse_map in
-        let () = forward_map := MapModule1.add key data !forward_map in 
-        reverse_map := MapModule2.add data key !reverse_map
+      if MapModule2.mem data t.revmap then
+        let new_reverse_map = MapModule2.remove data t.revmap in
+        let new_forward_map = MapModule1.add key data t.fwdmap in 
+        { fwdmap=new_forward_map; revmap=new_reverse_map }
       else 
-        let () = forward_map := MapModule1.add key data !forward_map in 
-        reverse_map := MapModule2.add data key !reverse_map;;
-  let add_reverse ~key ~data =
-    if MapModule2.mem key !reverse_map then
-      let value = MapModule2.find key !reverse_map in
-      let () = forward_map := MapModule1.remove value !forward_map in
-      let () = reverse_map := (MapModule2.add key data !reverse_map) in
-      forward_map := MapModule1.add data key !forward_map
-    else if MapModule1.mem data !forward_map then
-      let () = forward_map := MapModule1.remove data !forward_map in
-      let () = reverse_map := MapModule2.add key data !reverse_map in 
-      forward_map := MapModule1.add data key !forward_map
+        let new_forward_map = MapModule1.add key data t.fwdmap in 
+        let new_reverse_map = MapModule2.add data key t.revmap in
+        { fwdmap=new_forward_map; revmap=new_reverse_map }
+  let add_reverse t ~key ~data =
+    if MapModule2.mem key t.revmap then
+      let value = MapModule2.find key t.revmap in
+      let new_forward_map = MapModule1.remove value t.fwdmap in
+      let new_reverse_map = MapModule2.add key data t.revmap in
+      { fwdmap=new_forward_map; revmap=new_reverse_map }
+    else if MapModule1.mem data t.fwdmap then
+      let new_forward_map = MapModule1.remove data t.fwdmap in
+      let new_reverse_map = MapModule2.add key data t.revmap in 
+      let new_forward_map = MapModule1.add data key t.fwdmap in
+      { fwdmap=new_forward_map; revmap=new_reverse_map }
     else
-      let () = reverse_map := (MapModule2.add key data !reverse_map) in
-      forward_map := MapModule1.add data key !forward_map;;
-  let singleton ~key ~data =
-    let () = empty () in
-    add ~key ~data
-  let singleton_reverse ~key ~data =
-    let () = empty () in
-    add_reverse ~key ~data
-  let create_reverse_map_from_forward_map () =
-      let () = reverse_map := MapModule2.empty in
-      MapModule1.iter
-	     (fun k v ->
-	       add_reverse ~key:v ~data:k) !forward_map
-  let create_forward_map_from_reverse_map () =
-    let () = forward_map := MapModule1.empty in 
+      let new_reverse_map = MapModule2.add key data t.revmap in
+      let new_forward_map = MapModule1.add data key t.fwdmap in
+      { fwdmap=new_forward_map; revmap=new_reverse_map };;
+  let singleton t ~key ~data =
+    let empty_t = empty () in
+    add empty_t ~key ~data
+  let singleton_reverse t ~key ~data =
+    let empty_t = empty () in
+    add_reverse empty_t ~key ~data
+  let create_reverse_map_from_forward_map t =
+    let new_reverse_map = MapModule2.empty in
+    let new_t = { fwdmap=t.fwdmap; revmap=new_reverse_map } in
+    let bindingslist = MapModule1.bindings in
+    let rec helper bindings typet =
+      match bindings with
+      | [] -> t
+      | h :: t ->
+         let newt = add_reverse typet ~key:(snd h) ~data:(fst h) in
+         helper t newt in
+    helper bindingslist new_t
+  let create_forward_map_from_reverse_map t =
+    let new_forward_map = MapModule1.empty in
+    let new_t = {fwdmap=new_forward_map; revmap=t.revmap} in 
     MapModule2.iter
       (fun k v ->
-	add ~key:v ~data:k) !reverse_map
-  let remove ~key =
+	add new_t ~key:v ~data:k) t.revmap
+(*  let remove ~key =
     let value = MapModule1.find key !forward_map in 
     let () = forward_map := MapModule1.remove key !forward_map in
     reverse_map := MapModule2.remove value !reverse_map
@@ -197,5 +202,5 @@ module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
   let set_forward_map ~map =
     let () = empty () in
     let () = forward_map := map in
-    create_reverse_map_from_forward_map ()
+    create_reverse_map_from_forward_map ()*)
 end;;
