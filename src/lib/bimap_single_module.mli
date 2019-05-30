@@ -43,60 +43,58 @@ sig
   val filter_reverse :
     t -> f:(MapModule2.key -> MapModule1.key -> bool) -> t
   (*---------------Not testing these 2 right now---------------*)
-  val iter : t -> f:(MapModule1.key -> MapModule2.key -> unit) -> unit
-  val iter_reverse : t -> f:(MapModule2.key -> MapModule1.key -> unit) -> unit
+  val iter : t -> f:(MapModule1.key -> MapModule2.key -> unit) -> t
+  val iter_reverse : t -> f:(MapModule2.key -> MapModule1.key -> unit) -> t
   (*-----------------------------------------------------------*)
-(*  val fold : f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
+  val fold : t -> f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
   val fold_reverse :
-    f:(MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
-  val for_all : f:(MapModule1.key -> MapModule2.key -> bool) -> bool
+    t -> f:(MapModule2.key -> MapModule1.key -> 'a -> 'a) -> 'a -> 'a
+  val for_all : t -> f:(MapModule1.key -> MapModule2.key -> bool) -> bool
   val for_all_reverse :
-    f:(MapModule2.key -> MapModule1.key -> bool) -> bool
-  val exists : f:(MapModule1.key -> MapModule2.key -> bool) -> bool
+    t -> f:(MapModule2.key -> MapModule1.key -> bool) -> bool
+  val exists : t -> f:(MapModule1.key -> MapModule2.key -> bool) -> bool
   val exists_reverse :
-    f:(MapModule2.key -> MapModule1.key -> bool) -> bool
+    t -> f:(MapModule2.key -> MapModule1.key -> bool) -> bool
   val partition :
-    f:(MapModule1.key -> MapModule2.key -> bool) ->
+    t -> f:(MapModule1.key -> MapModule2.key -> bool) ->
     MapModule2.key MapModule1.t * MapModule2.key MapModule1.t
   val partition_reverse :
-    f:(MapModule2.key -> MapModule1.key -> bool) ->
+    t -> f:(MapModule2.key -> MapModule1.key -> bool) ->
     MapModule1.key MapModule2.t * MapModule1.key MapModule2.t
-  val cardinal : unit -> int
-  val cardinal_reverse : unit -> int
-  val bindings : unit -> (MapModule1.key * MapModule2.key) list
-  val bindings_reverse : unit -> (MapModule2.key * MapModule1.key) list
-  val min_binding_exn : unit -> MapModule1.key * MapModule2.key
-  val max_binding_exn : unit -> MapModule1.key * MapModule2.key
-  val min_binding : unit -> (MapModule1.key * MapModule2.key) option
-  val max_binding : unit -> (MapModule1.key * MapModule2.key) option
-  val min_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
-  val max_binding_reverse_exn : unit -> MapModule2.key * MapModule1.key
-  val min_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
-  val max_binding_reverse : unit -> (MapModule2.key * MapModule1.key) option
+  val cardinal : t -> int
+  val cardinal_reverse : t -> int
+  val bindings : t -> (MapModule1.key * MapModule2.key) list
+  val bindings_reverse : t -> (MapModule2.key * MapModule1.key) list
+  val min_binding_exn : t -> MapModule1.key * MapModule2.key
+  val max_binding_exn : t -> MapModule1.key * MapModule2.key
+  val min_binding : t -> (MapModule1.key * MapModule2.key) option
+  val max_binding : t -> (MapModule1.key * MapModule2.key) option
+  val min_binding_reverse_exn : t -> MapModule2.key * MapModule1.key
+  val max_binding_reverse_exn : t -> MapModule2.key * MapModule1.key
+  val min_binding_reverse : t -> (MapModule2.key * MapModule1.key) option
+  val max_binding_reverse : t -> (MapModule2.key * MapModule1.key) option
   (*-----------------------untested-3-functions-------------------*)
-  val choose : unit -> MapModule1.key * MapModule2.key
-  val choose_reverse : unit -> MapModule2.key * MapModule1.key
+  val choose : t -> MapModule1.key * MapModule2.key
+  val choose_reverse : t -> MapModule2.key * MapModule1.key
   val split_reverse :
-    key:MapModule2.key ->
+    t -> key:MapModule2.key ->
     MapModule1.key MapModule2.t * MapModule1.key option *
       MapModule1.key MapModule2.t
   (*--------------------------------------------------------------*)
   val split :
-    key:MapModule1.key ->
+    t -> key:MapModule1.key ->
     MapModule2.key MapModule1.t * MapModule2.key option *
       MapModule2.key MapModule1.t
-  val find_exn : key:MapModule1.key -> MapModule2.key
-  val find_reverse_exn : key:MapModule2.key -> MapModule1.key
-  val find : key:MapModule1.key -> MapModule2.key option
-  val find_reverse : key:MapModule2.key -> MapModule1.key option
-  val map : f:(MapModule2.key -> MapModule2.key) -> unit
-  val map_reverse : f:(MapModule1.key -> MapModule1.key) -> unit
-  (*---------------------untested-3-functions----------------*)
+  val find_exn : t -> key:MapModule1.key -> MapModule2.key
+  val find_reverse_exn : t -> key:MapModule2.key -> MapModule1.key
+  val find : t -> key:MapModule1.key -> MapModule2.key option
+  val find_reverse : t -> key:MapModule2.key -> MapModule1.key option
+  val map : t -> f:(MapModule2.key -> MapModule2.key) -> t
+  val map_reverse : t -> f:(MapModule1.key -> MapModule1.key) -> t
+  (*---------------------untested-functions----------------*)
   val mapi :
-    f:(MapModule1.key -> MapModule2.key -> MapModule2.key) -> unit
+    t -> f:(MapModule1.key -> MapModule2.key -> MapModule2.key) -> t
   val mapi_reverse :
-    f:(MapModule2.key -> MapModule1.key -> MapModule1.key) -> unit
-  val set_forward_map : map:(MapModule2.key MapModule1.t) -> unit
-                                                               (*---------------------------------------------------------*)
- *)
+    t -> f:(MapModule2.key -> MapModule1.key -> MapModule1.key) -> t
+  (*---------------------------------------------------------*)
 end
