@@ -111,16 +111,10 @@ module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     let new_reverse_map = (MapModule2.filter f t.revmap) in
     let new_fwd_map = create_forward_map_from_reverse_map new_reverse_map in
     { fwdmap=new_fwd_map; revmap=new_reverse_map }
-  (*--- NOTE:iter mutates the map but we must return unit, yet we must also mutate the reverse map before returning --- *)
   let iter t ~f =
-    (*--todo:do not mutate the argument*)
-    let () = MapModule1.iter f t.fwdmap in
-    let new_rev_map = create_reverse_map_from_forward_map ~forward_map:t.fwdmap in
-    { fwdmap = t.fwdmap; revmap = new_rev_map }
+    MapModule1.iter f t.fwdmap
   let iter_reverse t ~f =
-    let () = MapModule2.iter f t.revmap in
-    let new_fwd_map = create_forward_map_from_reverse_map t.revmap in
-    { fwdmap=new_fwd_map; revmap=t.revmap }
+    MapModule2.iter f t.revmap
   let fold t ~f = 
     MapModule1.fold f t.fwdmap
   let fold_reverse t ~f =

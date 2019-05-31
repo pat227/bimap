@@ -43,8 +43,8 @@ sig
   val filter_reverse :
     t -> f:(MapModule2.key -> MapModule1.key -> bool) -> t
   (*---------------Not testing these 2 right now---------------*)
-  val iter : t -> f:(MapModule1.key -> MapModule2.key -> unit) -> t
-  val iter_reverse : t -> f:(MapModule2.key -> MapModule1.key -> unit) -> t
+  val iter : t -> f:(MapModule1.key -> MapModule2.key -> unit) -> unit
+  val iter_reverse : t -> f:(MapModule2.key -> MapModule1.key -> unit) -> unit
   (*-----------------------------------------------------------*)
   val fold : t -> f:(MapModule1.key -> MapModule2.key -> 'a -> 'a) -> 'a -> 'a
   val fold_reverse :
