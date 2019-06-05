@@ -100,31 +100,33 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     add_reverse t ~key ~data
   let create_reverse_map_from_forward_map forward_map =
     let new_reverse_map = ref MapModule2.empty in
-    MapModule1.iter
-      (fun k v ->
-        List.iter
-          (fun x ->
-            if MapModule2.mem x !new_reverse_map then 
-              let rev_list = MapModule2.find x !new_reverse_map in
-              new_reverse_map := MapModule2.add x (k::rev_list) !new_reverse_map
-            else
-              new_reverse_map := MapModule2.add x [k] !new_reverse_map
-          ) v
-      ) forward_map
+    let () = MapModule1.iter
+               (fun k v ->
+                 List.iter
+                   (fun x ->
+                     if MapModule2.mem x !new_reverse_map then 
+                       let rev_list = MapModule2.find x !new_reverse_map in
+                       new_reverse_map := MapModule2.add x (k::rev_list) !new_reverse_map
+                     else
+                       new_reverse_map := MapModule2.add x [k] !new_reverse_map
+                   ) v
+               ) forward_map in
+    !new_reverse_map
       
   let create_forward_map_from_reverse_map reverse_map =
     let new_forward_map = ref MapModule1.empty in
-    MapModule2.iter
-      (fun k v ->
-        List.iter
-          (fun x ->
-            if MapModule1.mem x !new_forward_map then 
-              let fwd_list = MapModule1.find x !new_forward_map in
-              new_forward_map := MapModule1.add x (k::fwd_list) !new_forward_map
-            else
-              new_forward_map := MapModule1.add x [k] !new_forward_map
-          ) v)
-      !reverse_map
+    let () = MapModule2.iter
+               (fun k v ->
+                 List.iter
+                   (fun x ->
+                     if MapModule1.mem x !new_forward_map then 
+                       let fwd_list = MapModule1.find x !new_forward_map in
+                       new_forward_map := MapModule1.add x (k::fwd_list) !new_forward_map
+                     else
+                       new_forward_map := MapModule1.add x [k] !new_forward_map
+                   ) v)
+               reverse_map in
+    !new_forward_map
 
   let remove t ~key =
     if MapModule1.mem key t.fwdmap then 
@@ -156,115 +158,122 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
               (fun fwdlist_opt ->
                 match fwdlist_opt with
                 | Some fwdlist ->
-                   Some (List.filter (fun y -> y != key) fwd_list)
+                   Some (List.filter (fun y -> y != key) fwdlist)
                 | None -> (*should be impossible or evidence of a bug*)
                    raise (Failure "A value in the revmap was not found as key in fwdmap!")
               ) m
           ) t.fwdmap rev_list in
       { fwdmap=new_fwdmap; revmap=new_reverse_map }
     else t
-(*  
-  let merge ~f ~othermap =
-    let () = forward_map := MapModule1.merge f !forward_map othermap in
-    create_reverse_map_from_forward_map ()
-  let merge_reverse ~f ~othermap =
-    let () = reverse_map := MapModule2.merge f !reverse_map othermap in
-    create_forward_map_from_reverse_map ()
-  let union ~f ~othermap =
-    let () = forward_map := MapModule1.union f !forward_map othermap in
-    create_reverse_map_from_forward_map ()
-  let union_reverse ~f ~othermap =
-    let () = reverse_map := MapModule2.union f !reverse_map othermap in
-    create_forward_map_from_reverse_map ()
-  let compare ~f ~othermap =
-    MapModule1.compare f !forward_map othermap
-  let compare_reverse ~f ~othermap =
-    MapModule2.compare f !reverse_map othermap
-  let equal ~f ~othermap =
-    MapModule1.equal f !forward_map othermap
-  let equal_reverse ~f ~othermap =
-    MapModule2.equal f !reverse_map othermap
-  let filter ~f =
-    let () = forward_map := (MapModule1.filter f !forward_map) in
-    create_reverse_map_from_forward_map ()
-  let filter_reverse ~f =
-    let () = reverse_map := (MapModule2.filter f !reverse_map) in
-    create_forward_map_from_reverse_map ()
-  let iter ~f =
-    let () = MapModule1.iter f !forward_map in
-    create_reverse_map_from_forward_map ()
-  let iter_reverse ~f =
-    let () = MapModule2.iter f !reverse_map in
-    create_forward_map_from_reverse_map ()    
-  let fold ~f = 
-    MapModule1.fold f !forward_map
-  let fold_reverse ~f =
-    MapModule2.fold f !reverse_map
-  let for_all ~f =
-    MapModule1.for_all f !forward_map
-  let for_all_reverse ~f =
-    MapModule2.for_all f !reverse_map
-  let exists ~f =
-    MapModule1.exists f !forward_map
-  let exists_reverse ~f =
-    MapModule2.exists f !reverse_map
-  let partition ~f =
-    MapModule1.partition f !forward_map
-  let partition_reverse ~f =
-    MapModule2.partition f !reverse_map
-  let cardinal () =
-    MapModule1.cardinal !forward_map
-  let cardinal_reverse () =
-    MapModule2.cardinal !reverse_map
-  let bindings () =
-    MapModule1.bindings !forward_map
-  let bindings_reverse () =
-    MapModule2.bindings !reverse_map
-  let min_binding () =
-    MapModule1.min_binding !forward_map
-  let min_binding_reverse () =
-    MapModule2.min_binding !reverse_map
-  let max_binding () =
-    MapModule1.max_binding !forward_map
-  let max_binding_reverse () =
-    MapModule2.max_binding !reverse_map
-  let choose () =
-    MapModule1.choose !forward_map
-  let choose_reverse () =
-    MapModule2.choose !reverse_map
-  let split ~key =
-    MapModule1.split key !forward_map
-  let split_reverse ~key =
-    MapModule2.split key !reverse_map
-  let find_exn ~key =
-    MapModule1.find key !forward_map
-  let find_reverse_exn ~key =
-    MapModule2.find key !reverse_map
-  let find ~key =
+  
+  let merge t ~f ~othermap =
+    let new_forward_map = MapModule1.merge f t.fwdmap othermap in
+    let new_revmap = create_reverse_map_from_forward_map new_forward_map in
+    { fwdmap=new_forward_map; revmap=new_revmap }
+  let merge_reverse t ~f ~othermap =
+    let new_reverse_map = MapModule2.merge f t.revmap othermap in
+    let new_fwdmap = create_forward_map_from_reverse_map new_reverse_map in
+    { fwdmap=new_fwdmap; revmap=new_reverse_map }
+  let union t ~f ~othermap =
+    let new_forward_map = MapModule1.union f t.fwdmap othermap in
+    let new_revmap = create_reverse_map_from_forward_map new_forward_map in
+    { fwdmap=new_forward_map; revmap=new_revmap }
+  let union_reverse t ~f ~othermap =
+    let new_reverse_map = MapModule2.union f t.revmap othermap in
+    let new_fwdmap = create_forward_map_from_reverse_map new_reverse_map in
+    { fwdmap=new_fwdmap; revmap=new_reverse_map }
+  let compare t ~f ~othermap =
+    MapModule1.compare f t.fwdmap othermap
+  let compare_reverse t ~f ~othermap =
+    MapModule2.compare f t.revmap othermap
+  let equal t ~f ~othermap =
+    MapModule1.equal f t.fwdmap othermap
+  let equal_reverse t ~f ~othermap =
+    MapModule2.equal f t.revmap othermap
+  let filter t ~f =
+    let new_forward_map = (MapModule1.filter f t.fwdmap) in
+    let new_revmap = create_reverse_map_from_forward_map t.fwdmap in
+    { fwdmap=new_forward_map; revmap=new_revmap }    
+  let filter_reverse t ~f =
+    let new_reverse_map = (MapModule2.filter f t.revmap) in
+    let new_fwdmap = create_forward_map_from_reverse_map new_reverse_map in
+    { fwdmap=new_fwdmap; revmap=new_reverse_map }
+  (*iter returns unit, should not mutuate map, that is what the map function is for*)
+  let iter t ~f =
+    MapModule1.iter f t.fwdmap
+  let iter_reverse t ~f =
+    MapModule2.iter f t.revmap
+  let fold t ~f = 
+    MapModule1.fold f t.fwdmap
+  let fold_reverse t ~f =
+    MapModule2.fold f t.revmap
+  let for_all t ~f =
+    MapModule1.for_all f t.fwdmap
+  let for_all_reverse t ~f =
+    MapModule2.for_all f t.revmap
+  let exists t ~f =
+    MapModule1.exists f t.fwdmap
+  let exists_reverse t ~f =
+    MapModule2.exists f t.revmap
+  let partition t ~f =
+    MapModule1.partition f t.fwdmap
+  let partition_reverse t ~f =
+    MapModule2.partition f t.revmap
+  let cardinal t =
+    MapModule1.cardinal t.fwdmap
+  let cardinal_reverse t =
+    MapModule2.cardinal t.revmap
+  let bindings t =
+    MapModule1.bindings t.fwdmap
+  let bindings_reverse t =
+    MapModule2.bindings t.revmap
+  let min_binding t =
+    MapModule1.min_binding t.fwdmap
+  let min_binding_reverse t =
+    MapModule2.min_binding t.revmap
+  let max_binding t =
+    MapModule1.max_binding t.fwdmap
+  let max_binding_reverse t =
+    MapModule2.max_binding t.revmap
+  let choose t =
+    MapModule1.choose t.fwdmap
+  let choose_reverse t =
+    MapModule2.choose t.revmap
+  let split t ~key =
+    MapModule1.split key t.fwdmap
+  let split_reverse t ~key =
+    MapModule2.split key t.revmap
+  let find_exn t ~key =
+    MapModule1.find key t.fwdmap
+  let find_reverse_exn t ~key =
+    MapModule2.find key t.revmap
+  let find t ~key =
     try
-      Some (MapModule1.find key !forward_map)
+      Some (MapModule1.find key t.fwdmap)
     with _ -> None
-  let find_reverse ~key =
+  let find_reverse t ~key =
     try
-      Some (MapModule2.find key !reverse_map)
+      Some (MapModule2.find key t.revmap)
     with _ -> None 
-  let map ~f =
-    let () = forward_map := MapModule1.map f !forward_map in
-    create_reverse_map_from_forward_map ()
-  let map_reverse ~f =
-    let () = reverse_map := MapModule2.map f !reverse_map in
-    create_forward_map_from_reverse_map ()
-  let mapi ~f =
+  let map t ~f =
+    let new_forward_map = MapModule1.map f t.fwdmap in
+    let new_revmap = create_reverse_map_from_forward_map new_forward_map in
+    { fwdmap=new_forward_map; revmap=new_revmap }    
+  let map_reverse t ~f =
+    let new_reverse_map = MapModule2.map f t.revmap in
+    let new_fwdmap = create_forward_map_from_reverse_map new_reverse_map in
+    { fwdmap=new_fwdmap; revmap=new_reverse_map }
+      
+  let mapi t ~f =
     let () = forward_map := MapModule1.mapi f !forward_map in
     create_reverse_map_from_forward_map ()
-  let mapi_reverse ~f =
+  let mapi_reverse t ~f =
     let () = reverse_map := MapModule2.mapi f !reverse_map in
     create_forward_map_from_reverse_map ()
   (*need a way to quickly set up bimap in an other than empty state by supplying 
     a map already populated with values*)
-  let set_forward_map ~map =
+  let set_forward_map t ~map =
     let () = empty () in
     let () = forward_map := map in
     create_reverse_map_from_forward_map ()
- *)
 end;;
