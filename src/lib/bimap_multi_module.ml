@@ -265,15 +265,16 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     { fwdmap=new_fwdmap; revmap=new_reverse_map }
       
   let mapi t ~f =
-    let () = forward_map := MapModule1.mapi f !forward_map in
-    create_reverse_map_from_forward_map ()
+    let new_forward_map = MapModule1.mapi f t.fwdmap in
+    let new_reverse_map = create_reverse_map_from_forward_map new_forward_map in
+    { fwdmap=new_forward_map; revmap=new_reverse_map }    
   let mapi_reverse t ~f =
-    let () = reverse_map := MapModule2.mapi f !reverse_map in
-    create_forward_map_from_reverse_map ()
+    let new_reverse_map = MapModule2.mapi f t.revmap in
+    let new_forward_map = create_forward_map_from_reverse_map new_reverse_map in
+    { fwdmap=new_forward_map; revmap=new_reverse_map }
   (*need a way to quickly set up bimap in an other than empty state by supplying 
     a map already populated with values*)
   let set_forward_map t ~map =
-    let () = empty () in
-    let () = forward_map := map in
-    create_reverse_map_from_forward_map ()
+    let new_reverse_map = create_reverse_map_from_forward_map map in
+    { fwdmap=map; revmap=new_reverse_map }
 end;;
