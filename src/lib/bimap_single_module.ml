@@ -1,7 +1,7 @@
 module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
 
   type t = { fwdmap:MapModule2.key MapModule1.t; revmap:MapModule1.key MapModule2.t}
-
+  let create_t ~fwdmap ~revmap = { fwdmap=fwdmap; revmap=revmap }
   let empty () =
     { fwdmap=MapModule1.empty; revmap=MapModule2.empty }
   let is_empty t =

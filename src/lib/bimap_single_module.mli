@@ -3,6 +3,7 @@ module Bimap_single_module :
 functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
 sig
   type t
+  val create_t : fwdmap:MapModule2.key MapModule1.t -> revmap:MapModule1.key MapModule2.t -> t
   val empty : unit -> t
   val is_empty : t -> bool
   val mem : t -> key:MapModule1.key -> bool
@@ -11,6 +12,8 @@ sig
   val add_reverse : t -> key:MapModule2.key -> data:MapModule1.key -> t
   val singleton : t -> key:MapModule1.key -> data:MapModule2.key -> t
   val singleton_reverse : t -> key:MapModule2.key -> data:MapModule1.key -> t
+  val create_reverse_map_from_forward_map : forward_map:MapModule2.key MapModule1.t -> MapModule1.key MapModule2.t
+  val create_forward_map_from_reverse_map : reverse_map:MapModule1.key MapModule2.t -> MapModule2.key MapModule1.t
   val remove : t -> key:MapModule1.key -> t
   val remove_reverse : t-> key:MapModule2.key -> t
   (*Needed to get access to the underlying map for use by 

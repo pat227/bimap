@@ -20,11 +20,15 @@ module Bimap_single_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     method mem_reverse k =
       MapModule2.mem k !reverse_map
     method add ~key ~data =
-      let () = forward_map := MapModule1.add key data !forward_map in
-      reverse_map := MapModule2.add data key !reverse_map
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.add newt ~key ~data in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method add_reverse ~key ~data =
-      let () = reverse_map := (MapModule2.add key data !reverse_map) in
-      forward_map := (MapModule1.add data key !forward_map)
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.add_reverse newt ~key ~data in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt      
     method singleton ~key ~data =
       let () = self#empty () in
       self#add ~key ~data
@@ -32,17 +36,11 @@ module Bimap_single_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
       let () = self#empty () in
       self#add_reverse ~key ~data
     method private create_reverse_map_from_forward_map () =
-      let () = self#empty_reverse_map () in
-      MapModule1.iter 
-        (fun k v ->
-	  reverse_map :=
-	    MapModule2.add v k !reverse_map) !forward_map
+      let new_reverse_map = Bimap_p.create_reverse_map_from_forward_map ~forward_map:(!forward_map) in
+      reverse_map := new_reverse_map
     method private create_forward_map_from_reverse_map () =
-      let () = self#empty_forward_map () in 
-      MapModule2.iter
-	(fun k v ->
-	  forward_map :=
-	    MapModule1.add v k !forward_map) !reverse_map
+      let new_forward_map = Bimap_p.create_forward_map_from_reverse_map ~reverse_map:(!reverse_map) in
+      forward_map := new_forward_map
     method remove ~key =
       let value = MapModule1.find key !forward_map in 
       let () = forward_map := MapModule1.remove key !forward_map in
