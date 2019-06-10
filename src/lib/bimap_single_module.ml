@@ -13,9 +13,10 @@ module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
   let mem_reverse t ~key =
     MapModule2.mem key t.revmap;;
   let add t ~key ~data =
-    if MapModule1.mem key t.fwdmap then
+    if (MapModule1.mem key t.fwdmap) && (MapModule2.mem data t.revmap) then
       let value = MapModule1.find key t.fwdmap in
-      let new_reverse_map = MapModule2.remove value t.revmap in 
+      let new_reverse_map = MapModule2.remove value t.revmap in
+      let new_reverse_map = MapModule2.add data key new_reverse_map in 
       let new_forward_map = MapModule1.add key data t.fwdmap in 
       { fwdmap=new_forward_map; revmap=new_reverse_map }
     else
@@ -24,27 +25,30 @@ module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
         value1 -> key at same time.*)
       if MapModule2.mem data t.revmap then
         let new_reverse_map = MapModule2.remove data t.revmap in
-        let new_forward_map = MapModule1.add key data t.fwdmap in 
+        let new_reverse_map = MapModule2.add data key new_reverse_map in 
+        let new_forward_map = MapModule1.add key data t.fwdmap in
         { fwdmap=new_forward_map; revmap=new_reverse_map }
       else 
         let new_forward_map = MapModule1.add key data t.fwdmap in 
         let new_reverse_map = MapModule2.add data key t.revmap in
         { fwdmap=new_forward_map; revmap=new_reverse_map }
   let add_reverse t ~key ~data =
-    if MapModule2.mem key t.revmap then
+    if (MapModule2.mem key t.revmap) && (MapModule1.mem data t.fwdmap) then
       let value = MapModule2.find key t.revmap in
       let new_forward_map = MapModule1.remove value t.fwdmap in
+      let new_forward_map = MapModule1.add data key new_forward_map in
       let new_reverse_map = MapModule2.add key data t.revmap in
       { fwdmap=new_forward_map; revmap=new_reverse_map }
-    else if MapModule1.mem data t.fwdmap then
+    else
+      if MapModule1.mem data t.fwdmap then
       let new_forward_map = MapModule1.remove data t.fwdmap in
       let new_reverse_map = MapModule2.add key data t.revmap in 
       let new_forward_map = MapModule1.add data key new_forward_map in
       { fwdmap=new_forward_map; revmap=new_reverse_map }
-    else
-      let new_reverse_map = MapModule2.add key data t.revmap in
-      let new_forward_map = MapModule1.add data key t.fwdmap in
-      { fwdmap=new_forward_map; revmap=new_reverse_map };;
+      else
+        let new_reverse_map = MapModule2.add key data t.revmap in
+        let new_forward_map = MapModule1.add data key t.fwdmap in
+        { fwdmap=new_forward_map; revmap=new_reverse_map };;
   let singleton t ~key ~data =
     let empty_t = empty () in
     add empty_t ~key ~data

@@ -1,4 +1,6 @@
+module Bimap_pure = Bimap_single_module.Bimap_single_module
 module Bimap_single_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
+  module Bimap_p = Bimap_pure(MapModule1)(MapModule2)
   class bimap_single_class = object(self)
     val mutable forward_map = ref MapModule1.empty
     val mutable reverse_map = ref MapModule2.empty
@@ -18,7 +20,7 @@ module Bimap_single_class(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     method mem_reverse k =
       MapModule2.mem k !reverse_map
     method add ~key ~data =
-      let () = forward_map := MapModule1.add key data !forward_map in 
+      let () = forward_map := MapModule1.add key data !forward_map in
       reverse_map := MapModule2.add data key !reverse_map
     method add_reverse ~key ~data =
       let () = reverse_map := (MapModule2.add key data !reverse_map) in
