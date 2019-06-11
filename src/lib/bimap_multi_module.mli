@@ -2,6 +2,7 @@ module Bimap_multi_module :
 functor (MapModule1 : Map.S) (MapModule2 : Map.S) ->
 sig
   type t
+  val create_t : fwdmap:MapModule2.key list MapModule1.t -> revmap:MapModule1.key list MapModule2.t -> t
   val get_forward_map : t -> MapModule2.key list MapModule1.t
   val get_reverse_map : t -> MapModule1.key list MapModule2.t
   val empty : unit -> t

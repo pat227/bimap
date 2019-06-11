@@ -1,7 +1,7 @@
 module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct 
 
   type t = { fwdmap:MapModule2.key list MapModule1.t; revmap:MapModule1.key list MapModule2.t}
-             
+  let create_t ~fwdmap ~revmap = { fwdmap=fwdmap; revmap=revmap } 
   let get_forward_map t = t.fwdmap
   let get_reverse_map t = t.revmap
   let empty () = { fwdmap=MapModule1.empty; revmap=MapModule2.empty }
@@ -36,15 +36,23 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
             ) forward_list
         else
           reverse_map := MapModule2.add data [key] !reverse_map
-*)
-    (*let update_all_fwd_keys ~fwdkey ~rev_list =
-      if List.length rev_list > 0 then
-        List.iter
-          (fun x ->
-            let fwd_list = MapModule1.find x !forward_map in
-            let new_fwd_list = data::fwd_list in
-            forward_map := MapModule1.add data new_fwd_list !forward_map
-          ) rev_list else () in *)       
+   *)
+  let update t ~key ~f =
+    let rec insert_updated_reverse_values t l =
+      match l with
+      | [] -> m
+      | h :: tl ->
+         let newmt = add_reverse t ~key:h ~data:key in
+         insert_updated_values newt tl in 
+    if Module1.mem key t.fwdmap then
+      let oldvalues = Module1.find key t.fwdmap in
+      let newfwdmap = Module1.update key f t.fwdmap in
+      let newvalues = Module1.find key t.fwdmap in
+      let newrevmap = remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
+      let newt = { fwdmap=newfwdmap; revmap=newrevmap } in
+      insert_updated_reverse_values newt newvalues
+    else 
+      
   let rec add t ~key ~data =
     if MapModule1.mem key t.fwdmap then
       if mem_data_of_fwd_map t.fwdmap ~key ~data then t
