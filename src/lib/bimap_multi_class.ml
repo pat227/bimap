@@ -21,20 +21,9 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       reverse_map := Bimap_p.get_reverse_map newt
 
     method private remove_fwd_key_from_reverse_map ~fwd_values_list ~key =
-      List.iter
-        (fun k ->
-          let old_reverse_bindings_opt = ModuleB.find_opt k !reverse_map in
-          match old_reverse_bindings_opt with
-          | Some old_reverse_bindings -> 
-             if ((List.length old_reverse_bindings) > 1) then
-               let new_reverse_bindings = List.filter (fun v -> not (v = key)) old_reverse_bindings in
-               let () = reverse_map := ModuleB.remove k !reverse_map in
-               reverse_map :=
-                 ModuleB.add k new_reverse_bindings !reverse_map
-             else
-               reverse_map := ModuleB.remove k !reverse_map
-          | None -> ()
-        ) fwd_values_list
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!revmap in
+      let newrevmap = Bimap_p.remove_fwd_key_from_reverse_map newt ~fwd_values_list:oldvalues ~key in
+      reverse_map := newrevmap
 
     method private remove_rev_key_from_forward_map ~rev_values_list ~key =
       List.iter
