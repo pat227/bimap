@@ -1,6 +1,6 @@
-module Bimap_pure = Bimap_single_module.Bimap_single_module
+module Bimap_pure = Bimap_multi_module.Bimap_multi_module
 module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
-  module Bimap_p = Bimap_pure(MapModule1)(MapModule2)
+  module Bimap_p = Bimap_pure(ModuleA)(ModuleB)
   class bimap_multi_class = object(self)
     val mutable forward_map = ref ModuleA.empty
     val mutable reverse_map = ref ModuleB.empty
@@ -10,50 +10,23 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       reverse_map := ModuleB.empty
 
     method add_multi ~key ~data =
-      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!revmap in
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
       let newt = Bimap_p.add newt ~key ~data in
       let () = forward_map := Bimap_p.get_forward_map newt in
       reverse_map := Bimap_p.get_reverse_map newt
     method add_multi_reverse ~key ~data =
-      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!revmap in
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
       let newt = Bimap_p.add_reverse newt ~key ~data in
       let () = forward_map := Bimap_p.get_forward_map newt in
       reverse_map := Bimap_p.get_reverse_map newt
 
-    method private remove_fwd_key_from_reverse_map ~fwd_values_list ~key =
-      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!revmap in
-      let newrevmap = Bimap_p.remove_fwd_key_from_reverse_map newt ~fwd_values_list:oldvalues ~key in
-      reverse_map := newrevmap
-
-    method private remove_rev_key_from_forward_map ~rev_values_list ~key =
-      List.iter
-        (fun k ->
-          let old_fwd_bindings_opt = ModuleA.find_opt k !forward_map in
-          match old_fwd_bindings_opt with
-          | Some old_fwd_bindings -> 
-             if (List.length old_fwd_bindings) > 1 then
-               let new_fwd_bindings = List.filter (fun v -> not (v = key)) old_fwd_bindings in
-               let () = forward_map := ModuleA.remove k !forward_map in
-               forward_map :=
-                 ModuleA.add k new_fwd_bindings !forward_map
-             else
-               forward_map := ModuleA.remove k !forward_map
-          | None -> ()             
-        ) rev_values_list
-
     method private create_reverse_map_from_forward_map () =
-      let () = self#empty_reverse_map () in 
-      ModuleA.iter
-	(fun k v ->
-          List.iter (fun v -> self#add_multi_reverse ~key:v ~data:k) v
-	) !forward_map
+      let newfwdmap = Bimpa_p.create_rev_map_from_forward_map !forward_map in
+      forward_map := newfwdmap
 
     method private create_forward_map_from_reverse_map () =
-      let () = self#empty_forward_map () in 
-      ModuleB.iter
-	(fun k v ->
-          List.iter (fun v -> self#add_multi ~key:v ~data:k) v
-	) !reverse_map
+      let newrevmap = Bimpa_p.create_forward_map_from_reverse_map !reverse_map in
+      reverse_map := newrevmap
 
     method cardinal () =
       ModuleA.cardinal !forward_map
@@ -72,7 +45,7 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
         let () = forward_map := (ModuleA.update key f !forward_map) in
         let newvalues = ModuleA.find key !forward_map in
         (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-        let () = self#remove_fwd_key_from_reverse_map ~fwd_values_list:oldvalues ~key in
+        let newrevmap = Bimap_p.remove_fwd_key_from_reverse_map !reverse_map  ~fwd_values_list:oldvalues ~key in
         List.iter 
           (fun v ->
             self#add_multi_reverse ~key:v ~data:key
@@ -104,14 +77,16 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       if ModuleA.mem key !forward_map then 
         let fwd_values_list = ModuleA.find key !forward_map in 
         let () = forward_map := (ModuleA.remove key !forward_map) in
-        self#remove_fwd_key_from_reverse_map ~fwd_values_list ~key
+        let newrevmap = Bimap_p.remove_fwd_key_from_reverse_map !reverse_map ~fwd_values_list ~key in
+        reverse_map := newrevmap
       else ()
 
     method remove_reverse ~key =
       if ModuleB.mem key !reverse_map then 
         let rev_values_list = ModuleB.find key !reverse_map in 
         let () = reverse_map := (ModuleB.remove key !reverse_map) in
-        self#remove_rev_key_from_forward_map ~rev_values_list ~key
+        let newfwdmap = Bimap_p.remove_rev_key_from_forward_map !forward_map ~rev_values_list ~key in
+        forward_map := newfwdmap
       else ()
 
     method merge f ~(othermap:ModuleB.key list ModuleA.t) =

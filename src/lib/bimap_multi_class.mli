@@ -14,10 +14,7 @@ sig
     method private create_reverse_map_from_forward_map : unit -> unit
     method private empty_forward_map : unit -> unit
     method private empty_reverse_map : unit -> unit
-    method private remove_fwd_key_from_reverse_map :
-                     fwd_values_list:ModuleB.key list -> key:ModuleA.key -> unit
-    method private remove_rev_key_from_forward_map :
-                     rev_values_list:ModuleA.key list -> key:ModuleB.key -> unit
+
     method empty : unit -> unit
     method mem : ModuleA.key -> bool
     method mem_reverse : ModuleB.key -> bool

@@ -23,6 +23,12 @@ sig
       val create_forward_map_from_reverse_map : unit -> unit*)
   val remove : t -> key:MapModule1.key -> t
   val remove_reverse : t -> key:MapModule2.key -> t
+  val remove_fwd_key_from_reverse_map :
+    MapModule1.key list MapModule2.t -> fwd_values_list:MapModule2.key list ->
+    key:MapModule1.key -> MapModule1.key list MapModule2.t
+  val remove_rev_key_from_forward_map :
+    MapModule2.key list MapModule1.t -> rev_values_list:MapModule1.key list ->
+    key:MapModule2.key -> MapModule2.key list MapModule1.t
   val merge :
     t -> f:(MapModule1.key ->
        MapModule2.key list option ->

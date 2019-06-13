@@ -37,23 +37,7 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
         else
           reverse_map := MapModule2.add data [key] !reverse_map
    *)
-  let update t ~key ~f =
-    let rec insert_updated_reverse_values t l =
-      match l with
-      | [] -> m
-      | h :: tl ->
-         let newmt = add_reverse t ~key:h ~data:key in
-         insert_updated_values newt tl in 
-    if Module1.mem key t.fwdmap then
-      let oldvalues = Module1.find key t.fwdmap in
-      let newfwdmap = Module1.update key f t.fwdmap in
-      let newvalues = Module1.find key t.fwdmap in
-      let newrevmap = remove_fwd_key_from_reverse_map t ~fwd_values_list:oldvalues ~key in
-      let newt = { fwdmap=newfwdmap; revmap=newrevmap } in
-      insert_updated_reverse_values newt newvalues
-    else
-      t
-      
+    
   let rec add t ~key ~data =
     if MapModule1.mem key t.fwdmap then
       if mem_data_of_fwd_map t.fwdmap ~key ~data then t
@@ -100,6 +84,78 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
         forward_map := MapModule1.add data [key] !forward_map 
 
  *)
+
+  let remove_fwd_key_from_reverse_map revmap ~fwd_values_list ~key =
+    let rec foo m k l =
+      (match l with
+       | [] -> m
+       | h :: tl ->
+          let old_reverse_bindings_opt = MapModule2.find_opt h m in
+          (match old_reverse_bindings_opt with
+           | Some old_reverse_bindings -> 
+              if ((List.length old_reverse_bindings) > 1) then
+                let newvs = List.filter (fun v -> not (v = key)) old_reverse_bindings in
+                let m2 = MapModule2.add h newvs m in
+                foo m2 k tl
+              else
+                let m2 = MapModule2.remove h m in 
+                foo m2 k tl
+           | None -> foo m k tl)
+      ) in
+    foo revmap key fwd_values_list
+
+    let remove_rev_key_from_forward_map fwdmap ~rev_values_list ~key =
+      let rec foo m k l =
+        (match l with
+         | [] -> m
+         | h :: tl ->
+            let old_fwd_bindings_opt = MapModule1.find_opt h m in
+            (match old_fwd_bindings_opt with
+             | Some old_fwd_bindings -> 
+                if ((List.length old_fwd_bindings) > 1) then
+                  let newvs = List.filter (fun v -> not (v = key)) old_fwd_bindings in
+                  let m2 = MapModule1.add h newvs m in
+                  foo m2 k tl
+                else
+                  let m2 = MapModule1.remove h m in 
+                  foo m2 k tl
+             | None -> foo m k tl)
+        ) in
+      foo fwdmap key rev_values_list
+
+  let update t ~key ~f =
+    let rec insert_updated_reverse_values t l =
+      match l with
+      | [] -> t
+      | h :: tl ->
+         let newt = add_reverse t ~key:h ~data:key in
+         insert_updated_reverse_values newt tl in 
+    if MapModule1.mem key t.fwdmap then
+      let oldvalues = MapModule1.find key t.fwdmap in
+      let newfwdmap = MapModule1.update key f t.fwdmap in
+      let newvalues = MapModule1.find key t.fwdmap in
+      let newrevmap = remove_fwd_key_from_reverse_map t.revmap ~fwd_values_list:oldvalues ~key in
+      let newt = { fwdmap=newfwdmap; revmap=newrevmap } in
+      insert_updated_reverse_values newt newvalues
+    else
+      t
+
+  let update_reverse t ~key ~f =
+    let rec insert_updated_forward_values t l =
+      match l with
+      | [] -> t
+      | h :: tl ->
+         let newt = add t ~key:h ~data:key in
+         insert_updated_forward_values newt tl in 
+    if MapModule2.mem key t.revmap then
+      let oldvalues = MapModule2.find key t.revmap in
+      let newrevmap = MapModule2.update key f t.revmap in
+      let newvalues = MapModule2.find key t.revmap in
+      let newfwdmap = remove_rev_key_from_forward_map t.fwdmap ~rev_values_list:oldvalues ~key in
+      let newt = { fwdmap=newfwdmap; revmap=newrevmap } in
+      insert_updated_forward_values newt newvalues
+    else
+      t
               
   let singleton ~key ~data =
     let t = empty () in
@@ -174,25 +230,6 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
           ) t.fwdmap rev_list in
       { fwdmap=new_fwdmap; revmap=new_reverse_map }
     else t
-
-    let remove_fwd_key_from_reverse_map t ~fwd_values_list ~key =
-      let rec foo m k l =
-        (match l with
-         | [] -> m
-         | h :: tl ->
-            let old_reverse_bindings_opt = Module2.find_opt h m in
-            (match old_reverse_bindings_opt with
-             | Some old_reverse_bindings -> 
-                if ((List.length old_reverse_bindings) > 1) then
-                  let newvs = List.filter (fun v -> not (v = key)) old_reverse_bindings in
-                  let m2 = Module2.add h newvs m in
-                  foo m2 k tl
-                else
-                  let m2 = Module2.remove h m in 
-                  foo m2 k tl
-             | None -> foo m k tl)
-        ) in
-      foo t.revmap key fwd_values_list
 
   let merge t ~f ~othermap =
     let new_forward_map = MapModule1.merge f t.fwdmap othermap in
