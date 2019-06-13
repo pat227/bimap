@@ -19,8 +19,8 @@ sig
   val singleton : key:MapModule1.key -> data:MapModule2.key -> t
   val singleton_reverse :
     key:MapModule2.key -> data:MapModule1.key -> t
-  (*val create_reverse_map_from_forward_map : unit -> unit
-      val create_forward_map_from_reverse_map : unit -> unit*)
+  val create_reverse_map_from_forward_map : MapModule2.key list MapModule1.t -> MapModule1.key list MapModule2.t
+  val create_forward_map_from_reverse_map : MapModule1.key list MapModule2.t -> MapModule2.key list MapModule1.t
   val remove : t -> key:MapModule1.key -> t
   val remove_reverse : t -> key:MapModule2.key -> t
   val remove_fwd_key_from_reverse_map :
@@ -49,6 +49,12 @@ sig
        MapModule1.key list ->
        MapModule1.key list -> MapModule1.key list option) ->
     othermap:MapModule1.key list MapModule2.t -> t
+
+  val update : t -> key:MapModule1.key ->
+               f:(MapModule2.key list option -> MapModule2.key list option) -> t
+  val update_reverse : t -> key:MapModule2.key ->
+                       f:(MapModule1.key list option -> MapModule1.key list option) -> t
+                                                   
   val compare :
     t -> f:(MapModule2.key list -> MapModule2.key list -> int) ->
     othermap:MapModule2.key list MapModule1.t -> int

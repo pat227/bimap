@@ -21,12 +21,12 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       reverse_map := Bimap_p.get_reverse_map newt
 
     method private create_reverse_map_from_forward_map () =
-      let newfwdmap = Bimpa_p.create_rev_map_from_forward_map !forward_map in
-      forward_map := newfwdmap
+      let newrevmap = Bimap_p.create_reverse_map_from_forward_map !forward_map in
+      reverse_map := newrevmap
 
     method private create_forward_map_from_reverse_map () =
-      let newrevmap = Bimpa_p.create_forward_map_from_reverse_map !reverse_map in
-      reverse_map := newrevmap
+      let newfwdmap = Bimap_p.create_forward_map_from_reverse_map !reverse_map in
+      forward_map := newfwdmap
 
     method cardinal () =
       ModuleA.cardinal !forward_map
@@ -40,30 +40,15 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
     method mem_reverse key =
       ModuleB.mem key !reverse_map
     method update ~key ~f =
-      if ModuleA.mem key !forward_map then 
-        let oldvalues = ModuleA.find key !forward_map in
-        let () = forward_map := (ModuleA.update key f !forward_map) in
-        let newvalues = ModuleA.find key !forward_map in
-        (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-        let newrevmap = Bimap_p.remove_fwd_key_from_reverse_map !reverse_map  ~fwd_values_list:oldvalues ~key in
-        List.iter 
-          (fun v ->
-            self#add_multi_reverse ~key:v ~data:key
-          ) newvalues
-      else ()
-
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.update newt ~key ~f in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method update_reverse ~key ~f =
-      if ModuleB.mem key !reverse_map then 
-        let oldvalues = ModuleB.find key !reverse_map in
-        let () = reverse_map := (ModuleB.update key f !reverse_map) in
-        let newvalues = ModuleB.find key !reverse_map in
-        (*remove or filter mappings in reverse map for oldvalues and then add_multi newvalues to reverse map*)
-        let () = self#remove_rev_key_from_forward_map ~rev_values_list:oldvalues ~key in
-        List.iter 
-          (fun v ->
-            self#add_multi ~key:v ~data:key
-          ) newvalues
-      else ()
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.update_reverse newt ~key ~f in 
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method singleton ~key ~data =
       let () = self#empty_forward_map () in
       let () = self#empty_reverse_map () in
