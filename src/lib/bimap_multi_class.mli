@@ -10,122 +10,88 @@ sig
              key:ModuleB.key -> data:ModuleA.key -> unit
     method cardinal : unit -> int
     method cardinal_reverse : unit -> int
+    method compare : (ModuleB.key list -> ModuleB.key list -> int) -> othermap:ModuleB.key list ModuleA.t -> int
+    method compare_reverse : (ModuleA.key list -> ModuleA.key list -> int) -> othermap:ModuleA.key list ModuleB.t -> int
     method private create_forward_map_from_reverse_map : unit -> unit
     method private create_reverse_map_from_forward_map : unit -> unit
     method private empty_forward_map : unit -> unit
     method private empty_reverse_map : unit -> unit
 
     method empty : unit -> unit
+    method equal : (ModuleB.key list -> ModuleB.key list -> bool) -> othermap:ModuleB.key list ModuleA.t -> bool
+    method equal_reverse : (ModuleA.key list -> ModuleA.key list -> bool) -> othermap:ModuleA.key list ModuleB.t -> bool
+    method exists : f:(ModuleB.key list -> bool) -> bool
+    method exists_reverse : f:(ModuleA.key list -> bool) -> bool
     method mem : ModuleA.key -> bool
     method mem_reverse : ModuleB.key -> bool
-    method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit
-    method update_reverse : key:ModuleB.key -> f:(ModuleA.key list option -> ModuleA.key list option) -> unit
-    method singleton : key:ModuleA.key -> data:ModuleB.key -> unit
-    method singleton_reverse : key:ModuleB.key -> data:ModuleA.key -> unit
-    method remove : key:ModuleA.key -> unit
-    method remove_reverse : key:ModuleB.key -> unit
     method merge : (ModuleA.key -> ModuleB.key list option -> ModuleB.key list option -> ModuleB.key list option) ->
                    othermap:ModuleB.key list ModuleA.t -> unit
     method merge_reverse : (ModuleB.key -> ModuleA.key list option -> ModuleA.key list option -> ModuleA.key list option) ->
                            othermap:ModuleA.key list ModuleB.t -> unit
+    method remove : key:ModuleA.key -> unit
+    method remove_reverse : key:ModuleB.key -> unit
+    method remove_multi : key:ModuleA.key -> value:ModuleB.key -> unit
+    method remove_multi_reverse : key:ModuleB.key -> value:ModuleA.key -> unit
+    method singleton : key:ModuleA.key -> data:ModuleB.key -> unit
+    method singleton_reverse : key:ModuleB.key -> data:ModuleA.key -> unit
+    method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit
+    method update_reverse : key:ModuleB.key -> f:(ModuleA.key list option -> ModuleA.key list option) -> unit
     method union : (ModuleA.key -> ModuleB.key list -> ModuleB.key list -> ModuleB.key list option) ->
                    othermap:ModuleB.key list ModuleA.t -> unit
     method union_reverse : (ModuleB.key -> ModuleA.key list -> ModuleA.key list -> ModuleA.key list option) ->
                            othermap:ModuleA.key list ModuleB.t -> unit
-    method compare : (ModuleB.key list -> ModuleB.key list -> int) -> othermap:ModuleB.key list ModuleA.t -> int
-    method compare_reverse : (ModuleA.key list -> ModuleA.key list -> int) -> othermap:ModuleA.key list ModuleB.t -> int
-    method equal : (ModuleB.key list -> ModuleB.key list -> bool) -> othermap:ModuleB.key list ModuleA.t -> bool
-    method equal_reverse : (ModuleA.key list -> ModuleA.key list -> bool) -> othermap:ModuleA.key list ModuleB.t -> bool
- (*
-            method counti :
-                     f:(key:'a -> data:'b list -> bool) -> int
-            (*        method private create_forward_map_from_reverse_map : unit -> unit
-          method private create_reverse_map_from_forward_map : unit -> unit *)
-            method data : 'b Core.List.t list
-            method data_reverse : 'a Core.List.t list
-            method empty : unit -> unit
-            (*        method private empty_forward_map : unit -> unit
-          method private empty_reverse_map : unit -> unit *)
-            method exists : f:('b Core.List.t -> bool) -> bool
-            method exists_reverse : f:('a Core.List.t -> bool) -> bool
-            method existsi :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> bool) -> bool
-            method existsi_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> bool) -> bool
-            method filter : f:('b Core.List.t -> bool) -> unit -> unit
-            method filter_keys : f:(ModuleA.Map.Key.t -> bool) -> unit -> unit
-            method filter_keys_reverse :
-                     f:(ModuleB.Map.Key.t -> bool) -> unit -> unit
-            method filter_map :
-                     f:('b Core.List.t -> 'b Core.List.t option) -> unit -> unit
-            method filter_map_reverse :
-                     f:('a Core.List.t -> 'a Core.List.t option) -> unit -> unit
-            method filter_reverse : f:('a Core.List.t -> bool) -> unit -> unit
-            method filteri :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> bool) ->
-                     unit -> unit
-            method filteri_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> bool) ->
-                     unit -> unit
-            method find : key:ModuleA.Map.Key.t -> 'b Core.List.t option
-            method find_exn : key:'a -> 'b Core.List.t
-            method find_exn_reverse : key:ModuleB.Map.Key.t -> 'a Core.List.t
-            method find_reverse :
-                     key:ModuleB.Map.Key.t -> 'a Core.List.t option
-            method fold :
-                     init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
-            method fold_reverse :
-                     init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e
-            method fold_right :
-                     init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e
-            method fold_right_reverse :
-                     init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e
-            method for_all : f:('b Core.List.t -> bool) -> bool
-            method for_all_reverse : f:('a Core.List.t -> bool) -> bool
-            method is_empty : bool
-            method iter : f:('b Core.List.t -> unit) -> unit
-            method iter_keys : f:(ModuleA.Map.Key.t -> unit) -> unit
-            method iter_keys_reverse : f:(ModuleB.Map.Key.t -> unit) -> unit
-            method iter_reverse : f:('a Core.List.t -> unit) -> unit
-            method iteri :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> unit) -> unit
-            method iteri_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> unit) -> unit
-            method keys : ModuleA.Map.Key.t list
-            method keys_reverse : ModuleB.Map.Key.t list
-            method length : int
-            method map : f:('b Core.List.t -> 'b Core.List.t) -> unit
-            method map_reverse : f:('a Core.List.t -> 'a Core.List.t) -> unit
-            method mapi :
-                     f:(key:ModuleA.Map.Key.t -> data:'b Core.List.t -> 'b Core.List.t) ->
-                     unit
-            method mapi_reverse :
-                     f:(key:ModuleB.Map.Key.t -> data:'a Core.List.t -> 'a Core.List.t) ->
-                     unit
-            method max_elt :
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method max_elt_exn : ModuleA.Map.Key.t * 'b Core.List.t
-            method max_elt_exn_reverse : ModuleB.Map.Key.t * 'a Core.List.t
-            method max_elt_reverse :
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
 
-            method min_elt :
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method min_elt_exn : ModuleA.Map.Key.t * 'b Core.List.t
-            method min_elt_exn_reverse : ModuleB.Map.Key.t * 'a Core.List.t
-            method min_elt_reverse :
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method nth :
-                     Core_kernel__.Import.int ->
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.option
-            method nth_reverse :
-                     Core_kernel__.Import.int ->
-                     (ModuleB.Map.Key.t * 'a Core.List.t) Core_kernel__.Import.option
-            method to_alist :
-                     ?key_order:[ `Decreasing | `Increasing ] ->
-                     unit ->
-                     (ModuleA.Map.Key.t * 'b Core.List.t) Core_kernel__.Import.list
 
-                                                                              *)
-          end
+    (*===TODO===*)
+    method bindings : (ModuleA.key * ModuleB.key list) list
+    method bindings_reverse : (ModuleB.key * ModuleA.key list) list
+    method choose : ModuleA.key * ModuleB.key list
+    method choose_reverse : ModuleB.key * ModuleA.key list
+    method filter : f:(ModuleA.key -> ModuleB.key list -> bool) -> unit
+    method filter_reverse : f:(ModuleB.key -> ModuleA.key list -> bool) -> unit
+    method find : key:ModuleA.key -> ModuleB.key list option
+    method find_reverse :
+             key:ModuleB.key -> ModuleA.key list option
+    method find_exn : key:ModuleA.key -> ModuleB.key list
+    method find_reverse_exn : key:ModuleB.key -> ModuleA.key list
+    method fold :
+             init:'e -> f:(key:ModuleA.key -> data:ModuleB.key list -> 'e -> 'e) -> 'e
+    method fold_reverse :
+             init:'e -> f:(key:ModuleB.key -> data:ModuleA.key list -> 'e -> 'e) -> 'e
+    method for_all : f:(ModuleA.key -> ModuleB.key -> bool) -> bool
+    method for_all_reverse :
+      f:(ModuleB.key -> ModuleA.key -> bool) -> bool
+    method iter : f:(ModuleB.key list -> unit) -> unit
+    method iter_reverse : f:(ModuleA.key list -> unit) -> unit                                                          
+    method map : f:(ModuleB.key list -> ModuleB.key list) -> unit
+    method map_reverse : f:(ModuleA.key list -> ModuleA.key list) -> unit
+    method mapi :
+             f:(key:ModuleA.key -> data:ModuleB.key list -> ModuleB.key list) ->
+             unit
+    method mapi_reverse :
+             f:(key:ModuleB.key -> data:ModuleA.key list -> ModuleA.key list) ->
+             unit
+    method max_binding : (ModuleA.key * ModuleB.key list) option
+    method max_binding_exn : ModuleA.key * ModuleB.key list
+    method max_binding_reverse : (ModuleB.key * ModuleA.key list) option
+    method max_binding_reverse_exn : ModuleB.key * ModuleA.key list
+    method min_binding : (ModuleA.key * ModuleB.key list) option
+    method min_binding_exn : ModuleA.key * ModuleB.key list
+    method min_binding_reverse : (ModuleB.key * ModuleA.key list) option
+    method min_binding_reverse_exn : ModuleB.key * ModuleA.key list
+    method partition :
+             f:(ModuleA.key -> ModuleB.key list -> bool) ->
+             ModuleB.key ModuleA.t * ModuleB.key ModuleA.t
+    method partition_reverse :
+             f:(ModuleB.key -> ModuleA.key list -> bool) ->
+             ModuleA.key ModuleB.t * ModuleA.key ModuleB.t
+    method split :
+             key:ModuleA.key ->
+             ModuleB.key list ModuleA.t * ModuleB.key option *
+               ModuleB.key list ModuleA.t
+    method split_reverse :
+             key:ModuleB.key ->
+             ModuleA.key ModuleB.t * ModuleA.key option *
+               ModuleA.key ModuleB.t
+  end
 end

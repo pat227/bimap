@@ -94,132 +94,84 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       ModuleA.equal f !forward_map othermap
     method equal_reverse f ~othermap =
       ModuleB.equal f !reverse_map othermap
-  (*
-    method counti ~f =
-      ModuleA.counti !forward_map ~f
-    method data =
-      ModuleA.data !forward_map
-    method data_reverse =
-      ModuleB.data !reverse_map
-    method empty () =
-      (*let () = forward_map := (Core.empty ~comparator:(Core.comparator !forward_map)) in
-      reverse_map := (Core.empty ~comparator:(Core.comparator !reverse_map))*)
-      let () = self#empty_forward_map () in
-      self#empty_reverse_map ()
     method exists ~f =
-      ModuleA.exists !forward_map ~f
+      ModuleA.exists f !forward_map
     method exists_reverse ~f =
-      ModuleB.exists !reverse_map ~f
-    method existsi ~f =
-      ModuleA.existsi !forward_map ~f
-    method existsi_reverse ~f =
-      ModuleB.existsi !reverse_map ~f
+      ModuleB.exists f !reverse_map
     method find ~key =
-      ModuleA.find !forward_map key
+      ModuleA.find key !forward_map
     method find_reverse ~key =
-      ModuleB.find !reverse_map key 
-    method find_exn ~(key:ModuleA.Key.t) =
-      ModuleA.find_exn !forward_map key
+      ModuleB.find key !reverse_map 
+(*    method find_exn ~key =
+      ModuleA.find_exn key !forward_map
     method find_exn_reverse ~key =
-      Core.find_exn !reverse_map key
-    method filter ~f =
-      let () = forward_map := (ModuleA.filter !forward_map ~f) in
-      (*Since each map is a multi map of 'a list or 'b list, with 'b or 'a as keys, respectively, the ~f used to 
+      ModuleB.find_exn key !reverse_map*)
+    (*Since each map is a multi map of 'a list or 'b list, with 'b or 'a as keys, respectively, the ~f used to 
         filter keys in one map cannot be used to filter values in the other.*)
-      self#create_reverse_map_from_forward_map
+    method filter ~f =
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.filter newt ~f in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method filter_reverse ~f =
-      let () = reverse_map := (ModuleB.filter !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map
-    method filter_keys ~f =
-      let () = forward_map := (ModuleA.filter_keys !forward_map ~f) in
-      self#create_reverse_map_from_forward_map
-    method filter_keys_reverse ~f =
-      let () = reverse_map := (ModuleB.filter_keys !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map
-    method filteri ~f =
-      let () = forward_map := (ModuleA.filteri !forward_map ~f) in
-      self#create_reverse_map_from_forward_map
-    method filteri_reverse ~f =
-      let () = reverse_map := (ModuleB.filteri !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map
-    method filter_map ~f =
-      let () = forward_map := (ModuleA.filter_map !forward_map ~f) in
-      self#create_reverse_map_from_forward_map
-    method filter_map_reverse ~f =
-      let () = reverse_map := (ModuleB.filter_map !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map
-    method fold : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e = 
-      (fun ~init ~f -> ModuleA.fold !forward_map ~init ~f)
-    method fold_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleB.fold !reverse_map ~init ~f)
-(*    method fold_range_inclusive ~min ~max ~init ~f =
-      Core.fold_range_inclusive !forward_map ~min ~max ~init ~f*)
-    method fold_right : 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleA.fold_right !forward_map ~init ~f)
-    method fold_right_reverse : 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e =
-      (fun ~init ~f -> ModuleB.fold_right !reverse_map ~init ~f)
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.filter_reverse newt ~f in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
+    method fold ~f (*: 'e. init:'e -> f:(key:'a -> data:'b list -> 'e -> 'e) -> 'e*) =
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.fold ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
+    method fold_reverse ~f (*: 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e*) =
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.fold_reverse ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method for_all ~f =
       ModuleA.for_all !forward_map ~f
     method for_all_reverse ~f =
       ModuleB.for_all !reverse_map ~f
     method is_empty =
       ModuleA.is_empty !forward_map
-    method iter_keys ~f =
-      ModuleA.iter_keys !forward_map ~f
-    method iter_keys_reverse ~f =
-      ModuleB.iter_keys !reverse_map ~f
     method iter ~f =
       ModuleA.iter !forward_map ~f
     method iter_reverse ~f =
       ModuleB.iter !reverse_map ~f
-    method iteri ~f =
-      ModuleA.iteri !forward_map ~f
-    method iteri_reverse ~f =
-      ModuleB.iteri !reverse_map ~f
-    method keys =
-      ModuleA.keys !forward_map
-    method keys_reverse =
-      ModuleB.keys !reverse_map
-    method length =
-      ModuleA.length !forward_map
     method map ~f =
-      let () = forward_map := (ModuleA.map !forward_map ~f) in
-      self#create_reverse_map_from_forward_map ()
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.map ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method map_reverse ~f =
-      let () = reverse_map := (ModuleB.map !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map () 
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.map_reverse ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method mapi ~f =
-      let () = forward_map := (Core.mapi !forward_map ~f) in
-      self#create_reverse_map_from_forward_map ()
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.mapi ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
     method mapi_reverse ~f =
-      let () = reverse_map := (Core.mapi !reverse_map ~f) in
-      self#create_forward_map_from_reverse_map ()     
-
-    method min_elt =
-      Core.min_elt !forward_map
-    method min_elt_exn =
-      Core.min_elt_exn !forward_map
-    method min_elt_reverse =
-      Core.min_elt !reverse_map
-    method min_elt_exn_reverse =
-      Core.min_elt_exn !reverse_map
-    method max_elt =
-      Core.max_elt !forward_map
-    method max_elt_exn =
-      Core.max_elt_exn !forward_map
-    method max_elt_reverse =
-      Core.max_elt !reverse_map
-    method max_elt_exn_reverse =
-      Core.max_elt_exn !reverse_map
-    method nth int =
-      Core.nth !forward_map int
-    method nth_reverse int =
-      Core.nth !reverse_map int
-
+      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
+      let newt = Bimap_p.mapi_reverse ~f newt in
+      let () = forward_map := Bimap_p.get_forward_map newt in
+      reverse_map := Bimap_p.get_reverse_map newt
+    method min_binding =
+      ModuleA.min_binding !forward_map
+    method min_binding_reverse =
+      ModuleB.min_binding !reverse_map
+    method max_binding =
+      ModuleA.max_binding !forward_map
+    method max_binding_reverse =
+      ModuleB.max_binding !reverse_map
+    (**Remove the head element*)
     method remove_multi ~key =
       try
 	let values = ModuleA.find_exn !forward_map key in
-	let head_element = Core.List.nth_exn values 0 in 
+	let head_element = List.nth 0 values in
+        let new_values = List.tl values in 
 	let () = forward_map := (ModuleA.remove_multi !forward_map key) in
 	(*using head_element: if reverse_map binds head_element only to key then remove it else filter out key*)
         self#remove_fwd_key_from_reverse_map ~fwd_values_list:[head_element] ~key
@@ -234,11 +186,6 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
         self#remove_rev_key_from_forward_map ~rev_values_list:[head_element] ~key
         (*--TODO--improve exception handling*)
       with _e -> raise (Failure "bimap_multi::remove_reverse_multi() failed")
-    method to_alist ?key_order () =
-      match Core.Option.is_some key_order with
-      | false -> Core.to_alist !forward_map
-      | true -> Core.to_alist ~key_order:(Core.Option.value_exn key_order) !forward_map
 
-      *)
   end
 end
