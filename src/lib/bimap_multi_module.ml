@@ -198,17 +198,7 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
       let values = MapModule1.find key t.fwdmap in 
       let new_forward_map = MapModule1.remove key t.fwdmap in
       let new_revmap =
-        List.fold_left
-          (fun m x ->
-            MapModule2.update x
-              (fun revlist_opt ->
-                match revlist_opt with
-                | Some revlist -> 
-                   Some (List.filter (fun y -> y != key) revlist)
-                | None -> (*should be impossible or evidence of a bug*)
-                   raise (Failure "A value in the fwdmap was not found as key in revmap!")
-              ) m
-          ) t.revmap values in 
+        remove_fwd_key_from_reverse_map t.revmap ~fwd_values_list:values ~key in
       { fwdmap=new_forward_map ; revmap=new_revmap }
     else t
 
@@ -217,17 +207,7 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
       let rev_list = MapModule2.find key t.revmap in 
       let new_reverse_map = MapModule2.remove key t.revmap in
       let new_fwdmap =
-        List.fold_left
-          (fun m x ->
-            MapModule1.update x
-              (fun fwdlist_opt ->
-                match fwdlist_opt with
-                | Some fwdlist ->
-                   Some (List.filter (fun y -> y != key) fwdlist)
-                | None -> (*should be impossible or evidence of a bug*)
-                   raise (Failure "A value in the revmap was not found as key in fwdmap!")
-              ) m
-          ) t.fwdmap rev_list in
+        remove_rev_key_from_forward_map t.fwdmap ~rev_values_list:rev_list ~key in
       { fwdmap=new_fwdmap; revmap=new_reverse_map }
     else t
 
