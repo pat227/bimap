@@ -38,10 +38,10 @@ sig
   val filter : t -> f:(MapModule1.key -> MapModule2.key list -> bool) -> t
   val filter_reverse :
     t -> f:(MapModule2.key -> MapModule1.key list -> bool) -> t
-  val find_exn : t -> key:MapModule1.key -> MapModule2.key list
-  val find_reverse_exn : t -> key:MapModule2.key -> MapModule1.key list
-  val find : t -> key:MapModule1.key -> MapModule2.key list option
-  val find_reverse : t -> key:MapModule2.key -> MapModule1.key list option
+  val find_opt : t -> key:MapModule1.key -> MapModule2.key list option
+  val find_reverse_opt : t -> key:MapModule2.key -> MapModule1.key list option
+  val find : t -> key:MapModule1.key -> MapModule2.key list
+  val find_reverse : t -> key:MapModule2.key -> MapModule1.key list
   val fold :
     t -> f:(MapModule1.key -> MapModule2.key list -> 'a -> 'a) -> 'a -> 'a
   val fold_reverse :
@@ -87,8 +87,8 @@ sig
     MapModule1.key list MapModule2.t * MapModule1.key list MapModule2.t
   val remove : t -> key:MapModule1.key -> t
   val remove_reverse : t -> key:MapModule2.key -> t
-  val remove_multi : t -> key:MapModule1.key -> MapModule2.key option * t
-  val remove_multi_reverse : t -> key:MapModule2.key -> MapModule1.key option * t
+  val remove_multi : t -> key:MapModule1.key -> (t * MapModule2.key) option
+  val remove_multi_reverse : t -> key:MapModule2.key -> (t * MapModule1.key) option
   val remove_fwd_key_from_reverse_map :
     MapModule1.key list MapModule2.t -> fwd_values_list:MapModule2.key list ->
     key:MapModule1.key -> MapModule1.key list MapModule2.t

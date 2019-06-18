@@ -154,15 +154,15 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     let new_reverse_map = (MapModule2.filter f t.revmap) in
     let new_fwdmap = create_forward_map_from_reverse_map new_reverse_map in
     { fwdmap=new_fwdmap; revmap=new_reverse_map }
-  let find_exn t ~key =
-    MapModule1.find key t.fwdmap
-  let find_reverse_exn t ~key =
-    MapModule2.find key t.revmap
   let find t ~key =
+    MapModule1.find key t.fwdmap
+  let find_reverse t ~key =
+    MapModule2.find key t.revmap
+  let find_opt t ~key =
     try
       Some (MapModule1.find key t.fwdmap)
     with _ -> None
-  let find_reverse t ~key =
+  let find_reverse_opt t ~key =
     try
       Some (MapModule2.find key t.revmap)
     with _ -> None 
@@ -255,34 +255,59 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
 
   (**Remove the head of the list of values under the key, and return it too alongside the bimap*)
   let remove_multi t ~key =
-    if MapModule1.mem key t.fwdmap then 
-      let values = MapModule1.find key t.fwdmap in
-      let new_values = List.tl values in
-      let value = List.hd values in 
-      let new_forward_map = MapModule1.add key new_values t.fwdmap in
-      let rev_values = MapModule2.find value t.revmap in
-      let new_rev_values = List.filter (fun x -> x != key) rev_values in
-      let new_revmap = MapModule2.add value new_rev_values t.revmap in 
-      let newt = { fwdmap=new_forward_map ; revmap=new_revmap } in
-      (Some value, newt)
-    else
-      (None, t)
-
+    try
+      (match (MapModule1.find_opt key t.fwdmap) with
+       | None -> None
+       | Some values ->
+          let len = List.length values in 
+          (match len with
+           | 1 ->
+              let head_element = List.hd values in
+	      let new_forward_map = MapModule1.remove key t.fwdmap in
+              let newrevmap = remove_fwd_key_from_reverse_map t.revmap ~fwd_values_list:[head_element] ~key in
+              let newt = { fwdmap = new_forward_map; revmap = newrevmap } in 
+              Some (newt, head_element)
+           | 0 ->
+              (*should be impossible*)
+              None
+           | _ -> 
+              let head_element = List.hd values in
+              let new_values = List.tl values in 
+	      let new_forward_map = MapModule1.add key new_values t.fwdmap in
+              let newrevmap = remove_fwd_key_from_reverse_map t.revmap ~fwd_values_list:[head_element] ~key in
+              let newt = { fwdmap = new_forward_map; revmap = newrevmap } in 
+              Some (newt, head_element)
+          )
+      )
+    with _e -> raise (Failure "bimap_multi::remove_multi() failed")
+                     
   (**Remove the head of the list of values under the key, and return it too alongside the bimap*)
   let remove_multi_reverse t ~key =
-    if MapModule2.mem key t.revmap then 
-      let values = MapModule2.find key t.revmap in
-      let new_values = List.tl values in
-      let value = List.hd values in 
-      let new_forward_map = MapModule2.add key new_values t.revmap  in
-      let rev_values = MapModule1.find value t.fwdmap in
-      let new_rev_values = List.filter (fun x -> x != key) rev_values in
-      let new_revmap = MapModule1.add value new_rev_values t.fwdmap in 
-      let newt = { revmap=new_forward_map ; fwdmap=new_revmap } in
-      (Some value, newt)
-    else
-      (None, t)
-
+    try
+      (match (MapModule2.find_opt key t.revmap) with
+       | None -> None
+       | Some values ->
+          let len = List.length values in 
+          (match len with
+           | 1 ->
+              let head_element = List.hd values in
+	      let new_reverse_map = MapModule2.remove key t.revmap in
+              let newfwdmap = remove_rev_key_from_forward_map t.fwdmap ~rev_values_list:[head_element] ~key in
+              let newt = { fwdmap=newfwdmap; revmap=new_reverse_map } in 
+              Some (newt, head_element)
+           | 0 ->
+              (*should be impossible*)
+              None
+           | _ -> 
+              let head_element = List.hd values in
+              let new_values = List.tl values in 
+	      let new_reverse_map = MapModule2.add key new_values t.revmap in
+              let newfwdmap = remove_rev_key_from_forward_map t.fwdmap ~rev_values_list:[head_element] ~key in
+              let newt = { fwdmap=newfwdmap; revmap=new_reverse_map } in 
+              Some (newt, head_element)
+          )
+      )
+    with _e -> raise (Failure "bimap_multi::remove_reverse_multi() failed")
   (*need a way to quickly set up bimap in an other than empty state by supplying 
     a map already populated with values*)
   let set_forward_map t ~map =
