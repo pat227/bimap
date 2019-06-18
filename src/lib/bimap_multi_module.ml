@@ -166,10 +166,10 @@ module Bimap_multi_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     try
       Some (MapModule2.find key t.revmap)
     with _ -> None 
-  let fold t ~f = 
-    MapModule1.fold f t.fwdmap
-  let fold_reverse t ~f =
-    MapModule2.fold f t.revmap
+  let fold t ~f init = 
+    MapModule1.fold f t.fwdmap init
+  let fold_reverse t ~f init =
+    MapModule2.fold f t.revmap init
   let for_all t ~f =
     MapModule1.for_all f t.fwdmap
   let for_all_reverse t ~f =

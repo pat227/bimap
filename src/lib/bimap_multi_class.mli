@@ -55,10 +55,8 @@ sig
              key:ModuleB.key -> ModuleA.key list option
     method find_exn : key:ModuleA.key -> ModuleB.key list
     method find_reverse_exn : key:ModuleB.key -> ModuleA.key list
-    method fold :
-             (key:ModuleA.key -> data:ModuleB.key list -> 'e -> 'e) -> 'e -> 'e
-    method fold_reverse :
-             (key:ModuleB.key -> data:ModuleA.key list -> 'e -> 'e) -> 'e -> 'e
+    method fold : (ModuleA.key -> ModuleB.key list -> 'e -> 'e) -> 'e  -> 'e
+    method fold_reverse : (ModuleB.key -> ModuleA.key list -> 'e -> 'e) -> 'e -> 'e
     method for_all : f:(ModuleA.key -> ModuleB.key -> bool) -> bool
     method for_all_reverse :
       f:(ModuleB.key -> ModuleA.key -> bool) -> bool

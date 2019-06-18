@@ -117,12 +117,13 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       let () = forward_map := Bimap_p.get_forward_map newt in
       reverse_map := Bimap_p.get_reverse_map newt
     method fold : 'e. (ModuleA.key -> ModuleB.key list -> 'e -> 'e) -> 'e -> 'e =
-      (fun init f ->
+      (fun f init ->
         let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
-        Bimap_p.fold newt ~f)
-    method fold_reverse ~f (*: 'e. init:'e -> f:(key:'b -> data:'a list -> 'e -> 'e) -> 'e*) =
-      let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in
-      Bimap_p.fold_reverse newt ~f
+        Bimap_p.fold newt ~f init)
+    method fold_reverse : 'e. (ModuleB.key -> ModuleA.key list -> 'e -> 'e) -> 'e -> 'e =
+      (fun f init ->
+        let newt = Bimap_p.create_t ~fwdmap:!forward_map ~revmap:!reverse_map in 
+        Bimap_p.fold_reverse newt ~f init)
     method for_all ~f =
       ModuleA.for_all f !forward_map
     method for_all_reverse ~f =
