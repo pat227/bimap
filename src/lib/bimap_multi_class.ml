@@ -117,14 +117,6 @@ module Bimap_multi_class (ModuleA : Map.S)(ModuleB : Map.S) = struct
       let newt = Bimap_p.mapi_reverse ~f newt in
       let () = forward_map := Bimap_p.get_forward_map newt in
       reverse_map := Bimap_p.get_reverse_map newt
-    method min_binding_exn =
-      ModuleA.min_binding !forward_map
-    method min_binding_reverse_exn =
-      ModuleB.min_binding !reverse_map
-    method max_binding_exn =
-      ModuleA.max_binding !forward_map
-    method max_binding_reverse_exn =
-      ModuleB.max_binding !reverse_map
     method min_binding =
       ModuleA.min_binding !forward_map
     method min_binding_reverse =

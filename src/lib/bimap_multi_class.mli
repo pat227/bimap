@@ -34,28 +34,20 @@ sig
     method find_reverse : key:ModuleB.key -> ModuleA.key list
     method fold : (ModuleA.key -> ModuleB.key list -> 'e -> 'e) -> 'e  -> 'e
     method fold_reverse : (ModuleB.key -> ModuleA.key list -> 'e -> 'e) -> 'e -> 'e
-    method for_all : f:(ModuleA.key -> ModuleB.key -> bool) -> bool
+    method for_all : f:(ModuleA.key -> ModuleB.key list -> bool) -> bool
     method for_all_reverse :
-      f:(ModuleB.key -> ModuleA.key -> bool) -> bool
-    method iter : f:(ModuleB.key list -> unit) -> unit
-    method iter_reverse : f:(ModuleA.key list -> unit) -> unit                                                          
+      f:(ModuleB.key -> ModuleA.key list -> bool) -> bool
+    method iter : f:(ModuleA.key -> ModuleB.key list -> unit) -> unit
+    method iter_reverse : f:(ModuleB.key -> ModuleA.key list -> unit) -> unit                                                          
     method is_empty : bool
                             method map : f:(ModuleB.key list -> ModuleB.key list) -> unit
     method map_reverse : f:(ModuleA.key list -> ModuleA.key list) -> unit
-    method mapi :
-             f:(key:ModuleA.key -> data:ModuleB.key list -> ModuleB.key list) ->
-             unit
-    method mapi_reverse :
-             f:(key:ModuleB.key -> data:ModuleA.key list -> ModuleA.key list) ->
-             unit
-    method max_binding : (ModuleA.key * ModuleB.key list) option
-    method max_binding_exn : ModuleA.key * ModuleB.key list
-    method max_binding_reverse : (ModuleB.key * ModuleA.key list) option
-    method max_binding_reverse_exn : ModuleB.key * ModuleA.key list
-    method min_binding : (ModuleA.key * ModuleB.key list) option
-    method min_binding_exn : ModuleA.key * ModuleB.key list
-    method min_binding_reverse : (ModuleB.key * ModuleA.key list) option
-    method min_binding_reverse_exn : ModuleB.key * ModuleA.key list
+    method mapi : f:(ModuleA.key -> ModuleB.key list -> ModuleB.key list) -> unit
+    method mapi_reverse : f:(ModuleB.key -> ModuleA.key list -> ModuleA.key list) -> unit
+    method max_binding : ModuleA.key * ModuleB.key list
+    method max_binding_reverse : (ModuleB.key * ModuleA.key list)
+    method min_binding : (ModuleA.key * ModuleB.key list)
+    method min_binding_reverse : (ModuleB.key * ModuleA.key list)
     method mem : ModuleA.key -> bool
     method mem_reverse : ModuleB.key -> bool
     method merge : (ModuleA.key -> ModuleB.key list option -> ModuleB.key list option -> ModuleB.key list option) ->
@@ -64,24 +56,24 @@ sig
                            othermap:ModuleA.key list ModuleB.t -> unit
     method partition :
              f:(ModuleA.key -> ModuleB.key list -> bool) ->
-             ModuleB.key ModuleA.t * ModuleB.key ModuleA.t
+             ModuleB.key list ModuleA.t * ModuleB.key list ModuleA.t
     method partition_reverse :
              f:(ModuleB.key -> ModuleA.key list -> bool) ->
-             ModuleA.key ModuleB.t * ModuleA.key ModuleB.t
+             ModuleA.key list ModuleB.t * ModuleA.key list ModuleB.t
     method remove : key:ModuleA.key -> unit
     method remove_reverse : key:ModuleB.key -> unit
-    method remove_multi_opt : key:ModuleA.key -> ModuleB.key
-    method remove_reverse_multi_opt : key:ModuleB.key -> ModuleA.key
+    method remove_multi_opt : key:ModuleA.key -> ModuleB.key option
+    method remove_reverse_multi_opt : key:ModuleB.key -> ModuleA.key option
     method singleton : key:ModuleA.key -> data:ModuleB.key -> unit
     method singleton_reverse : key:ModuleB.key -> data:ModuleA.key -> unit
     method split :
              key:ModuleA.key ->
-             ModuleB.key list ModuleA.t * ModuleB.key option *
+             ModuleB.key list ModuleA.t * ModuleB.key list option *
                ModuleB.key list ModuleA.t
     method split_reverse :
              key:ModuleB.key ->
-             ModuleA.key ModuleB.t * ModuleA.key option *
-               ModuleA.key ModuleB.t
+             ModuleA.key list ModuleB.t * ModuleA.key list option *
+               ModuleA.key list ModuleB.t
     method update : key:ModuleA.key -> f:(ModuleB.key list option -> ModuleB.key list option) -> unit
     method update_reverse : key:ModuleB.key -> f:(ModuleA.key list option -> ModuleA.key list option) -> unit
     method union : (ModuleA.key -> ModuleB.key list -> ModuleB.key list -> ModuleB.key list option) ->
