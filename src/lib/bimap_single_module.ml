@@ -175,15 +175,15 @@ module Bimap_single_module(MapModule1 : Map.S)(MapModule2 : Map.S) = struct
     MapModule1.split key t.fwdmap
   let split_reverse t ~key =
     MapModule2.split key t.revmap
-  let find_exn t ~key =
-    MapModule1.find key t.fwdmap
-  let find_reverse_exn t ~key =
-    MapModule2.find key t.revmap
   let find t ~key =
+    MapModule1.find key t.fwdmap
+  let find_reverse t ~key =
+    MapModule2.find key t.revmap
+  let find_opt t ~key =
     try
       Some (MapModule1.find key t.fwdmap)
     with _ -> None
-  let find_reverse t ~key =
+  let find_reverse_opt t ~key =
     try
       Some (MapModule2.find key t.revmap)
     with _ -> None
