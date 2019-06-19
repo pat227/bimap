@@ -40,7 +40,7 @@ sig
     method iter : f:(ModuleA.key -> ModuleB.key list -> unit) -> unit
     method iter_reverse : f:(ModuleB.key -> ModuleA.key list -> unit) -> unit                                                          
     method is_empty : bool
-                            method map : f:(ModuleB.key list -> ModuleB.key list) -> unit
+    method map : f:(ModuleB.key list -> ModuleB.key list) -> unit
     method map_reverse : f:(ModuleA.key list -> ModuleA.key list) -> unit
     method mapi : f:(ModuleA.key -> ModuleB.key list -> ModuleB.key list) -> unit
     method mapi_reverse : f:(ModuleB.key -> ModuleA.key list -> ModuleA.key list) -> unit
@@ -80,6 +80,5 @@ sig
                    othermap:ModuleB.key list ModuleA.t -> unit
     method union_reverse : (ModuleB.key -> ModuleA.key list -> ModuleA.key list -> ModuleA.key list option) ->
                            othermap:ModuleA.key list ModuleB.t -> unit
-
   end
 end

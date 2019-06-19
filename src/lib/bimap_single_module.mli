@@ -102,7 +102,7 @@ sig
     t -> key:MapModule1.key ->
     MapModule2.key MapModule1.t * MapModule2.key option *
       MapModule2.key MapModule1.t
-  (*val union : (ModuleA.key -> ModuleB.key -> ModuleB.key -> ModuleB.key option) ->
-                  MapModule2.key MapModule1.t -> MapModule2.key MapModule1.t -> unit*)
+  val union : t -> f:(MapModule1.key -> MapModule2.key -> MapModule2.key -> MapModule2.key option) ->
+              othermap:MapModule2.key MapModule1.t -> t
 
 end
