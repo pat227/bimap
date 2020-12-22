@@ -17,7 +17,6 @@ sig
   val create_t : fwdmap:ModuleB.Map.Key.t list ModuleA.Map.t -> revmap:ModuleA.Map.Key.t list ModuleB.Map.t -> t
   val data : t -> ModuleB.Map.Key.t list list
   val data_reverse : t-> ModuleA.Map.Key.t list list
-  val empty : t
             (*        method private empty_forward_map : unit -> unit
           method private empty_reverse_map : unit -> unit *)
   val exists : t -> f:(ModuleB.Map.Key.t list -> bool) -> bool
@@ -86,5 +85,6 @@ sig
 (*  val remove_fwd_key_from_reverse_map : fwd_values_list:ModuleB.Map.Key.t list -> key:ModuleA.Map.Key.t -> t*)
 (*        method private remove_rev_key_from_forward_map :
           rev_values_list:'a Core.List.t -> key:'b -> unit  *)
-(*        method private remove_reverse_keys : 'b Core.List.t -> unit *)
+  val remove_forward_keys : ModuleA.t list -> 'b ModuleA.Map.t -> 'b ModuleA.Map.t
+  val remove_reverse_keys : ModuleB.t list -> 'a ModuleB.Map.t -> 'a ModuleB.Map.t
 end

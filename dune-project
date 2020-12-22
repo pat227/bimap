@@ -1,28 +1,22 @@
-(lang dune 1.2)
+(lang dune 2.0)
 (name bimap)
-(version 20190311)
+(version 2020Dec19)
 
+(generate_opam_files true)
 
-;FAILS WITH: unknown field opam
-;(opam
-; (tags org:none)
-; (depends
-;   (ocaml (>= 4.06.0))
-;   (core (>= v0.11.3))
-;   (ocamlfind (>= 1.8))
-;   (dune (>= 1.2.1))
-;   (oUnit (>= 2.08))
-; )
-; (package
-;  (name bimap)
-;  (synopsis "An OCaml library implementing bi-directional maps and multi-maps")
-;  (description "Bi-directional maps permit clients to not only obtain a value provided a key, but to obtain a key provided a value.")
-;  (depends
-;   (ocaml (>= 4.06.0))
-;   (core (>= v0.11.3))
-;   (ocamlfind (>= 1.8))
-;   (dune (>= 1.2.1))
-;   (oUnit (>= 2.08))
-;  )
-; )
-;)
+(source (github pat227/bimap.git))
+(license GPLv3)
+(authors "papatangonyc@gmail.com")
+(maintainers "papatangonyc@gmail.com")
+(package
+ (name bimap)
+ (synopsis "An OCaml library implementing bi-directional maps and multi-maps")
+ (description "Bi-directional maps permit clients to not only obtain a value provided a key, but to obtain a key provided a value")
+ (depends
+  (ocaml (>= 4.06.0))
+  (core (>= v0.11.3))
+  (ocamlfind (>= 1.8))
+  (dune (>= 2.0))
+  (oUnit (>= 2.08))
+ )
+)

@@ -1,6 +1,6 @@
-(alias
-   (name runtest)
-   (action (run ./bimap_tests.exe))
+(rule
+  (alias runtest)
+  (action (run ./bimap_tests.exe))
 )
 (executable
   (name bimap_tests)

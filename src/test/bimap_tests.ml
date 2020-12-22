@@ -45,8 +45,8 @@ module Bimap_tests = struct
   let test1 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"one";
       bim#set ~key:2 ~data:"two";
@@ -82,8 +82,8 @@ module Bimap_tests = struct
   let test2 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in 
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in 
     begin
       bim#set ~key:1 ~data:"one";
       bim#set ~key:2 ~data:"two";
@@ -129,8 +129,8 @@ module Bimap_tests = struct
   let test3 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in   
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in   
     begin
       bim#set ~key:1 ~data:"single";
       bim#set ~key:2 ~data:"double";
@@ -167,8 +167,8 @@ module Bimap_tests = struct
   let test3b _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in
     begin
       bim#set ~key:4 ~data:"quadruple";
       bim#set ~key:5 ~data:"pentuple";
@@ -182,16 +182,22 @@ module Bimap_tests = struct
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       bim#filter_reverse ~f:(fun v -> v > 4);
       assert_equal 2 (bim#count ~f:(fun _x -> true));
+      assert_equal 2 (bim#count_reverse ~f:(fun _x -> true));
       bim#set ~key:4 ~data:"quadruple";
+
       assert_equal 3 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       bim#filter_keys ~f:(fun k -> k < 5);
       assert_equal 1 (bim#count ~f:(fun _x -> true));
-      
+      assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
+
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
       bim#filter_keys_reverse ~f:(fun v -> String.length v > 8);
       assert_equal 1 (bim#count ~f:(fun _x -> true));
       assert_equal 1 (bim#count_reverse ~f:(fun _x -> true));
@@ -200,7 +206,8 @@ module Bimap_tests = struct
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
       assert_equal 3 (bim#count ~f:(fun _x -> true));
-      bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key <6);
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
+      bim#filteri ~f:(fun ~key ~data -> String.length data > 8 || key < 6);
       assert_equal 2 (bim#count ~f:(fun _x -> true));
       assert_equal (Some "quadruple") (bim#find ~key:4);
       assert_equal (Some "pentuple") (bim#find ~key:5);
@@ -209,7 +216,10 @@ module Bimap_tests = struct
       bim#set ~key:4 ~data:"quadruple";
       bim#set ~key:5 ~data:"pentuple";
       bim#set ~key:6 ~data:"sextuple";
-      bim#filteri_reverse ~f:(fun ~key ~data -> String.length key > 8 || data <6);
+      assert_equal 3 (bim#count ~f:(fun _x -> true));
+      assert_equal 3 (bim#count_reverse ~f:(fun _x -> true));
+      bim#filteri_reverse ~f:(fun ~key ~data -> String.length key > 8 || data < 6);
+
       assert_equal 2 (bim#count ~f:(fun _x -> true));
       assert_equal 2 (bim#count_reverse ~f:(fun _x -> true));
       assert_equal (Some "quadruple") (bim#find ~key:4);
@@ -250,8 +260,8 @@ module Bimap_tests = struct
   let test4 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"single";
       bim#set ~key:2 ~data:"double";
@@ -287,8 +297,8 @@ module Bimap_tests = struct
   let test5 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module Bimap_single = Bimap.Bimap_single(Core.Int)(Core.String) in
-    let bim = new Bimap_single.bimap_class int_map string_map in
+    let module Bimap_single_class = Bimap.Bimap_single_class(Core.Int)(Core.String) in
+    let bim = new Bimap_single_class.bimap_single_class int_map string_map in
     begin
       bim#set ~key:1 ~data:"uno";
       bim#set ~key:2 ~data:"dos";
@@ -323,8 +333,8 @@ module Bimap_tests = struct
   let test6 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
-    let bim = new BimapMulti.bimap_multi_class int_map string_map in
+    let module BimapMulti_class = Bimap.Bimap_multi_class(Core.Int)(Core.String) in
+    let bim = new BimapMulti_class.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
       bim#add_multi ~key:2 ~data:"two";
@@ -435,8 +445,8 @@ module Bimap_tests = struct
   let test7 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
-    let bim = new BimapMulti.bimap_multi_class int_map string_map in
+    let module BimapMulti_class = Bimap.Bimap_multi_class(Core.Int)(Core.String) in
+    let bim = new BimapMulti_class.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
       bim#add_multi ~key:2 ~data:"two";
@@ -462,8 +472,8 @@ module Bimap_tests = struct
   let test8 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
-    let bim = new BimapMulti.bimap_multi_class int_map string_map in
+    let module BimapMulti_class = Bimap.Bimap_multi_class(Core.Int)(Core.String) in
+    let bim = new BimapMulti_class.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
       bim#add_multi ~key:2 ~data:"two";
@@ -566,8 +576,8 @@ module Bimap_tests = struct
   let test9 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
-    let bim = new BimapMulti.bimap_multi_class int_map string_map in
+    let module BimapMulti_class = Bimap.Bimap_multi_class(Core.Int)(Core.String) in
+    let bim = new BimapMulti_class.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
       bim#add_multi ~key:2 ~data:"two";
@@ -661,8 +671,8 @@ module Bimap_tests = struct
   let test10 _text_ctx =
     let string_map = Core.String.Map.empty in
     let int_map = Core.Int.Map.empty in
-    let module BimapMulti = Bimap.Bimap_multi(Core.Int)(Core.String) in
-    let bim = new BimapMulti.bimap_multi_class int_map string_map in
+    let module BimapMulti_class = Bimap.Bimap_multi_class(Core.Int)(Core.String) in
+    let bim = new BimapMulti_class.bimap_multi_class int_map string_map in
     begin
       bim#add_multi ~key:1 ~data:"one";
       bim#add_multi ~key:2 ~data:"two";
@@ -803,9 +813,9 @@ module Bimap_tests = struct
     let t6 = Bimap_single_module.change_reverse t5 ~key:"tri" ~f:(fun _x -> (Some 4)) in 
     let () = assert_equal (Some 4) (Bimap_single_module.find_reverse t6 ~key:"tri") in 
     let () = assert_equal (Some "tri") (Bimap_single_module.find t6 ~key:4) in 
-    let () = assert_equal true (Bimap_single_module.mem t6 1) in 
-    let () = assert_equal true (Bimap_single_module.mem t6 2) in 
-    let () = assert_equal true (Bimap_single_module.mem_reverse t6 "tri") in
+    let () = assert_equal true (Bimap_single_module.mem t6 ~key:1) in 
+    let () = assert_equal true (Bimap_single_module.mem t6 ~key:2) in 
+    let () = assert_equal true (Bimap_single_module.mem_reverse t6 ~key:"tri") in
     let () = assert_equal (Some (1,"one")) (Bimap_single_module.min_elt t6) in
     let () = assert_equal (Some (4,"tri")) (Bimap_single_module.max_elt t6) in
     let () = assert_equal (1,"one") (Bimap_single_module.min_elt_exn t6) in
@@ -814,12 +824,12 @@ module Bimap_tests = struct
     let () = assert_equal (Some ("two",2)) (Bimap_single_module.max_elt_reverse t6) in
     let () = assert_equal ("one",1) (Bimap_single_module.min_elt_exn_reverse t6) in
     let () = assert_equal ("two",2) (Bimap_single_module.max_elt_exn_reverse t6) in
-    let () = assert_equal (Some (2,"two")) (Bimap_single_module.nth t6 1) in
-    let () = assert_equal (Some (4,"tri")) (Bimap_single_module.nth t6 2) in
-    let () = assert_equal (Some ("one",1)) (Bimap_single_module.nth_reverse t6 0) in
-    let () = assert_equal (Some ("tri",4)) (Bimap_single_module.nth_reverse t6 1) in 
-    let () = assert_equal (Some ("two",2)) (Bimap_single_module.nth_reverse t6 2) in
-    assert_equal None (Bimap_single_module.nth_reverse t6 3);;
+    let () = assert_equal (Some (2,"two")) (Bimap_single_module.nth t6 ~int:1) in
+    let () = assert_equal (Some (4,"tri")) (Bimap_single_module.nth t6 ~int:2) in
+    let () = assert_equal (Some ("one",1)) (Bimap_single_module.nth_reverse t6 ~int:0) in
+    let () = assert_equal (Some ("tri",4)) (Bimap_single_module.nth_reverse t6 ~int:1) in 
+    let () = assert_equal (Some ("two",2)) (Bimap_single_module.nth_reverse t6 ~int:2) in
+    assert_equal None (Bimap_single_module.nth_reverse t6 ~int:3);;
 
 
   let test13 _text_ctx =
@@ -855,7 +865,7 @@ module Bimap_tests = struct
 			      Some s -> Core.String.rev s
 			    | None -> "newentry") in 
     assert_equal "eno" (Bimap_single_module.find_exn t9 ~key:1);;
-  
+
   let test13b _text_ctx =
     let module Bimap_single_module = Bimap.Bimap_single_module(Core.Int)(Core.String) in
     let t = Bimap_single_module.empty in 
@@ -884,20 +894,20 @@ module Bimap_tests = struct
     let () = assert_equal 1 (Bimap_single_module.length t12) in
     let () = assert_equal 1 (Bimap_single_module.count_reverse t12 ~f:(fun _x -> true)) in 
 
-    let t13 = Bimap_single_module.set t12 ~key:4 ~data:"quadruple" in
+    let t13 = Bimap_single_module.set t ~key:4 ~data:"quadruple" in
     let t14 = Bimap_single_module.set t13 ~key:5 ~data:"pentuple" in 
     let t15 = Bimap_single_module.set t14 ~key:6 ~data:"sextuple" in 
     let () = assert_equal 3 (Bimap_single_module.length t15) in 
-    let t16 = Bimap_single_module.filteri t15 ~f:(fun ~key ~data -> String.length data > 8 || key <6) in
+    let t16 = Bimap_single_module.filteri t15 ~f:(fun ~key ~data -> String.length data > 8 || key < 6) in
     let () = assert_equal 2 (Bimap_single_module.length t16) in
     let () = assert_equal (Some "quadruple") (Bimap_single_module.find t15 ~key:4) in
     let () = assert_equal (Some "pentuple") (Bimap_single_module.find t15 ~key:5) in 
     let () = assert_equal None (Bimap_single_module.find t16 ~key:6) in
 
-    let t17 = Bimap_single_module.set t16 ~key:4 ~data:"quadruple" in 
+    let t17 = Bimap_single_module.set t ~key:4 ~data:"quadruple" in 
     let t18 = Bimap_single_module.set t17 ~key:5 ~data:"pentuple" in 
     let t19 = Bimap_single_module.set t18 ~key:6 ~data:"sextuple" in 
-    let t20 = Bimap_single_module.filteri_reverse t19 ~f:(fun ~key ~data -> String.length key > 8 || data <6) in 
+    let t20 = Bimap_single_module.filteri_reverse t19 ~f:(fun ~key ~data -> String.length key > 8 || data < 6) in 
     let () = assert_equal 2 (Bimap_single_module.length t20) in
     let () = assert_equal 2 (Bimap_single_module.count_reverse t20 ~f:(fun _x -> true)) in 
     let () = assert_equal (Some "quadruple") (Bimap_single_module.find t20 ~key:4) in 
@@ -1339,12 +1349,12 @@ module Bimap_tests = struct
     let t5 = Bimap_multi_module.add_multi t4 ~key:3 ~data:"tres" in 
     let t6 = Bimap_multi_module.add_multi t5 ~key:3 ~data:"triple" in 
 
-    let () = assert_equal true (Bimap_multi_module.mem t6 1) in 
-    let () = assert_equal true (Bimap_multi_module.mem t6 2) in 
-    let () = assert_equal true (Bimap_multi_module.mem t6 3) in 
-    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 "one") in 
-    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 "two") in 
-    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 "three") in
+    let () = assert_equal true (Bimap_multi_module.mem t6 ~key:1) in 
+    let () = assert_equal true (Bimap_multi_module.mem t6 ~key:2) in 
+    let () = assert_equal true (Bimap_multi_module.mem t6 ~key:3) in 
+    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 ~key:"one") in 
+    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 ~key:"two") in 
+    let () = assert_equal true (Bimap_multi_module.mem_reverse t6 ~key:"three") in
       
     let t7 = Bimap_multi_module.map_reverse t6 ~f:(fun x ->
                  Core.List.map x ~f:(fun v -> v * 10)) in 

@@ -17,8 +17,8 @@ module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) =
     if ModuleA.Map.mem t.fwdmap key then
       let value = ModuleA.Map.find_exn t.fwdmap key in 
       let newfmap = ModuleA.Map.set t.fwdmap ~key ~data in
-      let newrmap = ModuleB.Map.set t.revmap ~key:data ~data:key in
-      let newrmap = ModuleB.Map.remove newrmap value in
+      let newrmap = ModuleB.Map.remove t.revmap value in
+      let newrmap = ModuleB.Map.set newrmap ~key:data ~data:key in
       {fwdmap=newfmap; revmap=newrmap}
     else
       let newfmap = ModuleA.Map.set t.fwdmap ~key ~data in
@@ -28,8 +28,8 @@ module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) =
     if ModuleB.Map.mem t.revmap key then
       let value = ModuleB.Map.find_exn t.revmap key in
       let newrmap = ModuleB.Map.set t.revmap ~key ~data in
-      let newfmap = ModuleA.Map.set t.fwdmap ~key:data ~data:key in
-      let newfmap = ModuleA.Map.remove newfmap value in
+      let newfmap = ModuleA.Map.remove t.fwdmap value in
+      let newfmap = ModuleA.Map.set newfmap ~key:data ~data:key in
       {fwdmap=newfmap; revmap=newrmap}
     else
       let newrmap = ModuleB.Map.set t.revmap ~key ~data in
@@ -38,16 +38,16 @@ module Bimap_single (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) =
   let change t ~key ~f =
     let old_value = ModuleA.Map.find_exn t.fwdmap key in 
     let newfmap = ModuleA.Map.change t.fwdmap key ~f in
-    let new_value = ModuleA.Map.find_exn newfmap key in 
-    let newrmap = ModuleB.Map.set t.revmap ~key:new_value ~data:key in
-    let newrmap = ModuleB.Map.remove newrmap old_value in
+    let new_value = ModuleA.Map.find_exn newfmap key in
+    let newrmap = ModuleB.Map.remove t.revmap old_value in
+    let newrmap = ModuleB.Map.set newrmap ~key:new_value ~data:key in
     {fwdmap=newfmap; revmap=newrmap}
   let change_reverse t ~key ~f =
     let old_key = ModuleB.Map.find_exn t.revmap key in 
     let newrmap = ModuleB.Map.change t.revmap key ~f in
-    let new_value = ModuleB.Map.find_exn newrmap key in 
-    let newfmap = ModuleA.Map.set t.fwdmap ~key:new_value ~data:key in
-    let newfmap = ModuleA.Map.remove newfmap old_key in
+    let new_value = ModuleB.Map.find_exn newrmap key in
+    let newfmap = ModuleA.Map.remove t.fwdmap old_key in
+    let newfmap = ModuleA.Map.set newfmap ~key:new_value ~data:key in
     {fwdmap=newfmap; revmap=newrmap}
   let create_reverse_map_from_forward_map ~forward_map =
     let newrmap = ModuleB.Map.empty in
