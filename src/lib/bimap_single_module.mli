@@ -53,6 +53,7 @@ sig
   val for_all_reverse : t -> f:(ModuleA.Map.Key.t -> bool) -> bool
   val is_empty : t -> bool
   val iter_keys : t -> f:(ModuleA.Map.Key.t -> unit) -> unit
+  val iter : t -> f:(ModuleB.Map.Key.t -> unit) -> unit
   val iter_reverse : t -> f:(ModuleA.Map.Key.t -> unit) -> unit
   val iter_keys_reverse :  t -> f:(ModuleB.Map.Key.t -> unit) -> unit
   val iteri : t -> f:(key:ModuleA.Map.Key.t -> data:ModuleB.Map.Key.t -> unit) -> unit

@@ -139,7 +139,6 @@ module Bimap_multi_module (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
       ModuleA.Map.data t.fwdmap
     let data_reverse t =
       ModuleB.Map.data t.revmap
-    let empty = { fwdmap = ModuleA.Map.empty ; revmap = ModuleB.Map.empty }
     let exists t ~f =
       ModuleA.Map.exists t.fwdmap ~f
     let exists_reverse t ~f =

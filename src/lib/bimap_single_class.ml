@@ -91,7 +91,7 @@ module Bimap_single_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparabl
       forward_map := (ModuleA.Map.filter !forward_map ~f)
     method filteri ~f =
       let () = forward_map := (ModuleA.Map.filteri !forward_map ~f) in
-    self#create_reverse_map_from_forward_map
+      self#create_reverse_map_from_forward_map
     method filteri_reverse ~f =
       let () = reverse_map := (ModuleB.Map.filteri !reverse_map ~f) in
       self#create_forward_map_from_reverse_map
