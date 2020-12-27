@@ -1,7 +1,6 @@
 module Bimap_single_pure=Bimap_single_module.Bimap_single
 (*do this twice; once with objects/classes and once with modules
   --m1 and m2 are empty maps that need to be provided by client code-- *)
-(*Should made this a functor building on Comparable.S ... next version todo*)
 module Bimap_single_class (ModuleA : Core.Comparable.S)(ModuleB : Core.Comparable.S) = struct
   module Bimap_single_module = Bimap_single_pure(ModuleA)(ModuleB)
   class ['a, 'b] bimap_single_class (m1 : 'b ModuleA.Map.t) (m2 : 'a ModuleB.Map.t) = object(self)

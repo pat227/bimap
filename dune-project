@@ -15,8 +15,7 @@
  (depends
   (ocaml (>= 4.06.0))
   (core (>= v0.11.3))
-  (ocamlfind (>= 1.8))
   (dune (>= 2.0))
-  (oUnit (>= 2.08))
+  (ounit (>= 2.08))
  )
 )
