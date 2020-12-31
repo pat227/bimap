@@ -1,6 +1,6 @@
 (lang dune 2.0)
 (name bimap)
-(version 2020Dec27)
+(version 20201231)
 
 (generate_opam_files true)
 
@@ -16,6 +16,6 @@
   (ocaml (>= 4.06.0))
   (core (>= v0.11.3))
   (dune (>= 2.0))
-  (ounit (>= 2.2.2))
+  (ounit (and :with-test (>= 2.2.2)))
  )
 )
