@@ -16,6 +16,6 @@
   (ocaml (>= 4.06.0))
   (core (>= v0.11.3))
   (dune (>= 2.0))
-  (ounit (and :with-test (>= 2.2.2)))
+  (ounit2 (and :with-test (>= 2.2.2)))
  )
 )

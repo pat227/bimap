@@ -4,5 +4,5 @@
 )
 (executable
   (name bimap_tests)
-  (libraries core oUnit bimap)
+  (libraries core ounit2 bimap)
 )
