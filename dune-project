@@ -4,7 +4,7 @@
 
 (generate_opam_files true)
 
-(source (github pat227/bimap.git))
+(source (github pat227/bimap))
 (license GPLv3)
 (authors "papatangonyc@gmail.com")
 (maintainers "papatangonyc@gmail.com")
